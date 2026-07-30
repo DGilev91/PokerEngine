@@ -2,7 +2,9 @@ namespace PokerEngine.Interfaces;
 
 public interface IPokerGame
 {
-    void StartHand();
+    int MinPlayers { get; }
 
-    void Shuffle();
+    int MaxPlayers { get; }
+
+    IHand CreateHand(IReadOnlyList<long> stacks);
 }

@@ -2,6 +2,7 @@ namespace PokerEngine.Interfaces;
 
 public interface IHand
 {
+    
     void Initialize(IReadOnlyList<long> stacks);
 
     void PostAnte(int seat, long amount);
@@ -12,9 +13,9 @@ public interface IHand
 
     void PostStraddle(int seat, long amount);
 
-    void DealHole(int seat, List<string> cards);
+    void DealHole(int seat, IReadOnlyList<string> cards);
 
-    void DealBoard(List<string> cards, int board = 0);
+    void DealBoard(IReadOnlyList<string> cards, int board = 0);
 
     void Fold(int seat);
 
