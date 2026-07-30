@@ -6,5 +6,4 @@ public enum RoundType
     Flop,
     Turn,
     River,
-    Showdown
 }

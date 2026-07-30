@@ -1,9 +1,17 @@
 using PokerEngine.Interfaces;
+using PokerEngine.Models;
 
-namespace PokerEngine;
+namespace PokerEngine.States;
 
-public class Hand : IHand
+internal sealed class PokerState : IPokerState
 {
+    private PokerRules _rules;
+
+    public PokerState(PokerRules rules)
+    {
+        _rules = rules;
+    }
+
     public void Initialize(IReadOnlyList<long> stacks)
     {
     }

@@ -1,8 +1,8 @@
 namespace PokerEngine.Interfaces;
 
-public interface IHand
+internal interface IPokerState
 {
-    
+
     void Initialize(IReadOnlyList<long> stacks);
 
     void PostAnte(int seat, long amount);
