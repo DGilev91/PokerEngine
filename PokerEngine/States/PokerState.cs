@@ -1505,23 +1505,23 @@ public sealed class PokerState : IPokerState
         long availableTotal =
             seat.RoundBet + seat.Stack;
 
-        return _rules.BettingType switch
+        return _rules.GameLimit switch
         {
-            BettingType.FixedLimit =>
+            GameLimit.FixedLimit =>
                 Math.Min(
                     GetCurrentRound().BetSize,
                     availableTotal),
 
-            BettingType.PotLimit =>
+            GameLimit.PotLimit =>
                 Math.Min(
                     GetCurrentPotAmount(),
                     availableTotal),
 
-            BettingType.NoLimit =>
+            GameLimit.NoLimit =>
                 availableTotal,
 
             _ => throw new NotSupportedException(
-                $"Структура ставок {_rules.BettingType} не поддерживается.")
+                $"Структура ставок {_rules.GameLimit} не поддерживается.")
         };
     }
 
@@ -1536,26 +1536,26 @@ public sealed class PokerState : IPokerState
         long availableTotal =
             seat.RoundBet + seat.Stack;
 
-        return _rules.BettingType switch
+        return _rules.GameLimit switch
         {
-            BettingType.FixedLimit =>
+            GameLimit.FixedLimit =>
                 Math.Min(
                     highestBet +
                     GetCurrentRound().BetSize,
                     availableTotal),
 
-            BettingType.PotLimit =>
+            GameLimit.PotLimit =>
                 Math.Min(
                     highestBet +
                     GetCurrentPotAmount() +
                     amountToCall,
                     availableTotal),
 
-            BettingType.NoLimit =>
+            GameLimit.NoLimit =>
                 availableTotal,
 
             _ => throw new NotSupportedException(
-                $"Структура ставок {_rules.BettingType} не поддерживается.")
+                $"Структура ставок {_rules.GameLimit} не поддерживается.")
         };
     }
 

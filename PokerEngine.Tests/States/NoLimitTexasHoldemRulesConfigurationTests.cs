@@ -12,7 +12,7 @@ public sealed class NoLimitTexasHoldemRulesConfigurationTests
         PokerRules rules = NoLimitTexasHoldemTestFactory.GetRules(game);
 
         Assert.Equal(GameType.TexasHoldem, rules.GameType);
-        Assert.Equal(BettingType.NoLimit, rules.BettingType);
+        Assert.Equal(GameLimit.NoLimit, rules.GameLimit);
     }
 
     [Fact]

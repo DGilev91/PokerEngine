@@ -57,7 +57,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
         {
             Automation = automation,
             GameType = GameType.TexasHoldem,
-            BettingType = BettingType.NoLimit,
+            GameLimit = GameLimit.NoLimit,
 
             Rounds =
             [

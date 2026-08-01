@@ -1,6 +1,6 @@
 namespace PokerEngine.Enums;
 
-public enum BettingType
+public enum GameLimit
 {
     NoLimit,
     PotLimit,

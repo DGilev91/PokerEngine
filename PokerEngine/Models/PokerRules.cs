@@ -19,7 +19,7 @@ public sealed class PokerRules
     /// <summary>
     /// Структура ставок: Fixed Limit, Pot Limit или No Limit.
     /// </summary>
-    public required BettingType BettingType { get; init; }
+    public required GameLimit GameLimit { get; init; }
 
     /// <summary>
     /// Последовательность улиц игры:
