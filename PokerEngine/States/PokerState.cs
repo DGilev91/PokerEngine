@@ -774,6 +774,11 @@ public sealed class PokerState : IPokerState
 
     private void TryCompleteShowdown()
     {
+        if (_state == HandState.Completed)
+        {
+            return;
+        }
+
         Seat[] contenders = _seats.Where(seat => !seat.IsFolded).ToArray();
 
         if (contenders.Any(seat => seat.HoleCards.Count == 0))
