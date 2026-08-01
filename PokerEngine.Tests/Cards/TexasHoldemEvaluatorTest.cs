@@ -7,8 +7,7 @@ namespace PokerEngine.Tests.Cards;
 
 public sealed class TexasHoldemEvaluatorTest
 {
-    private readonly IHandEvaluator _evaluator =
-        new TexasHoldemEvaluator();
+    private readonly IHandEvaluator _evaluator = new TexasHoldemEvaluator();
 
     public static TheoryData<
         string[],
