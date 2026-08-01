@@ -5,6 +5,13 @@ namespace PokerEngine.Models;
 public sealed class PokerRules
 {
     /// <summary>
+    /// Определяет, какие части раздачи выполняются автоматически.
+    /// Automation.None означает полностью ручной режим.
+    /// Automation.All означает максимально автоматический режим.
+    /// </summary>
+    public required Automation Automation { get; init; } = Automation.None;
+
+    /// <summary>
     /// Тип игры: Texas Hold'em, Omaha, и т. д.
     /// </summary>
     public required GameType GameType { get; init; }

@@ -3,7 +3,6 @@ using PokerEngine.Enums;
 using PokerEngine.Hands;
 using PokerEngine.Interfaces;
 using PokerEngine.Models;
-using PokerEngine.States;
 
 namespace PokerEngine.Games;
 
@@ -12,6 +11,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
     private readonly PokerRules _rules;
 
     public NoLimitTexasHoldem(
+        Automation automation,
         long smallBlind,
         long bigBlind,
         long ante = 0,
@@ -48,6 +48,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
 
         _rules = new PokerRules
         {
+            Automation = automation,
             GameType = GameType.TexasHoldem,
             BettingType = BettingType.NoLimit,
 
@@ -101,12 +102,9 @@ public sealed class NoLimitTexasHoldem : PokerGame
 
     public override IPokerHand CreateHand()
     {
-        var state = new PokerState();
         var deck = new Deck();
-
         return new PokerHand(
             rules: _rules,
-            state: state,
             deck: deck);
     }
 }

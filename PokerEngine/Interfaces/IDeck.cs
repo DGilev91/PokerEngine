@@ -11,4 +11,8 @@ public interface IDeck
     string Deal();
 
     IReadOnlyList<string> Deal(int count);
+
+    void Take(string card);
+
+    void Take(IReadOnlyList<string> cards);
 }

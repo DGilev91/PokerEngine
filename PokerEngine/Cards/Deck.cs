@@ -96,4 +96,48 @@ public sealed class Deck : IDeck
 
         return cards;
     }
+
+    public void Take(string card)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(card);
+
+        if (!_cards.Remove(card))
+        {
+            throw new InvalidOperationException(
+                $"Карты {card} нет в колоде.");
+        }
+    }
+
+    public void Take(IReadOnlyList<string> cards)
+    {
+        ArgumentNullException.ThrowIfNull(cards);
+
+        if (cards.Count != cards.Distinct().Count())
+        {
+            throw new ArgumentException(
+                "Список содержит повторяющиеся карты.",
+                nameof(cards));
+        }
+
+        foreach (string card in cards)
+        {
+            if (string.IsNullOrWhiteSpace(card))
+            {
+                throw new ArgumentException(
+                    "Список содержит пустую карту.",
+                    nameof(cards));
+            }
+
+            if (!_cards.Contains(card))
+            {
+                throw new InvalidOperationException(
+                    $"Карты {card} нет в колоде.");
+            }
+        }
+
+        foreach (string card in cards)
+        {
+            _cards.Remove(card);
+        }
+    }
 }
