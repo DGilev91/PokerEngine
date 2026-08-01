@@ -26,8 +26,6 @@ public sealed record UncalledBetReturnedEvent(int seatId, long amount) : PokerHa
 
 public sealed record ShowCardsEvent(int seatId, IReadOnlyList<string> cards) : PokerHandEvent;
 
-public sealed record MuckCardsEvent(int seatId) : PokerHandEvent;
-
 public sealed record HandEvaluatedEvent(int seatId, int boardIndex, HandCategory category, IReadOnlyList<string> bestCards) : PokerHandEvent;
 
 public sealed record PotAwardedEvent(int potIndex, int boardIndex, int seatId, long amount) : PokerHandEvent;

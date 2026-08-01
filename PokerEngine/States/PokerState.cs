@@ -18,21 +18,16 @@ internal sealed class PokerState : IPokerState
     private readonly List<PokerHandEvent> _events = [];
     private readonly List<Seat> _seats = [];
     private readonly List<List<string>> _boards = [];
-
     private readonly PotState _potState = new();
 
     private HandState _state = HandState.None;
-    private RoundType _round = RoundType.None;
-    private int _roundIndex;
+    private int _roundIndex = -1;
     private int? _activeSeatId;
     private int _runoutCount = 1;
-
-
 
     public PokerState(PokerRules rules)
     {
         _rules = rules ?? throw new ArgumentNullException(nameof(rules));
-
         _deck = new Deck();
 
         _handEvaluator = _rules.GameType switch
@@ -41,7 +36,6 @@ internal sealed class PokerState : IPokerState
             _ => throw new NotSupportedException($"Тип игры {_rules.GameType} пока не поддерживается.")
         };
     }
-
 
     public IReadOnlyList<PokerHandEvent> Events => _events;
 
@@ -53,8 +47,7 @@ internal sealed class PokerState : IPokerState
 
     public HandState State => _state;
 
-    public RoundType Round => _round;
-
+    public RoundType Round => _roundIndex >= 0 && _roundIndex < _rules.Rounds.Count ? _rules.Rounds[_roundIndex].Type : RoundType.None;
 
     public void Initialize(IReadOnlyList<long> stacks)
     {
@@ -62,44 +55,41 @@ internal sealed class PokerState : IPokerState
 
         if (_state != HandState.None)
         {
-            throw new InvalidOperationException(
-                "Раздача уже была инициализирована.");
+            throw new InvalidOperationException("Раздача уже была инициализирована.");
         }
 
         if (stacks.Count < 2)
         {
-            throw new ArgumentException(
-                "Для раздачи необходимо минимум два игрока.",
-                nameof(stacks));
+            throw new ArgumentException("Для раздачи необходимо минимум два игрока.", nameof(stacks));
         }
 
         if (stacks.Any(stack => stack <= 0))
         {
-            throw new ArgumentException(
-                "Стек каждого игрока должен быть больше нуля.",
-                nameof(stacks));
+            throw new ArgumentException("Стек каждого игрока должен быть больше нуля.", nameof(stacks));
         }
 
         if (_rules.InitialBoardCount <= 0)
         {
-            throw new InvalidOperationException(
-                "Начальное количество досок должно быть больше нуля.");
+            throw new InvalidOperationException("Начальное количество досок должно быть больше нуля.");
         }
 
         if (_rules.MaxRunoutCount <= 0)
         {
-            throw new InvalidOperationException(
-                "Максимальное количество runout должно быть больше нуля.");
+            throw new InvalidOperationException("Максимальное количество runout должно быть больше нуля.");
+        }
+
+        if (_rules.Rounds.Count == 0)
+        {
+            throw new InvalidOperationException("В настройках отсутствуют раунды.");
         }
 
         _roundIndex = -1;
         _activeSeatId = null;
+        _runoutCount = 1;
 
         for (int seatId = 0; seatId < stacks.Count; seatId++)
         {
-            _seats.Add(new Seat(
-                seatId: seatId,
-                stack: stacks[seatId]));
+            _seats.Add(new Seat(seatId, stacks[seatId]));
         }
 
         for (int boardIndex = 0; boardIndex < _rules.InitialBoardCount; boardIndex++)
@@ -115,48 +105,52 @@ internal sealed class PokerState : IPokerState
 
     public void PlayerPost(int seatId, PostType postType, long amount)
     {
-        bool isAllIn = false;
+        Seat seat = GetSeat(seatId);
+        bool isAllIn = amount >= seat.Stack;
+
         _events.Add(new PlayerPostedEvent(seatId, postType, amount, isAllIn));
     }
 
     public void Start()
     {
+        if (_state != HandState.Initialized)
+        {
+            throw new InvalidOperationException("Раздачу можно запустить только после инициализации.");
+        }
+
         _state = HandState.Started;
-        _round = RoundType.Preflop;
+        _roundIndex = 0;
 
         _events.Add(new HandStartedEvent());
     }
-
 
     public void DealHole(int seatId, IReadOnlyList<string>? cards = null)
     {
         cards ??= [];
 
-        Seat seat = _seats[seatId];
-        seat.SetHoleCards(cards);
+        Seat seat = GetSeat(seatId);
+        string[] dealtCards = cards.ToArray();
 
-        _events.Add(new HoleCardsEvent(seatId, cards));
+        seat.SetHoleCards(dealtCards);
+
+        _events.Add(new HoleCardsEvent(seatId, dealtCards));
     }
 
     public void SetRunoutCount(int count)
     {
         if (_state != HandState.Started)
         {
-            throw new InvalidOperationException(
-                "Количество runout можно установить только после запуска раздачи.");
+            throw new InvalidOperationException("Количество runout можно установить только после запуска раздачи.");
         }
 
         if (count < 1 || count > _rules.MaxRunoutCount)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(count),
-                $"Количество runout должно быть от 1 до {_rules.MaxRunoutCount}.");
+            throw new ArgumentOutOfRangeException(nameof(count), $"Количество runout должно быть от 1 до {_rules.MaxRunoutCount}.");
         }
 
         if (_runoutCount != 1)
         {
-            throw new InvalidOperationException(
-                "Количество runout уже было установлено.");
+            throw new InvalidOperationException("Количество runout уже было установлено.");
         }
 
         _runoutCount = count;
@@ -182,18 +176,12 @@ internal sealed class PokerState : IPokerState
         cards ??= [];
 
         List<string> board = _boards[boardIndex];
-
-        RoundRules round = _rules.Rounds.FirstOrDefault(round =>
-            round.BoardCardCount > 0 &&
-            board.Count == GetBoardCardCountBefore(round.Type))
-            ?? throw new InvalidOperationException(
-                $"Нельзя определить следующую улицу. На доске уже {board.Count} карт.");
+        int roundIndex = FindNextBoardRoundIndex(board.Count);
+        RoundRules round = _rules.Rounds[roundIndex];
 
         if (cards.Count != round.BoardCardCount)
         {
-            throw new ArgumentException(
-                $"Для улицы {round.Type} необходимо передать {round.BoardCardCount} карт.",
-                nameof(cards));
+            throw new ArgumentException($"Для улицы {round.Type} необходимо передать {round.BoardCardCount} карт.", nameof(cards));
         }
 
         string[] dealtCards = cards.ToArray();
@@ -202,9 +190,9 @@ internal sealed class PokerState : IPokerState
 
         _events.Add(new BoardEvent(round.Type, boardIndex, dealtCards));
 
-        if (AllBoardsReachedRound(round.Type))
+        if (AllBoardsReachedRound(roundIndex))
         {
-            _round = round.Type;
+            _roundIndex = roundIndex;
         }
     }
 
@@ -215,57 +203,73 @@ internal sealed class PokerState : IPokerState
 
     public void ShowCards(int seatId, IReadOnlyList<string> cards)
     {
-        _events.Add(new ShowCardsEvent(seatId, cards));
+        ArgumentNullException.ThrowIfNull(cards);
+
+        GetSeat(seatId);
+
+        string[] shownCards = cards.ToArray();
+
+        _events.Add(new ShowCardsEvent(seatId, shownCards));
     }
 
-    public void MuckCards(int seatId)
+    private Seat GetSeat(int seatId)
     {
-        _events.Add(new MuckCardsEvent(seatId));
+        if (seatId < 0 || seatId >= _seats.Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(seatId), $"SeatId должен быть от 0 до {_seats.Count - 1}.");
+        }
+
+        return _seats[seatId];
     }
 
-
-    //--------------------------------------------------------
-
-    private bool AllBoardsReachedRound(RoundType roundType)
+    private int FindNextBoardRoundIndex(int boardCardCount)
     {
-        int requiredCardCount = GetBoardCardCountAfter(roundType);
+        for (int roundIndex = 0; roundIndex < _rules.Rounds.Count; roundIndex++)
+        {
+            RoundRules round = _rules.Rounds[roundIndex];
+
+            if (round.BoardCardCount <= 0)
+            {
+                continue;
+            }
+
+            if (boardCardCount == GetBoardCardCountBefore(roundIndex))
+            {
+                return roundIndex;
+            }
+        }
+
+        throw new InvalidOperationException($"Нельзя определить следующую улицу. На доске уже {boardCardCount} карт.");
+    }
+
+    private bool AllBoardsReachedRound(int roundIndex)
+    {
+        int requiredCardCount = GetBoardCardCountAfter(roundIndex);
 
         return _boards.All(board => board.Count >= requiredCardCount);
     }
 
-    private int GetBoardCardCountAfter(RoundType roundType)
+    private int GetBoardCardCountBefore(int roundIndex)
     {
         int cardCount = 0;
 
-        foreach (RoundRules round in _rules.Rounds)
+        for (int index = 0; index < roundIndex; index++)
         {
-            cardCount += round.BoardCardCount;
-
-            if (round.Type == roundType)
-            {
-                return cardCount;
-            }
+            cardCount += _rules.Rounds[index].BoardCardCount;
         }
 
-        throw new InvalidOperationException(
-            $"Раунд {roundType} отсутствует в настройках.");
+        return cardCount;
     }
 
-    private int GetBoardCardCountBefore(RoundType roundType)
+    private int GetBoardCardCountAfter(int roundIndex)
     {
         int cardCount = 0;
 
-        foreach (RoundRules round in _rules.Rounds)
+        for (int index = 0; index <= roundIndex; index++)
         {
-            if (round.Type == roundType)
-            {
-                return cardCount;
-            }
-
-            cardCount += round.BoardCardCount;
+            cardCount += _rules.Rounds[index].BoardCardCount;
         }
 
-        throw new InvalidOperationException(
-            $"Раунд {roundType} отсутствует в настройках.");
+        return cardCount;
     }
 }
