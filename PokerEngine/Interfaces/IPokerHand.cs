@@ -32,3 +32,4 @@ public interface IPokerState
     void DealBoard(int boardIndex = 0, IReadOnlyList<string>? cards = null);
 
     void ShowCards(int seatId, IReadOnlyList<string> cards);
+}
