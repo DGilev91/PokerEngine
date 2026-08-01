@@ -5,11 +5,11 @@ public enum HandCategory
     HighCard = 0,
     OnePair = 1,
     TwoPair = 2,
-    ThreeOfAKind = 3,
+    ThreeCard = 3,
     Straight = 4,
     Flush = 5,
     FullHouse = 6,
-    FourOfAKind = 7,
+    FourCard = 7,
     StraightFlush = 8,
     RoyalFlush = 9
 }

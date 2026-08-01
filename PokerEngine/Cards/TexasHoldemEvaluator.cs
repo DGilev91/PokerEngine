@@ -135,7 +135,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
                 maximumCount: 1);
 
             return CreateResult(
-                HandCategory.FourOfAKind,
+                HandCategory.FourCard,
                 bestCards,
                 fourRank,
                 kicker);
@@ -255,7 +255,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
                 maximumCount: 1);
 
             return CreateResult(
-                HandCategory.ThreeOfAKind,
+                HandCategory.ThreeCard,
                 bestCards,
                 firstThreeRank,
                 kickers[0],

@@ -52,7 +52,7 @@ public sealed class TexasHoldemEvaluatorTest
             {
                 ["Ks", "Kh"],
                 ["Kc", "Kd", "As", "2h", "3c"],
-                HandCategory.FourOfAKind,
+                HandCategory.FourCard,
                 ["Ks", "Kh", "Kc", "Kd", "As"]
             },
 
@@ -60,7 +60,7 @@ public sealed class TexasHoldemEvaluatorTest
             {
                 ["As", "2s"],
                 ["Kh", "Kd", "Kc", "Ks", "Qd"],
-                HandCategory.FourOfAKind,
+                HandCategory.FourCard,
                 ["Kh", "Kd", "Kc", "Ks", "As"]
             },
 
@@ -133,7 +133,7 @@ public sealed class TexasHoldemEvaluatorTest
             {
                 ["Qs", "Qh"],
                 ["Qc", "As", "Kd", "5h", "2c"],
-                HandCategory.ThreeOfAKind,
+                HandCategory.ThreeCard,
                 ["Qs", "Qh", "Qc", "As", "Kd"]
             },
 
@@ -141,7 +141,7 @@ public sealed class TexasHoldemEvaluatorTest
             {
                 ["As", "Kd"],
                 ["Qh", "Qc", "Qs", "5d", "2c"],
-                HandCategory.ThreeOfAKind,
+                HandCategory.ThreeCard,
                 ["Qh", "Qc", "Qs", "As", "Kd"]
             },
 
