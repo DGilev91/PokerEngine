@@ -23,11 +23,13 @@ public interface IPokerState
 
     void Start();
 
-    IReadOnlyList<string> DealHole(int seatId, IReadOnlyList<string>? cards = null);
+    void DealHole(int seatId, IReadOnlyList<string>? cards = null);
 
     void PlayerAction(int seatId, ActionType actionType, long amount = 0);
 
-    IReadOnlyList<string> DealBoard(int boardIndex = 0, IReadOnlyList<string>? cards = null);
+    void SetRunoutCount(int count);
+
+    void DealBoard(int boardIndex = 0, IReadOnlyList<string>? cards = null);
 
     void ShowCards(int seatId, IReadOnlyList<string> cards);
 

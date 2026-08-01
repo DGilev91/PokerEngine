@@ -13,9 +13,10 @@ public sealed class NoLimitTexasHoldem : PokerGame
         Automation automation,
         long smallBlind,
         long bigBlind,
-        AnteRules? ante = null,
-        StraddleRules? straddle = null,
-        int boardCount = 1)
+        AnteRules ante,
+        StraddleRules? straddle,
+        int initialBoardCount,
+        int maxRunoutCount)
     {
         if (smallBlind <= 0)
         {
@@ -38,11 +39,18 @@ public sealed class NoLimitTexasHoldem : PokerGame
                 "Ante не может быть отрицательным.");
         }
 
-        if (boardCount <= 0)
+        if (initialBoardCount <= 0)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(boardCount),
+                nameof(initialBoardCount),
                 "Количество досок должно быть больше нуля.");
+        }
+
+        if (maxRunoutCount <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(maxRunoutCount),
+                "Максимальное количество runout должно быть больше нуля.");
         }
 
         _rules = new PokerRules
@@ -53,28 +61,28 @@ public sealed class NoLimitTexasHoldem : PokerGame
 
             Rounds =
             [
-                new Round
+                new RoundRules
                 {
                     Type = RoundType.Preflop,
                     BoardCardCount = 0,
                     BetSize = bigBlind,
                     MaxRaises = null
                 },
-                new Round
+                new RoundRules
                 {
                     Type = RoundType.Flop,
                     BoardCardCount = 3,
                     BetSize = bigBlind,
                     MaxRaises = null
                 },
-                new Round
+                new RoundRules
                 {
                     Type = RoundType.Turn,
                     BoardCardCount = 1,
                     BetSize = bigBlind,
                     MaxRaises = null
                 },
-                new Round
+                new RoundRules
                 {
                     Type = RoundType.River,
                     BoardCardCount = 1,
@@ -88,7 +96,8 @@ public sealed class NoLimitTexasHoldem : PokerGame
             BigBlind = bigBlind,
             Straddle = straddle,
 
-            BoardCount = boardCount,
+            InitialBoardCount = initialBoardCount,
+            MaxRunoutCount = maxRunoutCount,
         };
     }
 

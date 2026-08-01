@@ -25,7 +25,7 @@ public sealed class PokerRules
     /// Последовательность улиц игры:
     /// preflop, flop, turn, river и т. д.
     /// </summary>
-    public required IReadOnlyList<Round> Rounds { get; init; }
+    public required IReadOnlyList<RoundRules> Rounds { get; init; }
 
     /// <summary>
     /// Размер малого блайнда.
@@ -54,10 +54,28 @@ public sealed class PokerRules
 
 
     /// <summary>
-    /// Начальное количество досок.
-    /// Обычно одна, для double board — две.
+    /// Начальное количество независимых досок в раздаче.
+    ///
+    /// Обычно равно 1.
+    /// Для double-board форматов, например double-board bomb pot,
+    /// может быть равно 2.
+    ///
+    /// Это значение определяет количество досок,
+    /// которые существуют с самого начала раздачи.
     /// </summary>
-    public int BoardCount { get; init; } = 1;
+    public int InitialBoardCount { get; init; } = 1;
+
+    /// <summary>
+    /// Максимальное количество runout, разрешённых для одной доски.
+    ///
+    /// Значение 1 означает, что Run It Twice запрещён.
+    /// Значение 2 разрешает Run It Twice.
+    /// Значение 3 разрешает Run It Three Times.
+    ///
+    /// Фактическое количество runout выбирается отдельно
+    /// для конкретной раздачи после all-in.
+    /// </summary>
+    public int MaxRunoutCount { get; init; } = 1;
 }
 
 public sealed class AnteRules
@@ -87,5 +105,33 @@ public sealed class StraddleRules
     /// Является ли первый страддл обязательным.
     /// </summary>
     public bool IsMandatory { get; init; }
+}
+
+public sealed class RoundRules
+{
+    /// <summary>
+    /// Тип улицы торговли.
+    /// </summary>
+    public required RoundType Type { get; init; }
+
+    /// <summary>
+    /// Количество карт, раздаваемых на каждую доску в начале улицы.
+    /// </summary>
+    public int BoardCardCount { get; init; }
+
+    /// <summary>
+    /// Размер ставки для этой улицы.
+    ///
+    /// В Fixed Limit определяет фиксированный размер bet и raise.
+    /// В No Limit и Pot Limit обычно равен минимальному размеру bet.
+    /// </summary>
+    public required long BetSize { get; init; }
+
+    /// <summary>
+    /// Максимальное количество полных повышений на улице.
+    /// Null означает отсутствие ограничения.
+    /// Обычно используется только в Fixed Limit.
+    /// </summary>
+    public int? MaxRaises { get; init; }
 }
 
