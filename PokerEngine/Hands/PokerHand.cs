@@ -7,15 +7,19 @@ namespace PokerEngine.Hands;
 
 internal sealed class PokerHand : IPokerHand
 {
+
     private readonly PokerRules _rules;
     private readonly IDeck _deck = new Deck();
 
+    private readonly List<PokerHandEvent> _events = [];
     private readonly List<Seat> _seats = [];
     private readonly List<List<string>> _boards = [];
     private readonly List<string> _burnedCards = [];
 
     private int _roundIndex;
     private bool _initialized;
+
+    public IReadOnlyList<PokerHandEvent> Events => _events;
 
     public IReadOnlyList<Seat> Seats => _seats;
 
@@ -678,5 +682,11 @@ internal sealed class PokerHand : IPokerHand
             throw new InvalidOperationException(
                 "Раздача не была инициализирована.");
         }
+    }
+
+    private void Emit(PokerHandEvent handEvent)
+    {
+        ArgumentNullException.ThrowIfNull(handEvent);
+        _events.Add(handEvent);
     }
 }

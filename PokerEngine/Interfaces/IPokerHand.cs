@@ -4,6 +4,8 @@ namespace PokerEngine.Interfaces;
 
 public interface IPokerHand
 {
+    IReadOnlyList<PokerHandEvent> Events { get; }
+
     IReadOnlyList<Seat> Seats { get; }
 
     PotState PotState { get; }
