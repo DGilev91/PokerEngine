@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="PokerEngine.Tests/PokerEngine.Tests.csproj" Id="220ce069-fe0d-437d-8468-a0ac3deb130d" />
   <Project Path="PokerEngine/PokerEngine.csproj" />
 </Solution>
