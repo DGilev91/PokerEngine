@@ -59,15 +59,16 @@ internal sealed class PokerHand : IPokerHand
         throw new NotImplementedException();
     }
 
+    public void PlayerPost(int seatId, PostType postType, long amount)
+    {
+        throw new NotImplementedException();
+    }
+
     public void Start()
     {
         throw new NotImplementedException();
     }
 
-    public void PlayerPost(int seatId, PostType postType, long amount)
-    {
-        throw new NotImplementedException();
-    }
 
     public IReadOnlyList<string> DealHole(int seatId, IReadOnlyList<string>? cards = null)
     {

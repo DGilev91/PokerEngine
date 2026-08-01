@@ -17,9 +17,9 @@ public interface IPokerHand
 
     void Initialize(IReadOnlyList<long> stacks);
 
-    void Start();
-
     void PlayerPost(int seatId, PostType postType, long amount);
+
+    void Start();
 
     IReadOnlyList<string> DealHole(int seatId, IReadOnlyList<string>? cards = null);
 
