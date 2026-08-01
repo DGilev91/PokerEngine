@@ -28,12 +28,6 @@ public sealed class PokerRules
     public required IReadOnlyList<Round> Rounds { get; init; }
 
     /// <summary>
-    /// Размер анте для каждого игрока.
-    /// Ноль означает отсутствие анте.
-    /// </summary>
-    public long Ante { get; init; }
-
-    /// <summary>
     /// Размер малого блайнда.
     /// Должен быть больше 0 и меньше размера большого блайнда.
     /// </summary>
@@ -52,12 +46,25 @@ public sealed class PokerRules
     /// </summary>
     public StraddleRules? Straddle { get; init; }
 
+    /// <summary>
+    /// Размер анте для каждого игрока.
+    /// Ноль означает отсутствие анте.
+    /// </summary>
+    public AnteRules? Ante { get; init; }
+
 
     /// <summary>
     /// Начальное количество досок.
     /// Обычно одна, для double board — две.
     /// </summary>
     public int BoardCount { get; init; } = 1;
+}
+
+public sealed class AnteRules
+{
+    public required AnteType Type { get; init; }
+
+    public required long Amount { get; init; }
 }
 
 public sealed class StraddleRules

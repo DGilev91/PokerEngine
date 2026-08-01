@@ -3,9 +3,9 @@ using PokerEngine.Enums;
 using PokerEngine.Interfaces;
 using PokerEngine.Models;
 
-namespace PokerEngine.Hands;
+namespace PokerEngine.States;
 
-internal sealed class PokerHand : IPokerHand
+internal sealed class PokerState : IPokerState
 {
     // Dependencies
 
@@ -28,7 +28,7 @@ internal sealed class PokerHand : IPokerHand
 
 
 
-    public PokerHand(PokerRules rules)
+    public PokerState(PokerRules rules)
     {
         _rules = rules ?? throw new ArgumentNullException(nameof(rules));
 

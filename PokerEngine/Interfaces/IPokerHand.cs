@@ -3,7 +3,7 @@ using PokerEngine.Models;
 
 namespace PokerEngine.Interfaces;
 
-public interface IPokerHand
+public interface IPokerState
 {
     IReadOnlyList<PokerHandEvent> Events { get; }
 

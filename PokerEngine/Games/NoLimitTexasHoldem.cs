@@ -1,6 +1,5 @@
-using PokerEngine.Cards;
 using PokerEngine.Enums;
-using PokerEngine.Hands;
+using PokerEngine.States;
 using PokerEngine.Interfaces;
 using PokerEngine.Models;
 
@@ -14,7 +13,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
         Automation automation,
         long smallBlind,
         long bigBlind,
-        long ante = 0,
+        AnteRules? ante = null,
         StraddleRules? straddle = null,
         int boardCount = 1)
     {
@@ -32,7 +31,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
                 "Big blind должен быть больше small blind.");
         }
 
-        if (ante < 0)
+        if (ante != null && ante.Amount < 0)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(ante),
@@ -93,8 +92,8 @@ public sealed class NoLimitTexasHoldem : PokerGame
         };
     }
 
-    public override IPokerHand CreateHand()
+    public override IPokerState CreateState()
     {
-        return new PokerHand(_rules);
+        return new PokerState(_rules);
     }
 }

@@ -4,5 +4,5 @@ namespace PokerEngine.Games;
 
 public abstract class PokerGame : IPokerGame
 {
-   public abstract IPokerHand CreateHand();
+   public abstract IPokerState CreateState();
 }
