@@ -187,7 +187,25 @@ internal sealed class PokerHand : IPokerHand
                 $"Игроку на месте {seatId} уже выданы карты.");
         }
 
-        const int holeCardCount = 2;
+        int holeCardCount = 0;
+        switch (_rules.GameType)
+        { 
+            case GameType.TexasHoldem:
+                holeCardCount = 2;
+                break;
+            case GameType.Omaha4c:
+                holeCardCount = 4;
+                break;
+            case GameType.Omaha5c:
+                holeCardCount = 5;
+                break;
+            case GameType.Omaha6c:
+                holeCardCount = 6;
+                break;
+            default:
+                throw new InvalidOperationException(
+                    $"Неизвестный тип игры: {_rules.GameType}.");
+        }
 
         IReadOnlyList<string> dealtCards;
 
