@@ -10,7 +10,7 @@ public sealed class UncalledBet
     {
         if (seatId < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(seatId);
+            throw new ArgumentOutOfRangeException(nameof(seatId));
         }
 
         if (amount <= 0)

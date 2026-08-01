@@ -5,17 +5,6 @@ namespace PokerEngine.Cards;
 
 public sealed class Deck : IDeck
 {
-    private static readonly char[] Ranks =
-    [
-        '2', '3', '4', '5', '6', '7',
-        '8', '9', 'T', 'J', 'Q', 'K', 'A'
-    ];
-
-    private static readonly char[] Suits =
-    [
-        'c', 'd', 'h', 's'
-    ];
-
     private readonly List<string> _cards;
 
     public IReadOnlyList<string> Cards => _cards;
@@ -24,7 +13,7 @@ public sealed class Deck : IDeck
 
     public Deck()
     {
-        _cards = CreateCards();
+        _cards = new List<string>(CardTable.Cards);
         Shuffle();
     }
 
@@ -82,20 +71,6 @@ public sealed class Deck : IDeck
         return dealtCards;
     }
 
-    private static List<string> CreateCards()
-    {
-        var cards = new List<string>(52);
-
-        foreach (char rank in Ranks)
-        {
-            foreach (char suit in Suits)
-            {
-                cards.Add($"{rank}{suit}");
-            }
-        }
-
-        return cards;
-    }
 
     public void Take(string card)
     {
