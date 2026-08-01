@@ -5,6 +5,11 @@ namespace PokerEngine.Models;
 public sealed class PokerRules
 {
     /// <summary>
+    /// Тип игры: Texas Hold'em, Omaha, и т. д.
+    /// </summary>
+    public required GameType GameType { get; init; }
+
+    /// <summary>
     /// Структура ставок: Fixed Limit, Pot Limit или No Limit.
     /// </summary>
     public required BettingType BettingType { get; init; }
@@ -65,36 +70,22 @@ public sealed class PokerRules
 public sealed class StraddleRules
 {
     /// <summary>
-    /// Режим определения позиции игрока, который может поставить страддл.
+    /// Режим определения позиции первого игрока,
+    /// который может поставить страддл.
     /// </summary>
     public required StraddleType Type { get; init; }
 
     /// <summary>
-    /// Допустимые размеры последовательных страддлов.
-    /// Значения задаются в порядке выставления.
+    /// Размеры последовательных страддлов.
+    /// Первый элемент — первый страддл,
+    /// второй — restraddle и так далее.
+    /// Пустой список означает отсутствие страддлов.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// Amounts = [400, 800, 1600];
-    /// </code>
-    /// </example>
     public required IReadOnlyList<long> Amounts { get; init; }
 
     /// <summary>
-    /// Является ли страддл обязательным.
+    /// Является ли первый страддл обязательным.
     /// </summary>
     public bool IsMandatory { get; init; }
-
-    /// <summary>
-    /// Разрешены ли повторные страддлы:
-    /// restraddle, double straddle и последующие.
-    /// </summary>
-    public bool AllowRestraddle { get; init; }
-
-    /// <summary>
-    /// Максимальное количество страддлов за раздачу.
-    /// Null означает, что ограничение определяется списком Amounts.
-    /// </summary>
-    public int? MaxCount { get; init; }
 }
 

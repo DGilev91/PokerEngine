@@ -1,4 +1,6 @@
+using PokerEngine.Cards;
 using PokerEngine.Enums;
+using PokerEngine.Hands;
 using PokerEngine.Interfaces;
 using PokerEngine.Models;
 using PokerEngine.States;
@@ -13,7 +15,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
         long smallBlind,
         long bigBlind,
         long ante = 0,
-        StraddleRules straddle = null,
+        StraddleRules? straddle = null,
         int boardCount = 1)
     {
         if (smallBlind <= 0)
@@ -46,6 +48,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
 
         _rules = new PokerRules
         {
+            GameType = GameType.TexasHoldem,
             BettingType = BettingType.NoLimit,
 
             Rounds =
@@ -87,7 +90,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
             Ante = ante,
             SmallBlind = smallBlind,
             BigBlind = bigBlind,
-            Straddle = null,
+            Straddle = straddle,
 
             BoardCount = boardCount,
 
@@ -96,8 +99,14 @@ public sealed class NoLimitTexasHoldem : PokerGame
         };
     }
 
-    public override IPokerState CreateState()
+    public override IPokerHand CreateHand()
     {
-        return new PokerState(_rules);
+        var state = new PokerState();
+        var deck = new Deck();
+
+        return new PokerHand(
+            rules: _rules,
+            state: state,
+            deck: deck);
     }
 }
