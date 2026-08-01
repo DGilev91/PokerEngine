@@ -21,13 +21,12 @@ internal sealed class PokerHand : IPokerHand
 
     private readonly PotState _potState = new();
 
+    private HandState _state = HandState.None;
     private RoundType _round = RoundType.None;
     private int _roundIndex;
     private int? _activeSeatId;
 
-    private bool _initialized;
-    private bool _started;
-    private bool _completed;
+
 
     public PokerHand(PokerRules rules)
     {
@@ -50,6 +49,8 @@ internal sealed class PokerHand : IPokerHand
     public PotState PotState => _potState;
 
     public IReadOnlyList<IReadOnlyList<string>> Boards => _boards;
+
+    public HandState State => _state;
 
     public RoundType Round => _round;
 

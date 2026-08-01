@@ -13,6 +13,8 @@ public interface IPokerHand
 
     IReadOnlyList<IReadOnlyList<string>> Boards { get; }
 
+    HandState State { get; }
+
     RoundType Round { get; }
 
     void Initialize(IReadOnlyList<long> stacks);
