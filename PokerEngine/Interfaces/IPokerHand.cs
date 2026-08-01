@@ -1,4 +1,5 @@
-﻿using PokerEngine.Models;
+﻿using PokerEngine.Enums;
+using PokerEngine.Models;
 
 namespace PokerEngine.Interfaces;
 
@@ -12,24 +13,21 @@ public interface IPokerHand
 
     IReadOnlyList<IReadOnlyList<string>> Boards { get; }
 
-    int RemainingDeckCards { get; }
+    RoundType Round { get; }
 
     void Initialize(IReadOnlyList<long> stacks);
 
-    void PostAnte(int seat, long amount);
-    void PostSmallBlind(int seat, long amount);
-    void PostBigBlind(int seat, long amount);
-    void PostStraddle(int seat, long amount);
+    void Start();
 
-    IReadOnlyList<string> DealHole(int seat, IReadOnlyList<string>? cards = null);
+    void PlayerPost(int seatId, PostType postType, long amount);
 
-    string BurnCard(string? card = null);
+    IReadOnlyList<string> DealHole(int seatId, IReadOnlyList<string>? cards = null);
 
-    IReadOnlyList<string> DealBoard(int board = 0, IReadOnlyList<string>? cards = null);
+    void PlayerAction(int seatId, ActionType actionType, long amount = 0);
 
-    void Fold(int seat);
-    void Check(int seat);
-    void Call(int seat);
-    void Bet(int seat, long amount);
-    void RaiseTo(int seat, long amount);
+    IReadOnlyList<string> DealBoard(int boardIndex = 0, IReadOnlyList<string>? cards = null);
+
+    void ShowCards(int seatId, IReadOnlyList<string> cards);
+
+    void MuckCards(int seatId);
 }

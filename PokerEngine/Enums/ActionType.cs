@@ -6,5 +6,5 @@ public enum ActionType
     Check,
     Call,
     Bet,
-    Raise
+    RaiseTo
 }
