@@ -7,13 +7,13 @@ namespace PokerEngine.Games;
 
 public sealed class NoLimitTexasHoldem : PokerGame
 {
-    private readonly PokerGameDefinition _rules
+    private readonly PokerRules _rules;
 
     public NoLimitTexasHoldem(
         long smallBlind,
         long bigBlind,
         long ante = 0,
-        IReadOnlyList<long>? straddles = null,
+        StraddleRules straddle = null,
         int boardCount = 1)
     {
         if (smallBlind <= 0)
@@ -46,7 +46,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
 
         _rules = new PokerRules
         {
-            BettingStructure = BettingStructure.NoLimit,
+            BettingType = BettingType.NoLimit,
 
             Rounds =
             [
@@ -84,16 +84,13 @@ public sealed class NoLimitTexasHoldem : PokerGame
                 }
             ],
 
-            HoleCardCount = 2,
-
             Ante = ante,
             SmallBlind = smallBlind,
             BigBlind = bigBlind,
-            Straddles = straddles ?? [],
+            Straddle = null,
 
             BoardCount = boardCount,
 
-            // В Hold'em можно использовать 0, 1 или 2 карманные карты.
             RequiredHoleCardsForHand = null,
             RequiredBoardCardsForHand = null
         };

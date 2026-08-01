@@ -2,7 +2,7 @@ using PokerEngine.Enums;
 
 namespace PokerEngine.Models;
 
-internal sealed class Round
+public sealed class Round
 {
     /// <summary>
     /// Тип раунда торговли: Preflop, Flop, Turn или River.

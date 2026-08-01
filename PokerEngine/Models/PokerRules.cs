@@ -2,24 +2,18 @@ using PokerEngine.Enums;
 
 namespace PokerEngine.Models;
 
-internal sealed class PokerRules
+public sealed class PokerRules
 {
     /// <summary>
     /// Структура ставок: Fixed Limit, Pot Limit или No Limit.
     /// </summary>
-    public required BettingStructure BettingStructure { get; init; }
+    public required BettingType BettingType { get; init; }
 
     /// <summary>
     /// Последовательность улиц игры:
     /// preflop, flop, turn, river и т. д.
     /// </summary>
     public required IReadOnlyList<Round> Rounds { get; init; }
-
-    /// <summary>
-    /// Размеры обязательных ставок по порядку:
-    /// small blind, big blind и дополнительные straddles.
-    /// </summary>
-    public required IReadOnlyList<long> BlindsOrStraddles { get; init; }
 
     /// <summary>
     /// Размер анте для каждого игрока.
@@ -39,19 +33,12 @@ internal sealed class PokerRules
     /// для игр с одинаковым минимальным бетом на всех улицах.
     /// </summary>
     public required long BigBlind { get; init; }
-    
+
     /// <summary>
-    /// Последовательность дополнительных обязательных страддлов.
-    /// Значения указываются в порядке их выставления после большого блайнда.
-    /// Пустой список означает, что страддлы не используются.
+    /// Правила использования страддлов.
+    /// Null означает, что страддлы запрещены.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// Straddles = [200, 400];
-    /// </code>
-    /// Означает первый страддл 200 и второй страддл 400.
-    /// </example>
-    public IReadOnlyList<long> Straddles { get; init; } = [];
+    public StraddleRules? Straddle { get; init; }
 
 
     /// <summary>
@@ -74,3 +61,40 @@ internal sealed class PokerRules
     /// </summary>
     public int? RequiredBoardCardsForHand { get; init; }
 }
+
+public sealed class StraddleRules
+{
+    /// <summary>
+    /// Режим определения позиции игрока, который может поставить страддл.
+    /// </summary>
+    public required StraddleType Type { get; init; }
+
+    /// <summary>
+    /// Допустимые размеры последовательных страддлов.
+    /// Значения задаются в порядке выставления.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// Amounts = [400, 800, 1600];
+    /// </code>
+    /// </example>
+    public required IReadOnlyList<long> Amounts { get; init; }
+
+    /// <summary>
+    /// Является ли страддл обязательным.
+    /// </summary>
+    public bool IsMandatory { get; init; }
+
+    /// <summary>
+    /// Разрешены ли повторные страддлы:
+    /// restraddle, double straddle и последующие.
+    /// </summary>
+    public bool AllowRestraddle { get; init; }
+
+    /// <summary>
+    /// Максимальное количество страддлов за раздачу.
+    /// Null означает, что ограничение определяется списком Amounts.
+    /// </summary>
+    public int? MaxCount { get; init; }
+}
+

@@ -3,7 +3,7 @@ using PokerEngine.Models;
 
 namespace PokerEngine.States;
 
-internal sealed class PokerState : IPokerState
+public sealed class PokerState : IPokerState
 {
     private PokerRules _rules;
 

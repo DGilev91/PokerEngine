@@ -1,6 +1,6 @@
 namespace PokerEngine.Interfaces;
 
-internal interface IPokerState
+public interface IPokerState
 {
 
     void Initialize(IReadOnlyList<long> stacks);
