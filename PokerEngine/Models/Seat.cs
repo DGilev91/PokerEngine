@@ -7,7 +7,7 @@ public sealed class Seat
     /// <summary>
     /// Номер места за столом.
     /// </summary>
-    public int Number { get; }
+    public int SeatId { get; }
 
     /// <summary>
     /// Стек игрока в начале раздачи.
@@ -44,12 +44,12 @@ public sealed class Seat
     /// </summary>
     public bool IsAllIn => Stack == 0 && !IsFolded;
 
-    public Seat(int number, long stack)
+    public Seat(int seatId, long stack)
     {
-        if (number < 0)
+        if (seatId < 0)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(number),
+                nameof(seatId),
                 "Номер места не может быть отрицательным.");
         }
 
@@ -60,7 +60,7 @@ public sealed class Seat
                 "Стек не может быть отрицательным.");
         }
 
-        Number = number;
+        SeatId = seatId;
         InitialStack = stack;
         Stack = stack;
     }

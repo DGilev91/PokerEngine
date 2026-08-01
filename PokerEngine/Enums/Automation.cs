@@ -11,9 +11,6 @@ public enum Automation
     DealHoleCards = 1 << 3,
     BurnCards = 1 << 4,
     DealBoard = 1 << 5,
-    CollectBets = 1 << 6,
-    EvaluateHands = 1 << 7,
-    PushPots = 1 << 8,
 
     All =
         ShuffleDeck |
@@ -21,8 +18,5 @@ public enum Automation
         PostBlinds |
         DealHoleCards |
         BurnCards |
-        DealBoard |
-        CollectBets |
-        EvaluateHands |
-        PushPots
+        DealBoard
 }

@@ -2,70 +2,55 @@
 
 public sealed class Pot
 {
-    private readonly HashSet<int> _contributorSeats = [];
-    private readonly HashSet<int> _eligibleSeats = [];
+    private readonly HashSet<int> _contributorSeatIds = [];
+    private readonly HashSet<int> _eligibleSeatIds = [];
 
-    /// <summary>
-    /// Индекс пота:
-    /// 0 — main pot, 1 и далее — side pots.
-    /// </summary>
     public int Index { get; }
 
-    /// <summary>
-    /// Общая сумма пота.
-    /// </summary>
-    public long Amount { get; internal set; }
+    public long Amount { get; private set; }
 
-    /// <summary>
-    /// Места игроков, чьи фишки вошли в этот пот.
-    /// Включает игроков, которые впоследствии сделали fold.
-    /// </summary>
-    public IReadOnlySet<int> ContributorSeats => _contributorSeats;
-
-    /// <summary>
-    /// Места игроков, которые имеют право выиграть этот пот.
-    /// Игроки после fold отсюда исключаются.
-    /// </summary>
-    public IReadOnlySet<int> EligibleSeats => _eligibleSeats;
-
-    /// <summary>
-    /// Main pot имеет индекс 0.
-    /// </summary>
     public bool IsMain => Index == 0;
+
+    public bool IsSide => Index > 0;
+
+    public IReadOnlySet<int> ContributorSeatIds =>
+        _contributorSeatIds;
+
+    public IReadOnlySet<int> EligibleSeatIds =>
+        _eligibleSeatIds;
 
     public Pot(int index)
     {
         if (index < 0)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(index),
-                "Индекс пота не может быть отрицательным.");
+            throw new ArgumentOutOfRangeException(nameof(index));
         }
 
         Index = index;
     }
 
-    internal void AddContribution(int seat, long amount)
+    internal void AddContribution(
+        int seatId,
+        long amount)
     {
-        if (seat < 0)
+        if (seatId < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(seat));
+            throw new ArgumentOutOfRangeException(nameof(seatId));
         }
 
         if (amount <= 0)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(amount),
-                "Сумма должна быть больше нуля.");
+            throw new ArgumentOutOfRangeException(nameof(amount));
         }
 
         Amount += amount;
-        _contributorSeats.Add(seat);
-        _eligibleSeats.Add(seat);
+
+        _contributorSeatIds.Add(seatId);
+        _eligibleSeatIds.Add(seatId);
     }
 
-    internal void RemoveEligibility(int seat)
+    internal void RemoveEligibility(int seatId)
     {
-        _eligibleSeats.Remove(seat);
+        _eligibleSeatIds.Remove(seatId);
     }
 }

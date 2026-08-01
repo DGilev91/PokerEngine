@@ -1,4 +1,5 @@
-﻿using PokerEngine.Enums;
+﻿using PokerEngine.Cards;
+using PokerEngine.Enums;
 using PokerEngine.Interfaces;
 using PokerEngine.Models;
 
@@ -7,11 +8,10 @@ namespace PokerEngine.Hands;
 internal sealed class PokerHand : IPokerHand
 {
     private readonly PokerRules _rules;
-    private readonly IDeck _deck;
+    private readonly IDeck _deck = new Deck();
 
     private readonly List<Seat> _seats = [];
     private readonly List<List<string>> _boards = [];
-    private readonly List<Pot> _pots = [];
     private readonly List<string> _burnedCards = [];
 
     private int _roundIndex;
@@ -19,7 +19,7 @@ internal sealed class PokerHand : IPokerHand
 
     public IReadOnlyList<Seat> Seats => _seats;
 
-    public IReadOnlyList<Pot> Pots => _pots;
+    public PotState PotState { get; } = new();
 
     public IReadOnlyList<string> BurnedCards => _burnedCards;
 
@@ -30,15 +30,11 @@ internal sealed class PokerHand : IPokerHand
 
     public int RemainingDeckCards => _deck.RemainingCount;
 
-    public PokerHand(
-        PokerRules rules,
-        IDeck deck)
+    public PokerHand(PokerRules rules)
     {
         ArgumentNullException.ThrowIfNull(rules);
-        ArgumentNullException.ThrowIfNull(deck);
 
         _rules = rules;
-        _deck = deck;
     }
 
     public void Initialize(IReadOnlyList<long> stacks)
@@ -52,20 +48,20 @@ internal sealed class PokerHand : IPokerHand
                 nameof(stacks));
         }
 
-        if (stacks.Any(stack => stack < 0))
+        if (stacks.Any(stack => stack <= 0))
         {
             throw new ArgumentException(
-                "Стек игрока не может быть отрицательным.",
+                "Стек игрока не может быть отрицательным или нулевым.",
                 nameof(stacks));
         }
 
         _seats.Clear();
 
-        for (int seat = 0; seat < stacks.Count; seat++)
+        for (int seatId = 0; seatId < stacks.Count; seatId++)
         {
             _seats.Add(new Seat(
-                number: seat,
-                stack: stacks[seat]));
+                seatId: seatId,
+                stack: stacks[seatId]));
         }
 
         _boards.Clear();
@@ -75,7 +71,7 @@ internal sealed class PokerHand : IPokerHand
             _boards.Add([]);
         }
 
-        _pots.Clear();
+        PotState.Clear();
         _burnedCards.Clear();
 
         _roundIndex = 0;
@@ -90,24 +86,30 @@ internal sealed class PokerHand : IPokerHand
         {
             foreach (Seat seat in _seats)
             {
-                PostAnte(seat.Number, _rules.Ante);
+                PostAnte(
+                    seat.SeatId,
+                    _rules.Ante);
             }
         }
     }
 
-    public void PostAnte(int seat, long amount)
+    public void PostAnte(
+        int seatId,
+        long amount)
     {
         EnsureInitialized();
 
         CommitChips(
-            GetSeat(seat),
+            GetSeat(seatId),
             amount,
             totalAmount: false);
 
-        RebuildPots();
+        RecalculatePots();
     }
 
-    public void PostSmallBlind(int seat, long amount)
+    public void PostSmallBlind(
+        int seatId,
+        long amount)
     {
         EnsureInitialized();
 
@@ -118,14 +120,16 @@ internal sealed class PokerHand : IPokerHand
         }
 
         CommitChips(
-            GetSeat(seat),
+            GetSeat(seatId),
             amount,
             totalAmount: false);
 
-        RebuildPots();
+        RecalculatePots();
     }
 
-    public void PostBigBlind(int seat, long amount)
+    public void PostBigBlind(
+        int seatId,
+        long amount)
     {
         EnsureInitialized();
 
@@ -136,14 +140,16 @@ internal sealed class PokerHand : IPokerHand
         }
 
         CommitChips(
-            GetSeat(seat),
+            GetSeat(seatId),
             amount,
             totalAmount: false);
 
-        RebuildPots();
+        RecalculatePots();
     }
 
-    public void PostStraddle(int seat, long amount)
+    public void PostStraddle(
+        int seatId,
+        long amount)
     {
         EnsureInitialized();
 
@@ -160,25 +166,25 @@ internal sealed class PokerHand : IPokerHand
         }
 
         CommitChips(
-            GetSeat(seat),
+            GetSeat(seatId),
             amount,
             totalAmount: false);
 
-        RebuildPots();
+        RecalculatePots();
     }
 
     public IReadOnlyList<string> DealHole(
-        int seat,
+        int seatId,
         IReadOnlyList<string>? cards = null)
     {
         EnsureInitialized();
 
-        Seat player = GetSeat(seat);
+        Seat seat = GetSeat(seatId);
 
-        if (player.HoleCards.Count > 0)
+        if (seat.HoleCards.Count > 0)
         {
             throw new InvalidOperationException(
-                $"Игроку на месте {seat} уже выданы карты.");
+                $"Игроку на месте {seatId} уже выданы карты.");
         }
 
         const int holeCardCount = 2;
@@ -212,7 +218,7 @@ internal sealed class PokerHand : IPokerHand
             dealtCards = cards.ToArray();
         }
 
-        player.SetHoleCards(dealtCards);
+        seat.SetHoleCards(dealtCards);
 
         return dealtCards;
     }
@@ -251,12 +257,19 @@ internal sealed class PokerHand : IPokerHand
     }
 
     public IReadOnlyList<string> DealBoard(
-        int board = 0, IReadOnlyList<string>? cards = null)
+        int board = 0,
+        IReadOnlyList<string>? cards = null)
     {
         EnsureInitialized();
         ValidateBoard(board);
 
         Round round = GetNextBoardRound();
+
+        if (round.BurnCard &&
+            IsAutomated(Automation.BurnCards))
+        {
+            BurnCard();
+        }
 
         IReadOnlyList<string> dealtCards;
 
@@ -268,12 +281,8 @@ internal sealed class PokerHand : IPokerHand
                     "Карты доски раздаются автоматически.");
             }
 
-            if (round.BurnCard)
-            {
-                BurnCard();
-            }
-
-            dealtCards = _deck.Deal(round.BoardDealingCount);
+            dealtCards = _deck.Deal(
+                round.BoardDealingCount);
         }
         else
         {
@@ -298,117 +307,132 @@ internal sealed class PokerHand : IPokerHand
         return dealtCards;
     }
 
-    public void Fold(int seat)
+    public void Fold(int seatId)
     {
         EnsureInitialized();
 
-        Seat player = GetSeat(seat);
+        Seat seat = GetSeat(seatId);
 
-        if (player.IsFolded)
+        if (seat.IsFolded)
         {
             throw new InvalidOperationException(
-                $"Игрок на месте {seat} уже сделал fold.");
+                $"Игрок на месте {seatId} уже сделал fold.");
         }
 
-        player.IsFolded = true;
+        seat.IsFolded = true;
 
-        foreach (Pot pot in _pots)
+        foreach (Pot pot in PotState.Pots)
         {
-            pot.RemoveEligibility(seat);
+            pot.RemoveEligibility(seatId);
         }
     }
 
-    public void Check(int seat)
+    public void Check(int seatId)
     {
         EnsureInitialized();
 
-        Seat player = GetActiveSeat(seat);
+        Seat seat = GetActiveSeat(seatId);
 
         long highestBet = GetHighestRoundBet();
 
-        if (player.RoundBet != highestBet)
+        if (seat.RoundBet != highestBet)
         {
             throw new InvalidOperationException(
-                $"Игрок на месте {seat} не может сделать check. " +
-                $"Текущая ставка игрока: {player.RoundBet}, максимальная: {highestBet}.");
+                $"Игрок на месте {seatId} не может сделать check. " +
+                $"Текущая ставка игрока: {seat.RoundBet}, " +
+                $"максимальная: {highestBet}.");
         }
     }
 
-    public void Call(int seat)
+    public void Call(int seatId)
     {
         EnsureInitialized();
 
-        Seat player = GetActiveSeat(seat);
+        Seat seat = GetActiveSeat(seatId);
 
         long highestBet = GetHighestRoundBet();
-        long amountToCall = highestBet - player.RoundBet;
+        long amountToCall = highestBet - seat.RoundBet;
 
         if (amountToCall <= 0)
         {
             throw new InvalidOperationException(
-                $"Игроку на месте {seat} нечего коллировать.");
+                $"Игроку на месте {seatId} нечего коллировать.");
         }
 
         CommitChips(
-            player,
+            seat,
             highestBet,
             totalAmount: true);
 
-        RebuildPots();
+        RecalculatePots();
     }
 
-    public void Bet(int seat, long amount)
+    public void Bet(
+        int seatId,
+        long amount)
     {
         EnsureInitialized();
 
-        Seat player = GetActiveSeat(seat);
+        Seat seat = GetActiveSeat(seatId);
 
         if (GetHighestRoundBet() > 0)
         {
             throw new InvalidOperationException(
-                "Нельзя сделать bet, когда на улице уже есть ставка. Используйте RaiseTo.");
+                "Нельзя сделать bet, когда на улице уже есть ставка. " +
+                "Используйте RaiseTo.");
         }
 
-        if (amount < GetCurrentRound().MinBet && amount < player.Stack)
+        Round round = GetCurrentRound();
+
+        if (amount < round.MinBet &&
+            amount < seat.Stack)
         {
             throw new InvalidOperationException(
-                $"Минимальная ставка равна {GetCurrentRound().MinBet}.");
+                $"Минимальная ставка равна {round.MinBet}.");
         }
 
         CommitChips(
-            player,
+            seat,
             amount,
             totalAmount: true);
 
-        RebuildPots();
+        RecalculatePots();
     }
 
-    public void RaiseTo(int seat, long amount)
+    public void RaiseTo(
+        int seatId,
+        long amount)
     {
         EnsureInitialized();
 
-        Seat player = GetActiveSeat(seat);
+        Seat seat = GetActiveSeat(seatId);
 
         long highestBet = GetHighestRoundBet();
 
         if (highestBet == 0)
         {
             throw new InvalidOperationException(
-                "Нельзя сделать raise, когда ставки ещё нет. Используйте Bet.");
+                "Нельзя сделать raise, когда ставки ещё нет. " +
+                "Используйте Bet.");
         }
 
-        if (amount <= highestBet && amount < player.RoundBet + player.Stack)
+        long maximumTotalBet =
+            seat.RoundBet + seat.Stack;
+
+        if (amount <= highestBet &&
+            amount < maximumTotalBet)
         {
             throw new InvalidOperationException(
-                $"RaiseTo должен быть больше текущей максимальной ставки {highestBet}.");
+                $"RaiseTo должен быть больше текущей " +
+                $"максимальной ставки {highestBet}.");
         }
 
         CommitChips(
-            player,
+            seat,
             amount,
             totalAmount: true);
 
-        RebuildPots();
+        RecalculatePots();
     }
 
     private void CommitChips(
@@ -426,7 +450,7 @@ internal sealed class PokerHand : IPokerHand
         if (seat.IsFolded)
         {
             throw new InvalidOperationException(
-                $"Игрок на месте {seat.Number} уже сделал fold.");
+                $"Игрок на месте {seat.SeatId} уже сделал fold.");
         }
 
         long contribution = totalAmount
@@ -436,7 +460,8 @@ internal sealed class PokerHand : IPokerHand
         if (contribution < 0)
         {
             throw new InvalidOperationException(
-                "Новая ставка не может быть меньше текущей ставки игрока.");
+                "Новая ставка не может быть меньше " +
+                "текущей ставки игрока.");
         }
 
         if (contribution == 0)
@@ -444,16 +469,18 @@ internal sealed class PokerHand : IPokerHand
             return;
         }
 
-        long paid = Math.Min(contribution, seat.Stack);
+        long paid = Math.Min(
+            contribution,
+            seat.Stack);
 
         seat.Stack -= paid;
         seat.RoundBet += paid;
         seat.TotalBet += paid;
     }
 
-    private void RebuildPots()
+    private void RecalculatePots()
     {
-        _pots.Clear();
+        PotState.Clear();
 
         long[] levels = _seats
             .Select(seat => seat.TotalBet)
@@ -470,71 +497,82 @@ internal sealed class PokerHand : IPokerHand
                 .Where(seat => seat.TotalBet >= level)
                 .ToArray();
 
-            if (contributors.Length < 2)
-            {
-                break;
-            }
-
-            long contributionPerSeat = level - previousLevel;
+            long contributionPerSeat =
+                level - previousLevel;
 
             if (contributionPerSeat <= 0)
             {
                 continue;
             }
 
-            var pot = new Pot(_pots.Count);
+            if (contributors.Length == 1)
+            {
+                Seat owner = contributors[0];
+
+                PotState.SetUncalledBet(
+                    seatId: owner.SeatId,
+                    amount: contributionPerSeat);
+
+                break;
+            }
+
+            var pot = new Pot(
+                index: PotState.Pots.Count);
 
             foreach (Seat seat in contributors)
             {
                 pot.AddContribution(
-                    seat.Number,
-                    contributionPerSeat);
+                    seatId: seat.SeatId,
+                    amount: contributionPerSeat);
 
                 if (seat.IsFolded)
                 {
-                    pot.RemoveEligibility(seat.Number);
+                    pot.RemoveEligibility(
+                        seat.SeatId);
                 }
             }
 
-            _pots.Add(pot);
+            PotState.AddPot(pot);
             previousLevel = level;
         }
     }
 
-    private Seat GetSeat(int seat)
+    private Seat GetSeat(int seatId)
     {
-        if (seat < 0 || seat >= _seats.Count)
+        if (seatId < 0 ||
+            seatId >= _seats.Count)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(seat),
-                $"Номер места должен быть от 0 до {_seats.Count - 1}.");
+                nameof(seatId),
+                $"SeatId должен быть от 0 до {_seats.Count - 1}.");
         }
 
-        return _seats[seat];
+        return _seats[seatId];
     }
 
-    private Seat GetActiveSeat(int seat)
+    private Seat GetActiveSeat(int seatId)
     {
-        Seat player = GetSeat(seat);
+        Seat seat = GetSeat(seatId);
 
-        if (player.IsFolded)
+        if (seat.IsFolded)
         {
             throw new InvalidOperationException(
-                $"Игрок на месте {seat} уже сделал fold.");
+                $"Игрок на месте {seatId} уже сделал fold.");
         }
 
-        if (player.IsAllIn)
+        if (seat.IsAllIn)
         {
             throw new InvalidOperationException(
-                $"Игрок на месте {seat} уже находится в all-in.");
+                $"Игрок на месте {seatId} уже находится в all-in.");
         }
 
-        return player;
+        return seat;
     }
 
     private void ValidateBoard(int board)
     {
-        if (board < 0 || board >= _boards.Count)
+        if (board < 0 ||
+            board >= _boards.Count)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(board),
@@ -591,7 +629,8 @@ internal sealed class PokerHand : IPokerHand
 
     private Round GetCurrentRound()
     {
-        if (_roundIndex < 0 || _roundIndex >= _rules.Rounds.Count)
+        if (_roundIndex < 0 ||
+            _roundIndex >= _rules.Rounds.Count)
         {
             throw new InvalidOperationException(
                 "Текущая улица не определена.");
@@ -607,9 +646,11 @@ internal sealed class PokerHand : IPokerHand
             : _seats.Max(seat => seat.RoundBet);
     }
 
-    private bool IsAutomated(Automation automation)
+    private bool IsAutomated(
+        Automation automation)
     {
-        return (_rules.Automation & automation) == automation;
+        return (_rules.Automation & automation) ==
+               automation;
     }
 
     private void EnsureInitialized()

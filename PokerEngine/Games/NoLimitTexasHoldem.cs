@@ -102,9 +102,6 @@ public sealed class NoLimitTexasHoldem : PokerGame
 
     public override IPokerHand CreateHand()
     {
-        var deck = new Deck();
-        return new PokerHand(
-            rules: _rules,
-            deck: deck);
+        return new PokerHand(_rules);
     }
 }
