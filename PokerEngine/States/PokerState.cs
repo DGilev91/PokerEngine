@@ -36,6 +36,7 @@ public sealed class PokerState : IPokerState
     private int _runoutCount = 1;
     private bool _runoutCountWasSet;
     private bool _waitingForRunoutDecision;
+    private bool _dealingRemainingBoardsAutomatically;
 
     private long _lastFullRaiseSize;
     private int _raiseCount;
@@ -48,7 +49,8 @@ public sealed class PokerState : IPokerState
         _handEvaluator = _rules.GameType switch
         {
             GameType.TexasHoldem => new TexasHoldemEvaluator(),
-            _ => throw new NotSupportedException($"Тип игры {_rules.GameType} пока не поддерживается.")
+            _ => throw new NotSupportedException(
+                $"Тип игры {_rules.GameType} пока не поддерживается.")
         };
     }
 
@@ -62,7 +64,12 @@ public sealed class PokerState : IPokerState
 
     public HandState State => _state;
 
-    public RoundType Round => _roundIndex == _rules.Rounds.Count ? RoundType.Showdown : _roundIndex >= 0 && _roundIndex < _rules.Rounds.Count ? _rules.Rounds[_roundIndex].Type : RoundType.None;
+    public RoundType Round =>
+        _roundIndex == _rules.Rounds.Count
+            ? RoundType.Showdown
+            : _roundIndex >= 0 && _roundIndex < _rules.Rounds.Count
+                ? _rules.Rounds[_roundIndex].Type
+                : RoundType.None;
 
     public void Initialize(IReadOnlyList<long> stacks)
     {
@@ -70,20 +77,25 @@ public sealed class PokerState : IPokerState
 
         if (_state != HandState.None)
         {
-            throw new InvalidOperationException("Раздача уже была инициализирована.");
+            throw new InvalidOperationException(
+                "Раздача уже была инициализирована.");
         }
 
         if (stacks.Count < 2)
         {
-            throw new ArgumentException("Для раздачи необходимо минимум два игрока.", nameof(stacks));
+            throw new ArgumentException(
+                "Для раздачи необходимо минимум два игрока.",
+                nameof(stacks));
         }
 
         if (stacks.Any(stack => stack <= 0))
         {
-            throw new ArgumentException("Стек каждого игрока должен быть больше нуля.", nameof(stacks));
+            throw new ArgumentException(
+                "Стек каждого игрока должен быть больше нуля.",
+                nameof(stacks));
         }
 
-        ValidateRules();
+        ValidateRules(stacks.Count);
 
         _events.Clear();
         _seats.Clear();
@@ -103,6 +115,7 @@ public sealed class PokerState : IPokerState
         _runoutCount = 1;
         _runoutCountWasSet = false;
         _waitingForRunoutDecision = false;
+        _dealingRemainingBoardsAutomatically = false;
 
         _lastFullRaiseSize = 0;
         _raiseCount = 0;
@@ -112,7 +125,9 @@ public sealed class PokerState : IPokerState
             _seats.Add(new Seat(seatId, stacks[seatId]));
         }
 
-        for (int boardIndex = 0; boardIndex < _rules.InitialBoardCount; boardIndex++)
+        for (int boardIndex = 0;
+             boardIndex < _rules.InitialBoardCount;
+             boardIndex++)
         {
             _boards.Add([]);
         }
@@ -126,6 +141,10 @@ public sealed class PokerState : IPokerState
 
         Emit(new NewHandEvent());
         Emit(new SeatsEvent(stacks.ToArray()));
+
+        PostAntesAutomatically();
+        PostBlindsAutomatically();
+        PostMandatoryStraddlesAutomatically();
     }
 
     public void PlayerPost(int seatId, PostType postType, long amount)
@@ -136,7 +155,9 @@ public sealed class PokerState : IPokerState
 
         if (amount <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(amount), "Размер поста должен быть больше нуля.");
+            throw new ArgumentOutOfRangeException(
+                nameof(amount),
+                "Размер поста должен быть больше нуля.");
         }
 
         long paid = Math.Min(amount, seat.Stack);
@@ -149,7 +170,11 @@ public sealed class PokerState : IPokerState
             seat.RoundBet += paid;
         }
 
-        Emit(new PlayerPostedEvent(seatId, postType, paid, seat.IsAllIn));
+        Emit(new PlayerPostedEvent(
+            seatId,
+            postType,
+            paid,
+            seat.IsAllIn));
 
         RecalculatePots();
     }
@@ -188,7 +213,9 @@ public sealed class PokerState : IPokerState
         BeginBettingRound();
     }
 
-    public void DealHole(int seatId, IReadOnlyList<string>? cards = null)
+    public void DealHole(
+        int seatId,
+        IReadOnlyList<string>? cards = null)
     {
         EnsureStarted();
 
@@ -196,7 +223,8 @@ public sealed class PokerState : IPokerState
 
         if (seat.HoleCards.Count > 0)
         {
-            throw new InvalidOperationException($"Игроку на месте {seatId} уже выданы карты.");
+            throw new InvalidOperationException(
+                $"Игроку на месте {seatId} уже выданы карты.");
         }
 
         int cardCount = GetHoleCardCount();
@@ -206,7 +234,8 @@ public sealed class PokerState : IPokerState
         {
             if (!IsAutomated(Automation.DealHoleCards))
             {
-                throw new InvalidOperationException("В ручном режиме необходимо передать карманные карты.");
+                throw new InvalidOperationException(
+                    "В ручном режиме необходимо передать карманные карты.");
             }
 
             dealtCards = _deck.Deal(cardCount).ToArray();
@@ -230,28 +259,35 @@ public sealed class PokerState : IPokerState
 
         if (count < 1 || count > _rules.MaxRunoutCount)
         {
-            throw new ArgumentOutOfRangeException(nameof(count), $"Количество runout должно быть от 1 до {_rules.MaxRunoutCount}.");
+            throw new ArgumentOutOfRangeException(
+                nameof(count),
+                $"Количество runout должно быть от 1 до {_rules.MaxRunoutCount}.");
         }
 
         if (_runoutCountWasSet)
         {
-            throw new InvalidOperationException("Количество runout уже было установлено.");
+            throw new InvalidOperationException(
+                "Количество runout уже было установлено.");
         }
 
         if (!_waitingForRunoutDecision && count > 1)
         {
-            throw new InvalidOperationException("Сейчас нет ситуации, в которой можно выбрать несколько runout.");
+            throw new InvalidOperationException(
+                "Сейчас нет ситуации, в которой можно выбрать несколько runout.");
         }
 
         _runoutCount = count;
         _runoutCountWasSet = true;
         _waitingForRunoutDecision = false;
 
-        int requiredBoardCount = _rules.InitialBoardCount * count;
+        int requiredBoardCount =
+            _rules.InitialBoardCount * count;
 
         while (_boards.Count < requiredBoardCount)
         {
-            int sourceBoardIndex = _boards.Count % _rules.InitialBoardCount;
+            int sourceBoardIndex =
+                _boards.Count % _rules.InitialBoardCount;
+
             _boards.Add([.. _boards[sourceBoardIndex]]);
         }
 
@@ -260,13 +296,18 @@ public sealed class PokerState : IPokerState
         ContinueAfterRunoutDecision();
     }
 
-    public void DealBoard(int boardIndex = 0, IReadOnlyList<string>? cards = null)
+    public void DealBoard(
+        int boardIndex = 0,
+        IReadOnlyList<string>? cards = null)
     {
         EnsureStarted();
         ValidateBoardIndex(boardIndex);
 
         List<string> board = _boards[boardIndex];
-        int roundIndex = FindNextBoardRoundIndex(board.Count);
+
+        int roundIndex =
+            FindNextBoardRoundIndex(board.Count);
+
         RoundRules round = _rules.Rounds[roundIndex];
 
         string[] dealtCards;
@@ -275,7 +316,8 @@ public sealed class PokerState : IPokerState
         {
             if (!IsAutomated(Automation.DealBoard))
             {
-                throw new InvalidOperationException("В ручном режиме необходимо передать карты доски.");
+                throw new InvalidOperationException(
+                    "В ручном режиме необходимо передать карты доски.");
             }
 
             if (IsAutomated(Automation.BurnCards))
@@ -283,7 +325,8 @@ public sealed class PokerState : IPokerState
                 _deck.Deal();
             }
 
-            dealtCards = _deck.Deal(round.BoardCardCount).ToArray();
+            dealtCards =
+                _deck.Deal(round.BoardCardCount).ToArray();
         }
         else
         {
@@ -295,7 +338,10 @@ public sealed class PokerState : IPokerState
 
         board.AddRange(dealtCards);
 
-        Emit(new BoardEvent(round.Type, boardIndex, dealtCards));
+        Emit(new BoardEvent(
+            round.Type,
+            boardIndex,
+            dealtCards));
 
         if (!AllBoardsReachedRound(roundIndex))
         {
@@ -303,6 +349,11 @@ public sealed class PokerState : IPokerState
         }
 
         _roundIndex = roundIndex;
+
+        if (_dealingRemainingBoardsAutomatically)
+        {
+            return;
+        }
 
         if (IsFinalRound())
         {
@@ -327,18 +378,23 @@ public sealed class PokerState : IPokerState
         BeginBettingRound();
     }
 
-    public void PlayerAction(int seatId, ActionType actionType, long amount = 0)
+    public void PlayerAction(
+        int seatId,
+        ActionType actionType,
+        long amount = 0)
     {
         EnsureStarted();
 
         if (_waitingForRunoutDecision)
         {
-            throw new InvalidOperationException("Сначала необходимо выбрать количество runout.");
+            throw new InvalidOperationException(
+                "Сначала необходимо выбрать количество runout.");
         }
 
         if (_activeSeatId != seatId)
         {
-            throw new InvalidOperationException($"Сейчас ход игрока на месте {_activeSeatId}.");
+            throw new InvalidOperationException(
+                $"Сейчас ход игрока на месте {_activeSeatId}.");
         }
 
         Seat seat = GetActionSeat(seatId);
@@ -366,13 +422,18 @@ public sealed class PokerState : IPokerState
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(actionType), actionType, "Неизвестное действие.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(actionType),
+                    actionType,
+                    "Неизвестное действие.");
         }
 
         ContinueAfterAction(seatId);
     }
 
-    public void ShowCards(int seatId, IReadOnlyList<string> cards)
+    public void ShowCards(
+        int seatId,
+        IReadOnlyList<string> cards)
     {
         EnsureStarted();
         ArgumentNullException.ThrowIfNull(cards);
@@ -389,10 +450,13 @@ public sealed class PokerState : IPokerState
             }
             else if (!seat.HoleCards.SequenceEqual(shownCards))
             {
-                throw new InvalidOperationException($"Показанные карты игрока {seatId} не совпадают с выданными картами.");
+                throw new InvalidOperationException(
+                    $"Показанные карты игрока {seatId} не совпадают с выданными картами.");
             }
 
-            string[] unknownCards = shownCards.Where(card => !DeckWasAlreadyUsed(card)).ToArray();
+            string[] unknownCards = shownCards
+                .Where(card => !DeckWasAlreadyUsed(card))
+                .ToArray();
 
             if (unknownCards.Length > 0)
             {
@@ -402,7 +466,9 @@ public sealed class PokerState : IPokerState
 
         _shownSeats.Add(seatId);
 
-        Emit(new ShowCardsEvent(seatId, cards.ToArray()));
+        Emit(new ShowCardsEvent(
+            seatId,
+            cards.ToArray()));
 
         if (Round == RoundType.Showdown)
         {
@@ -410,11 +476,156 @@ public sealed class PokerState : IPokerState
         }
     }
 
+    // Automatic posts
+
+    private void PostAntesAutomatically()
+    {
+        if (!IsAutomated(Automation.PostAntes))
+        {
+            return;
+        }
+
+        AnteRules? ante = _rules.Ante;
+
+        if (ante is null || ante.Amount <= 0)
+        {
+            return;
+        }
+
+        switch (ante.Type)
+        {
+            case AnteType.EveryPlayer:
+                foreach (Seat seat in _seats)
+                {
+                    PlayerPost(
+                        seat.SeatId,
+                        PostType.Ante,
+                        ante.Amount);
+                }
+
+                break;
+
+            default:
+                throw new NotSupportedException(
+                    $"Автоматическое ante типа {ante.Type} пока не поддерживается.");
+        }
+    }
+
+    private void PostBlindsAutomatically()
+    {
+        if (!IsAutomated(Automation.PostBlinds))
+        {
+            return;
+        }
+
+        if (_seats.Count < 2)
+        {
+            throw new InvalidOperationException(
+                "Для автоматической постановки блайндов необходимо минимум два игрока.");
+        }
+
+        PlayerPost(
+            0,
+            PostType.SmallBlind,
+            _rules.SmallBlind);
+
+        PlayerPost(
+            1,
+            PostType.BigBlind,
+            _rules.BigBlind);
+    }
+
+    private void PostMandatoryStraddlesAutomatically()
+    {
+        if (!IsAutomated(Automation.PostStraddles))
+        {
+            return;
+        }
+
+        StraddleRules? straddle = _rules.Straddle;
+
+        if (straddle is null ||
+            !straddle.IsMandatory ||
+            straddle.Amounts.Count == 0)
+        {
+            return;
+        }
+
+        switch (straddle.Type)
+        {
+            case StraddleType.Utg:
+                PostMandatoryUtgStraddles(straddle);
+                break;
+
+            case StraddleType.Button:
+                PostMandatoryButtonStraddle(straddle);
+                break;
+
+            case StraddleType.Mississippi:
+                throw new NotSupportedException(
+                    "Автоматический Mississippi straddle требует явного определения первого места.");
+
+            case StraddleType.AnyPosition:
+                throw new NotSupportedException(
+                    "Автоматический AnyPosition straddle требует передачи конкретного seatId.");
+
+            default:
+                throw new ArgumentOutOfRangeException(
+                    nameof(straddle.Type),
+                    straddle.Type,
+                    "Неизвестный тип страддла.");
+        }
+    }
+
+    private void PostMandatoryUtgStraddles(
+        StraddleRules straddle)
+    {
+        int availableSeatCount = _seats.Count - 2;
+
+        if (straddle.Amounts.Count > availableSeatCount)
+        {
+            throw new InvalidOperationException(
+                "Количество обязательных UTG-страддлов превышает количество мест после big blind.");
+        }
+
+        for (int index = 0;
+             index < straddle.Amounts.Count;
+             index++)
+        {
+            int seatId = 2 + index;
+
+            PlayerPost(
+                seatId,
+                PostType.Straddle,
+                straddle.Amounts[index]);
+        }
+    }
+
+    private void PostMandatoryButtonStraddle(
+        StraddleRules straddle)
+    {
+        if (straddle.Amounts.Count != 1)
+        {
+            throw new InvalidOperationException(
+                "Для обязательного Button straddle поддерживается только один автоматический страддл.");
+        }
+
+        int buttonSeatId = _seats.Count - 1;
+
+        PlayerPost(
+            buttonSeatId,
+            PostType.Straddle,
+            straddle.Amounts[0]);
+    }
+
+    // Player actions
+
     private void Fold(Seat seat)
     {
         if (seat.IsFolded)
         {
-            throw new InvalidOperationException($"Игрок на месте {seat.SeatId} уже сделал fold.");
+            throw new InvalidOperationException(
+                $"Игрок на месте {seat.SeatId} уже сделал fold.");
         }
 
         seat.IsFolded = true;
@@ -429,7 +640,12 @@ public sealed class PokerState : IPokerState
             RefreshUncalledCandidate();
         }
 
-        Emit(new PlayerActionEvent(seat.SeatId, ActionType.Fold, 0, seat.RoundBet, false));
+        Emit(new PlayerActionEvent(
+            seat.SeatId,
+            ActionType.Fold,
+            0,
+            seat.RoundBet,
+            false));
     }
 
     private void Check(Seat seat)
@@ -438,12 +654,18 @@ public sealed class PokerState : IPokerState
 
         if (seat.RoundBet != highestBet)
         {
-            throw new InvalidOperationException($"Игрок на месте {seat.SeatId} не может сделать check.");
+            throw new InvalidOperationException(
+                $"Игрок на месте {seat.SeatId} не может сделать check.");
         }
 
         _actedSeats.Add(seat.SeatId);
 
-        Emit(new PlayerActionEvent(seat.SeatId, ActionType.Check, 0, seat.RoundBet, false));
+        Emit(new PlayerActionEvent(
+            seat.SeatId,
+            ActionType.Check,
+            0,
+            seat.RoundBet,
+            false));
     }
 
     private void Call(Seat seat)
@@ -453,7 +675,8 @@ public sealed class PokerState : IPokerState
 
         if (amountToCall <= 0)
         {
-            throw new InvalidOperationException($"Игроку на месте {seat.SeatId} нечего коллировать.");
+            throw new InvalidOperationException(
+                $"Игроку на месте {seat.SeatId} нечего коллировать.");
         }
 
         long paid = CommitTo(seat, highestBet);
@@ -462,7 +685,12 @@ public sealed class PokerState : IPokerState
 
         RefreshUncalledCandidate();
 
-        Emit(new PlayerActionEvent(seat.SeatId, ActionType.Call, paid, seat.RoundBet, seat.IsAllIn));
+        Emit(new PlayerActionEvent(
+            seat.SeatId,
+            ActionType.Call,
+            paid,
+            seat.RoundBet,
+            seat.IsAllIn));
 
         RecalculatePots();
     }
@@ -471,7 +699,8 @@ public sealed class PokerState : IPokerState
     {
         if (GetHighestRoundBet() > 0)
         {
-            throw new InvalidOperationException("Нельзя сделать bet, когда ставка уже существует. Используйте RaiseTo.");
+            throw new InvalidOperationException(
+                "Нельзя сделать bet, когда ставка уже существует. Используйте RaiseTo.");
         }
 
         RoundRules round = GetCurrentRound();
@@ -479,25 +708,36 @@ public sealed class PokerState : IPokerState
 
         if (amount <= 0 || amount > maximum)
         {
-            throw new ArgumentOutOfRangeException(nameof(amount), $"Размер bet должен быть от 1 до {maximum}.");
+            throw new ArgumentOutOfRangeException(
+                nameof(amount),
+                $"Размер bet должен быть от 1 до {maximum}.");
         }
 
-        if (amount < round.BetSize && amount < seat.RoundBet + seat.Stack)
+        if (amount < round.BetSize &&
+            amount < seat.RoundBet + seat.Stack)
         {
-            throw new InvalidOperationException($"Минимальный bet равен {round.BetSize}.");
+            throw new InvalidOperationException(
+                $"Минимальный bet равен {round.BetSize}.");
         }
 
         long previousBet = seat.RoundBet;
         long paid = CommitTo(seat, amount);
         long betSize = seat.RoundBet - previousBet;
 
-        _lastFullRaiseSize = Math.Max(betSize, round.BetSize);
+        _lastFullRaiseSize =
+            Math.Max(betSize, round.BetSize);
+
         _lastAggressorSeatId = seat.SeatId;
 
         ResetActedAfterAggression(seat.SeatId);
         SetUncalledCandidate(seat.SeatId);
 
-        Emit(new PlayerActionEvent(seat.SeatId, ActionType.Bet, paid, seat.RoundBet, seat.IsAllIn));
+        Emit(new PlayerActionEvent(
+            seat.SeatId,
+            ActionType.Bet,
+            paid,
+            seat.RoundBet,
+            seat.IsAllIn));
 
         RecalculatePots();
     }
@@ -508,35 +748,49 @@ public sealed class PokerState : IPokerState
 
         if (highestBet <= 0)
         {
-            throw new InvalidOperationException("Нельзя сделать raise, когда ставки ещё нет. Используйте Bet.");
+            throw new InvalidOperationException(
+                "Нельзя сделать raise, когда ставки ещё нет. Используйте Bet.");
         }
 
-        long maximumRaiseTo = GetMaximumRaiseTo(seat);
+        long maximumRaiseTo =
+            GetMaximumRaiseTo(seat);
 
-        if (amount <= highestBet || amount > maximumRaiseTo)
+        if (amount <= highestBet ||
+            amount > maximumRaiseTo)
         {
-            throw new ArgumentOutOfRangeException(nameof(amount), $"RaiseTo должен быть больше {highestBet} и не больше {maximumRaiseTo}.");
+            throw new ArgumentOutOfRangeException(
+                nameof(amount),
+                $"RaiseTo должен быть больше {highestBet} и не больше {maximumRaiseTo}.");
         }
 
-        long minimumRaiseTo = highestBet + _lastFullRaiseSize;
-        long availableTotal = seat.RoundBet + seat.Stack;
-        bool isAllInRaise = amount >= availableTotal;
+        long minimumRaiseTo =
+            highestBet + _lastFullRaiseSize;
+
+        long availableTotal =
+            seat.RoundBet + seat.Stack;
+
+        bool isAllInRaise =
+            amount >= availableTotal;
 
         if (amount < minimumRaiseTo && !isAllInRaise)
         {
-            throw new InvalidOperationException($"Минимальный RaiseTo равен {minimumRaiseTo}.");
+            throw new InvalidOperationException(
+                $"Минимальный RaiseTo равен {minimumRaiseTo}.");
         }
 
         RoundRules round = GetCurrentRound();
 
-        if (round.MaxRaises.HasValue && _raiseCount >= round.MaxRaises.Value)
+        if (round.MaxRaises.HasValue &&
+            _raiseCount >= round.MaxRaises.Value)
         {
-            throw new InvalidOperationException("Достигнуто максимальное количество повышений.");
+            throw new InvalidOperationException(
+                "Достигнуто максимальное количество повышений.");
         }
 
         long paid = CommitTo(seat, amount);
         long raiseSize = seat.RoundBet - highestBet;
-        bool isFullRaise = raiseSize >= _lastFullRaiseSize;
+        bool isFullRaise =
+            raiseSize >= _lastFullRaiseSize;
 
         if (isFullRaise)
         {
@@ -553,10 +807,17 @@ public sealed class PokerState : IPokerState
 
         SetUncalledCandidate(seat.SeatId);
 
-        Emit(new PlayerActionEvent(seat.SeatId, ActionType.RaiseTo, paid, seat.RoundBet, seat.IsAllIn));
+        Emit(new PlayerActionEvent(
+            seat.SeatId,
+            ActionType.RaiseTo,
+            paid,
+            seat.RoundBet,
+            seat.IsAllIn));
 
         RecalculatePots();
     }
+
+    // Progression
 
     private void ContinueAfterAction(int actingSeatId)
     {
@@ -602,7 +863,9 @@ public sealed class PokerState : IPokerState
     {
         _activeSeatId = null;
 
-        if (HasUndealtBoardCards() && _rules.MaxRunoutCount > 1 && !_runoutCountWasSet)
+        if (HasUndealtBoardCards() &&
+            _rules.MaxRunoutCount > 1 &&
+            !_runoutCountWasSet)
         {
             _waitingForRunoutDecision = true;
             return;
@@ -676,7 +939,11 @@ public sealed class PokerState : IPokerState
         Seat seat = GetActionSeat(seatId);
 
         long highestBet = GetHighestRoundBet();
-        long callAmount = Math.Min(Math.Max(0, highestBet - seat.RoundBet), seat.Stack);
+
+        long callAmount = Math.Min(
+            Math.Max(0, highestBet - seat.RoundBet),
+            seat.Stack);
+
         long minBet = 0;
         long maxBet = 0;
         long minRaiseTo = 0;
@@ -692,6 +959,7 @@ public sealed class PokerState : IPokerState
             if (CanRaise(seat))
             {
                 actions.Add(ActionType.RaiseTo);
+
                 minRaiseTo = GetMinimumRaiseTo();
                 maxRaiseTo = GetMaximumRaiseTo(seat);
             }
@@ -703,7 +971,11 @@ public sealed class PokerState : IPokerState
             if (seat.Stack > 0)
             {
                 actions.Add(ActionType.Bet);
-                minBet = Math.Min(GetCurrentRound().BetSize, seat.Stack);
+
+                minBet = Math.Min(
+                    GetCurrentRound().BetSize,
+                    seat.Stack);
+
                 maxBet = GetMaximumBetTo(seat);
             }
         }
@@ -714,6 +986,7 @@ public sealed class PokerState : IPokerState
             if (CanRaise(seat))
             {
                 actions.Add(ActionType.RaiseTo);
+
                 minRaiseTo = GetMinimumRaiseTo();
                 maxRaiseTo = GetMaximumRaiseTo(seat);
             }
@@ -721,26 +994,41 @@ public sealed class PokerState : IPokerState
 
         _activeSeatId = seatId;
 
-        Emit(new PlayerTurnEvent(seatId, actions, callAmount, minBet, maxBet, minRaiseTo, maxRaiseTo));
+        Emit(new PlayerTurnEvent(
+            seatId,
+            actions,
+            callAmount,
+            minBet,
+            maxBet,
+            minRaiseTo,
+            maxRaiseTo));
     }
 
     private bool IsBettingRoundCompleted()
     {
         long highestBet = GetHighestRoundBet();
 
-        Seat[] actionableSeats = _seats.Where(seat => !seat.IsFolded && !seat.IsAllIn).ToArray();
+        Seat[] actionableSeats = _seats
+            .Where(seat =>
+                !seat.IsFolded &&
+                !seat.IsAllIn)
+            .ToArray();
 
         if (actionableSeats.Length == 0)
         {
             return true;
         }
 
-        return actionableSeats.All(seat => _actedSeats.Contains(seat.SeatId) && seat.RoundBet == highestBet);
+        return actionableSeats.All(seat =>
+            _actedSeats.Contains(seat.SeatId) &&
+            seat.RoundBet == highestBet);
     }
 
     private bool TryCompleteByFold()
     {
-        Seat[] remaining = _seats.Where(seat => !seat.IsFolded).ToArray();
+        Seat[] remaining = _seats
+            .Where(seat => !seat.IsFolded)
+            .ToArray();
 
         if (remaining.Length != 1)
         {
@@ -756,7 +1044,11 @@ public sealed class PokerState : IPokerState
         {
             winner.Stack += pot.Amount;
 
-            Emit(new PotAwardedEvent(pot.Index, 0, winner.SeatId, pot.Amount));
+            Emit(new PotAwardedEvent(
+                pot.Index,
+                0,
+                winner.SeatId,
+                pot.Amount));
         }
 
         CompleteHand();
@@ -764,8 +1056,20 @@ public sealed class PokerState : IPokerState
         return true;
     }
 
+    // Showdown
+
     private void StartShowdown()
     {
+        if (_state == HandState.Completed)
+        {
+            return;
+        }
+
+        if (_roundIndex == _rules.Rounds.Count)
+        {
+            return;
+        }
+
         _activeSeatId = null;
         _roundIndex = _rules.Rounds.Count;
 
@@ -779,9 +1083,12 @@ public sealed class PokerState : IPokerState
             return;
         }
 
-        Seat[] contenders = _seats.Where(seat => !seat.IsFolded).ToArray();
+        Seat[] contenders = _seats
+            .Where(seat => !seat.IsFolded)
+            .ToArray();
 
-        if (contenders.Any(seat => seat.HoleCards.Count == 0))
+        if (contenders.Any(
+                seat => seat.HoleCards.Count == 0))
         {
             return;
         }
@@ -793,75 +1100,138 @@ public sealed class PokerState : IPokerState
 
     private void EvaluateAndAwardPots()
     {
-        Dictionary<(int seatId, int boardIndex), EvaluatedHand> evaluations = [];
-
-        foreach (Seat seat in _seats.Where(seat => !seat.IsFolded))
+        if (_state == HandState.Completed)
         {
-            for (int boardIndex = 0; boardIndex < _boards.Count; boardIndex++)
+            return;
+        }
+
+        Dictionary<
+            (int seatId, int boardIndex),
+            EvaluatedHand> evaluations = [];
+
+        foreach (Seat seat in _seats.Where(
+                     seat => !seat.IsFolded))
+        {
+            for (int boardIndex = 0;
+                 boardIndex < _boards.Count;
+                 boardIndex++)
             {
-                EvaluatedHand evaluation = EvaluateHand(seat, boardIndex);
+                EvaluatedHand evaluation =
+                    EvaluateHand(seat, boardIndex);
 
-                evaluations[(seat.SeatId, boardIndex)] = evaluation;
+                evaluations[(seat.SeatId, boardIndex)] =
+                    evaluation;
 
-                Emit(new HandEvaluatedEvent(seat.SeatId, boardIndex, evaluation.Category, evaluation.BestCards));
+                Emit(new HandEvaluatedEvent(
+                    seat.SeatId,
+                    boardIndex,
+                    evaluation.Category,
+                    evaluation.BestCards));
             }
         }
 
         foreach (PotSlice pot in _potSlices)
         {
-            long boardShare = pot.Amount / _boards.Count;
-            long boardRemainder = pot.Amount % _boards.Count;
+            long boardShare =
+                pot.Amount / _boards.Count;
 
-            for (int boardIndex = 0; boardIndex < _boards.Count; boardIndex++)
+            long boardRemainder =
+                pot.Amount % _boards.Count;
+
+            for (int boardIndex = 0;
+                 boardIndex < _boards.Count;
+                 boardIndex++)
             {
-                long amountForBoard = boardShare + (boardIndex < boardRemainder ? 1 : 0);
+                long amountForBoard =
+                    boardShare +
+                    (boardIndex < boardRemainder ? 1 : 0);
 
                 if (amountForBoard <= 0)
                 {
                     continue;
                 }
 
-                int[] eligibleSeats = pot.EligibleSeatIds.Where(seatId => !_seats[seatId].IsFolded).ToArray();
+                int[] eligibleSeats = pot
+                    .EligibleSeatIds
+                    .Where(seatId =>
+                        !_seats[seatId].IsFolded)
+                    .ToArray();
 
                 if (eligibleSeats.Length == 0)
                 {
                     continue;
                 }
 
-                long bestStrength = eligibleSeats.Max(seatId => evaluations[(seatId, boardIndex)].Strength);
-                int[] winners = eligibleSeats.Where(seatId => evaluations[(seatId, boardIndex)].Strength == bestStrength).Order().ToArray();
+                long bestStrength = eligibleSeats.Max(
+                    seatId =>
+                        evaluations[(seatId, boardIndex)]
+                            .Strength);
 
-                long winnerShare = amountForBoard / winners.Length;
-                long winnerRemainder = amountForBoard % winners.Length;
+                int[] winners = eligibleSeats
+                    .Where(seatId =>
+                        evaluations[(seatId, boardIndex)]
+                            .Strength == bestStrength)
+                    .Order()
+                    .ToArray();
 
-                for (int index = 0; index < winners.Length; index++)
+                long winnerShare =
+                    amountForBoard / winners.Length;
+
+                long winnerRemainder =
+                    amountForBoard % winners.Length;
+
+                for (int index = 0;
+                     index < winners.Length;
+                     index++)
                 {
                     int winnerSeatId = winners[index];
-                    long awarded = winnerShare + (index < winnerRemainder ? 1 : 0);
+
+                    long awarded =
+                        winnerShare +
+                        (index < winnerRemainder ? 1 : 0);
 
                     _seats[winnerSeatId].Stack += awarded;
 
-                    Emit(new PotAwardedEvent(pot.Index, boardIndex, winnerSeatId, awarded));
+                    Emit(new PotAwardedEvent(
+                        pot.Index,
+                        boardIndex,
+                        winnerSeatId,
+                        awarded));
                 }
             }
         }
     }
 
-    private EvaluatedHand EvaluateHand(Seat seat, int boardIndex)
+    private EvaluatedHand EvaluateHand(
+        Seat seat,
+        int boardIndex)
     {
-        HandRank result = _handEvaluator.Evaluate(seat.HoleCards, _boards[boardIndex]);
+        HandRank result = _handEvaluator.Evaluate(
+            seat.HoleCards,
+            _boards[boardIndex]);
 
-        return new EvaluatedHand(result.Strength, result.Category, result.Cards.ToArray());
+        return new EvaluatedHand(
+            result.Strength,
+            result.Category,
+            result.Cards.ToArray());
     }
 
     private void CompleteHand()
     {
+        if (_state == HandState.Completed)
+        {
+            return;
+        }
+
         _activeSeatId = null;
         _waitingForRunoutDecision = false;
+        _dealingRemainingBoardsAutomatically = false;
         _state = HandState.Completed;
 
         Emit(new EndHandEvent());
     }
+
+    // Uncalled bet
 
     private void SetUncalledCandidate(int seatId)
     {
@@ -878,7 +1248,8 @@ public sealed class PokerState : IPokerState
             return;
         }
 
-        Seat candidate = GetSeat(_uncalledSeatId.Value);
+        Seat candidate =
+            GetSeat(_uncalledSeatId.Value);
 
         if (candidate.IsFolded)
         {
@@ -886,9 +1257,16 @@ public sealed class PokerState : IPokerState
             return;
         }
 
-        long highestOtherLiveBet = _seats.Where(seat => seat.SeatId != candidate.SeatId).Select(seat => seat.RoundBet).DefaultIfEmpty(0).Max();
+        long highestOtherLiveBet = _seats
+            .Where(seat =>
+                seat.SeatId != candidate.SeatId)
+            .Select(seat => seat.RoundBet)
+            .DefaultIfEmpty(0)
+            .Max();
 
-        _uncalledAmount = Math.Max(0, candidate.RoundBet - highestOtherLiveBet);
+        _uncalledAmount = Math.Max(
+            0,
+            candidate.RoundBet - highestOtherLiveBet);
 
         if (_uncalledAmount == 0)
         {
@@ -906,7 +1284,8 @@ public sealed class PokerState : IPokerState
     {
         RefreshUncalledCandidate();
 
-        if (!_uncalledSeatId.HasValue || _uncalledAmount <= 0)
+        if (!_uncalledSeatId.HasValue ||
+            _uncalledAmount <= 0)
         {
             return;
         }
@@ -918,46 +1297,79 @@ public sealed class PokerState : IPokerState
         seat.TotalBet -= amount;
         seat.Stack += amount;
 
-        Emit(new UncalledBetReturnedEvent(seat.SeatId, amount));
+        Emit(new UncalledBetReturnedEvent(
+            seat.SeatId,
+            amount));
 
         ClearUncalledCandidate();
     }
+
+    // Pots
 
     private void RecalculatePots()
     {
         _potSlices.Clear();
         _potState.Clear();
 
-        long[] levels = _seats.Select(seat => seat.TotalBet).Where(amount => amount > 0).Distinct().Order().ToArray();
+        long[] levels = _seats
+            .Select(seat => seat.TotalBet)
+            .Where(amount => amount > 0)
+            .Distinct()
+            .Order()
+            .ToArray();
+
         long previousLevel = 0;
 
         List<PotBuilder> builders = [];
 
         foreach (long level in levels)
         {
-            Seat[] contributors = _seats.Where(seat => seat.TotalBet >= level).ToArray();
-            long contributionPerSeat = level - previousLevel;
+            Seat[] contributors = _seats
+                .Where(seat => seat.TotalBet >= level)
+                .ToArray();
 
-            if (contributionPerSeat <= 0 || contributors.Length == 0)
+            long contributionPerSeat =
+                level - previousLevel;
+
+            if (contributionPerSeat <= 0 ||
+                contributors.Length == 0)
             {
                 previousLevel = level;
                 continue;
             }
 
-            long amount = contributionPerSeat * contributors.Length;
-            int[] eligibleSeatIds = contributors.Where(seat => !seat.IsFolded).Select(seat => seat.SeatId).Order().ToArray();
+            long amount =
+                contributionPerSeat *
+                contributors.Length;
 
-            Dictionary<int, long> contributions = contributors.ToDictionary(seat => seat.SeatId, _ => contributionPerSeat);
+            int[] eligibleSeatIds = contributors
+                .Where(seat => !seat.IsFolded)
+                .Select(seat => seat.SeatId)
+                .Order()
+                .ToArray();
 
-            PotBuilder? previousBuilder = builders.LastOrDefault();
+            Dictionary<int, long> contributions =
+                contributors.ToDictionary(
+                    seat => seat.SeatId,
+                    _ => contributionPerSeat);
 
-            if (previousBuilder is not null && previousBuilder.EligibleSeatIds.SequenceEqual(eligibleSeatIds))
+            PotBuilder? previousBuilder =
+                builders.LastOrDefault();
+
+            if (previousBuilder is not null &&
+                previousBuilder.EligibleSeatIds
+                    .SequenceEqual(eligibleSeatIds))
             {
                 previousBuilder.Amount += amount;
 
-                foreach ((int seatId, long contribution) in contributions)
+                foreach ((
+                    int seatId,
+                    long contribution) in contributions)
                 {
-                    previousBuilder.Contributions[seatId] = previousBuilder.Contributions.GetValueOrDefault(seatId) + contribution;
+                    previousBuilder.Contributions[seatId] =
+                        previousBuilder.Contributions
+                            .GetValueOrDefault(seatId) +
+                        contribution;
                 }
             }
             else
@@ -973,20 +1385,30 @@ public sealed class PokerState : IPokerState
             previousLevel = level;
         }
 
-        for (int potIndex = 0; potIndex < builders.Count; potIndex++)
+        for (int potIndex = 0;
+             potIndex < builders.Count;
+             potIndex++)
         {
             PotBuilder builder = builders[potIndex];
 
-            _potSlices.Add(new PotSlice(potIndex, builder.Amount, builder.EligibleSeatIds));
+            _potSlices.Add(new PotSlice(
+                potIndex,
+                builder.Amount,
+                builder.EligibleSeatIds));
 
-            Pot pot = new Pot(potIndex);
+            Pot pot = new(potIndex);
 
-            foreach ((int seatId, long contribution) in builder.Contributions)
+            foreach ((
+                int seatId,
+                long contribution) in builder.Contributions)
             {
-                pot.AddContribution(seatId, contribution);
+                pot.AddContribution(
+                    seatId,
+                    contribution);
             }
 
-            foreach (Seat seat in _seats.Where(seat => seat.IsFolded))
+            foreach (Seat seat in _seats.Where(
+                         seat => seat.IsFolded))
             {
                 pot.RemoveEligibility(seat.SeatId);
             }
@@ -999,11 +1421,15 @@ public sealed class PokerState : IPokerState
     {
         if (amountTo < seat.RoundBet)
         {
-            throw new InvalidOperationException("Новая ставка не может быть меньше текущей ставки игрока.");
+            throw new InvalidOperationException(
+                "Новая ставка не может быть меньше текущей ставки игрока.");
         }
 
-        long requested = amountTo - seat.RoundBet;
-        long paid = Math.Min(requested, seat.Stack);
+        long requested =
+            amountTo - seat.RoundBet;
+
+        long paid =
+            Math.Min(requested, seat.Stack);
 
         seat.Stack -= paid;
         seat.RoundBet += paid;
@@ -1011,6 +1437,8 @@ public sealed class PokerState : IPokerState
 
         return paid;
     }
+
+    // Round state
 
     private void ResetRoundBets()
     {
@@ -1034,56 +1462,107 @@ public sealed class PokerState : IPokerState
 
         RoundRules round = GetCurrentRound();
 
-        _lastFullRaiseSize = round.BetSize > 0 ? round.BetSize : _rules.BigBlind;
+        if (round.Type == RoundType.Preflop)
+        {
+            long highestForcedBet = GetHighestRoundBet();
+
+            _lastFullRaiseSize = highestForcedBet > 0
+                ? highestForcedBet
+                : _rules.BigBlind;
+        }
+        else
+        {
+            _lastFullRaiseSize = round.BetSize > 0
+                ? round.BetSize
+                : _rules.BigBlind;
+        }
     }
 
-    private void ResetActedAfterAggression(int aggressorSeatId)
+    private void ResetActedAfterAggression(
+        int aggressorSeatId)
     {
         _actedSeats.Clear();
         _actedSeats.Add(aggressorSeatId);
     }
 
+    // Betting values
+
     private long GetHighestRoundBet()
     {
-        return _seats.Count == 0 ? 0 : _seats.Max(seat => seat.RoundBet);
+        return _seats.Count == 0
+            ? 0
+            : _seats.Max(seat => seat.RoundBet);
     }
 
     private long GetMinimumRaiseTo()
     {
-        return GetHighestRoundBet() + _lastFullRaiseSize;
+        return GetHighestRoundBet() +
+               _lastFullRaiseSize;
     }
 
     private long GetMaximumBetTo(Seat seat)
     {
-        long availableTotal = seat.RoundBet + seat.Stack;
+        long availableTotal =
+            seat.RoundBet + seat.Stack;
 
         return _rules.BettingType switch
         {
-            BettingType.FixedLimit => Math.Min(GetCurrentRound().BetSize, availableTotal),
-            BettingType.PotLimit => Math.Min(GetCurrentPotAmount(), availableTotal),
-            BettingType.NoLimit => availableTotal,
-            _ => throw new NotSupportedException($"Структура ставок {_rules.BettingType} не поддерживается.")
+            BettingType.FixedLimit =>
+                Math.Min(
+                    GetCurrentRound().BetSize,
+                    availableTotal),
+
+            BettingType.PotLimit =>
+                Math.Min(
+                    GetCurrentPotAmount(),
+                    availableTotal),
+
+            BettingType.NoLimit =>
+                availableTotal,
+
+            _ => throw new NotSupportedException(
+                $"Структура ставок {_rules.BettingType} не поддерживается.")
         };
     }
 
     private long GetMaximumRaiseTo(Seat seat)
     {
         long highestBet = GetHighestRoundBet();
-        long amountToCall = Math.Max(0, highestBet - seat.RoundBet);
-        long availableTotal = seat.RoundBet + seat.Stack;
+
+        long amountToCall = Math.Max(
+            0,
+            highestBet - seat.RoundBet);
+
+        long availableTotal =
+            seat.RoundBet + seat.Stack;
 
         return _rules.BettingType switch
         {
-            BettingType.FixedLimit => Math.Min(highestBet + GetCurrentRound().BetSize, availableTotal),
-            BettingType.PotLimit => Math.Min(highestBet + GetCurrentPotAmount() + amountToCall, availableTotal),
-            BettingType.NoLimit => availableTotal,
-            _ => throw new NotSupportedException($"Структура ставок {_rules.BettingType} не поддерживается.")
+            BettingType.FixedLimit =>
+                Math.Min(
+                    highestBet +
+                    GetCurrentRound().BetSize,
+                    availableTotal),
+
+            BettingType.PotLimit =>
+                Math.Min(
+                    highestBet +
+                    GetCurrentPotAmount() +
+                    amountToCall,
+                    availableTotal),
+
+            BettingType.NoLimit =>
+                availableTotal,
+
+            _ => throw new NotSupportedException(
+                $"Структура ставок {_rules.BettingType} не поддерживается.")
         };
     }
 
     private long GetCurrentPotAmount()
     {
-        return _seats.Sum(seat => seat.TotalBet);
+        return _seats.Sum(
+            seat => seat.TotalBet);
     }
 
     private bool CanRaise(Seat seat)
@@ -1095,36 +1574,55 @@ public sealed class PokerState : IPokerState
 
         RoundRules round = GetCurrentRound();
 
-        if (round.MaxRaises.HasValue && _raiseCount >= round.MaxRaises.Value)
+        if (round.MaxRaises.HasValue &&
+            _raiseCount >= round.MaxRaises.Value)
         {
             return false;
         }
 
-        return GetMaximumRaiseTo(seat) > GetHighestRoundBet();
+        return GetMaximumRaiseTo(seat) >
+               GetHighestRoundBet();
     }
+
+    // Action order
 
     private int GetFirstSeatToAct()
     {
         if (Round == RoundType.Preflop)
         {
-            int? lastStraddleSeatId = _events.OfType<PlayerPostedEvent>().Where(post => post.postType == PostType.Straddle).Select(post => (int?)post.seatId).LastOrDefault();
+            int? lastStraddleSeatId = _events
+                .OfType<PlayerPostedEvent>()
+                .Where(post =>
+                    post.postType == PostType.Straddle)
+                .Select(post => (int?)post.seatId)
+                .LastOrDefault();
 
             if (lastStraddleSeatId.HasValue)
             {
-                return FindNextActionableSeat(lastStraddleSeatId.Value);
+                return FindNextActionableSeat(
+                    lastStraddleSeatId.Value);
             }
 
-            return _seats.Count == 2 ? FindNextActionableSeat(-1) : FindNextActionableSeat(1);
+            return _seats.Count == 2
+                ? FindNextActionableSeat(-1)
+                : FindNextActionableSeat(1);
         }
 
-        return _seats.Count == 2 ? FindNextActionableSeat(0) : FindNextActionableSeat(_seats.Count - 1);
+        return _seats.Count == 2
+            ? FindNextActionableSeat(0)
+            : FindNextActionableSeat(_seats.Count - 1);
     }
 
     private int FindNextActionableSeat(int seatId)
     {
-        for (int offset = 1; offset <= _seats.Count; offset++)
+        for (int offset = 1;
+             offset <= _seats.Count;
+             offset++)
         {
-            int nextSeatId = (seatId + offset + _seats.Count) % _seats.Count;
+            int nextSeatId =
+                (seatId + offset + _seats.Count) %
+                _seats.Count;
+
             Seat seat = _seats[nextSeatId];
 
             if (!seat.IsFolded && !seat.IsAllIn)
@@ -1133,34 +1631,48 @@ public sealed class PokerState : IPokerState
             }
         }
 
-        throw new InvalidOperationException("Нет игрока, способного выполнить действие.");
+        throw new InvalidOperationException(
+            "Нет игрока, способного выполнить действие.");
     }
 
     private int CountActionableSeats()
     {
-        return _seats.Count(seat => !seat.IsFolded && !seat.IsAllIn);
+        return _seats.Count(seat =>
+            !seat.IsFolded &&
+            !seat.IsAllIn);
     }
 
     private bool AllRemainingPlayersAllIn()
     {
-        Seat[] remaining = _seats.Where(seat => !seat.IsFolded).ToArray();
+        Seat[] remaining = _seats
+            .Where(seat => !seat.IsFolded)
+            .ToArray();
 
-        return remaining.Length > 1 && remaining.All(seat => seat.IsAllIn);
+        return remaining.Length > 1 &&
+               remaining.All(seat => seat.IsAllIn);
     }
+
+    // Boards
 
     private bool HasUndealtBoardCards()
     {
-        int totalBoardCards = _rules.Rounds.Sum(round => round.BoardCardCount);
+        int totalBoardCards = _rules.Rounds.Sum(
+            round => round.BoardCardCount);
 
-        return _boards.Any(board => board.Count < totalBoardCards);
+        return _boards.Any(
+            board => board.Count < totalBoardCards);
     }
 
     private void DealCurrentRoundBoardsAutomatically()
     {
         int roundIndex = _roundIndex;
-        int requiredCount = GetBoardCardCountAfter(roundIndex);
 
-        for (int boardIndex = 0; boardIndex < _boards.Count; boardIndex++)
+        int requiredCount =
+            GetBoardCardCountAfter(roundIndex);
+
+        for (int boardIndex = 0;
+             boardIndex < _boards.Count;
+             boardIndex++)
         {
             if (_boards[boardIndex].Count < requiredCount)
             {
@@ -1171,78 +1683,128 @@ public sealed class PokerState : IPokerState
 
     private void DealRemainingBoardsAutomatically()
     {
-        while (HasUndealtBoardCards())
+        if (_dealingRemainingBoardsAutomatically ||
+            _state == HandState.Completed)
         {
-            for (int boardIndex = 0; boardIndex < _boards.Count; boardIndex++)
-            {
-                int totalBoardCards = _rules.Rounds.Sum(round => round.BoardCardCount);
+            return;
+        }
 
-                if (_boards[boardIndex].Count < totalBoardCards)
+        _dealingRemainingBoardsAutomatically = true;
+
+        try
+        {
+            int totalBoardCards = _rules.Rounds.Sum(
+                round => round.BoardCardCount);
+
+            while (HasUndealtBoardCards())
+            {
+                bool dealtAnyBoard = false;
+
+                for (int boardIndex = 0;
+                     boardIndex < _boards.Count;
+                     boardIndex++)
                 {
+                    if (_boards[boardIndex].Count >=
+                        totalBoardCards)
+                    {
+                        continue;
+                    }
+
                     DealBoard(boardIndex);
+                    dealtAnyBoard = true;
+                }
+
+                if (!dealtAnyBoard)
+                {
+                    throw new InvalidOperationException(
+                        "Не удалось продолжить автоматическую раздачу досок.");
                 }
             }
+        }
+        finally
+        {
+            _dealingRemainingBoardsAutomatically = false;
         }
 
         StartShowdown();
     }
 
-    private int FindNextBoardRoundIndex(int boardCardCount)
+    private int FindNextBoardRoundIndex(
+        int boardCardCount)
     {
-        for (int roundIndex = 0; roundIndex < _rules.Rounds.Count; roundIndex++)
+        for (int roundIndex = 0;
+             roundIndex < _rules.Rounds.Count;
+             roundIndex++)
         {
-            RoundRules round = _rules.Rounds[roundIndex];
+            RoundRules round =
+                _rules.Rounds[roundIndex];
 
             if (round.BoardCardCount <= 0)
             {
                 continue;
             }
 
-            if (boardCardCount == GetBoardCardCountBefore(roundIndex))
+            if (boardCardCount ==
+                GetBoardCardCountBefore(roundIndex))
             {
                 return roundIndex;
             }
         }
 
-        throw new InvalidOperationException($"Нельзя определить следующую улицу. На доске уже {boardCardCount} карт.");
+        throw new InvalidOperationException(
+            $"Нельзя определить следующую улицу. На доске уже {boardCardCount} карт.");
     }
 
     private bool AllBoardsReachedRound(int roundIndex)
     {
-        int requiredCardCount = GetBoardCardCountAfter(roundIndex);
+        int requiredCardCount =
+            GetBoardCardCountAfter(roundIndex);
 
-        return _boards.All(board => board.Count >= requiredCardCount);
+        return _boards.All(
+            board => board.Count >= requiredCardCount);
     }
 
-    private int GetBoardCardCountBefore(int roundIndex)
+    private int GetBoardCardCountBefore(
+        int roundIndex)
     {
         int cardCount = 0;
 
-        for (int index = 0; index < roundIndex; index++)
+        for (int index = 0;
+             index < roundIndex;
+             index++)
         {
-            cardCount += _rules.Rounds[index].BoardCardCount;
+            cardCount +=
+                _rules.Rounds[index].BoardCardCount;
         }
 
         return cardCount;
     }
 
-    private int GetBoardCardCountAfter(int roundIndex)
+    private int GetBoardCardCountAfter(
+        int roundIndex)
     {
         int cardCount = 0;
 
-        for (int index = 0; index <= roundIndex; index++)
+        for (int index = 0;
+             index <= roundIndex;
+             index++)
         {
-            cardCount += _rules.Rounds[index].BoardCardCount;
+            cardCount +=
+                _rules.Rounds[index].BoardCardCount;
         }
 
         return cardCount;
     }
+
+    // Validation and helpers
 
     private RoundRules GetCurrentRound()
     {
-        if (_roundIndex < 0 || _roundIndex >= _rules.Rounds.Count)
+        if (_roundIndex < 0 ||
+            _roundIndex >= _rules.Rounds.Count)
         {
-            throw new InvalidOperationException("Текущий раунд не определён.");
+            throw new InvalidOperationException(
+                "Текущий раунд не определён.");
         }
 
         return _rules.Rounds[_roundIndex];
@@ -1250,7 +1812,8 @@ public sealed class PokerState : IPokerState
 
     private bool IsFinalRound()
     {
-        return _roundIndex == _rules.Rounds.Count - 1;
+        return _roundIndex ==
+               _rules.Rounds.Count - 1;
     }
 
     private int GetHoleCardCount()
@@ -1261,15 +1824,20 @@ public sealed class PokerState : IPokerState
             GameType.Omaha4c => 4,
             GameType.Omaha5c => 5,
             GameType.Omaha6c => 6,
-            _ => throw new NotSupportedException($"Тип игры {_rules.GameType} не поддерживается.")
+
+            _ => throw new NotSupportedException(
+                $"Тип игры {_rules.GameType} не поддерживается.")
         };
     }
 
     private Seat GetSeat(int seatId)
     {
-        if (seatId < 0 || seatId >= _seats.Count)
+        if (seatId < 0 ||
+            seatId >= _seats.Count)
         {
-            throw new ArgumentOutOfRangeException(nameof(seatId), $"SeatId должен быть от 0 до {_seats.Count - 1}.");
+            throw new ArgumentOutOfRangeException(
+                nameof(seatId),
+                $"SeatId должен быть от 0 до {_seats.Count - 1}.");
         }
 
         return _seats[seatId];
@@ -1281,12 +1849,14 @@ public sealed class PokerState : IPokerState
 
         if (seat.IsFolded)
         {
-            throw new InvalidOperationException($"Игрок на месте {seatId} уже сделал fold.");
+            throw new InvalidOperationException(
+                $"Игрок на месте {seatId} уже сделал fold.");
         }
 
         if (seat.IsAllIn)
         {
-            throw new InvalidOperationException($"Игрок на месте {seatId} уже находится в all-in.");
+            throw new InvalidOperationException(
+                $"Игрок на месте {seatId} уже находится в all-in.");
         }
 
         return seat;
@@ -1294,70 +1864,166 @@ public sealed class PokerState : IPokerState
 
     private void ValidateBoardIndex(int boardIndex)
     {
-        if (boardIndex < 0 || boardIndex >= _boards.Count)
+        if (boardIndex < 0 ||
+            boardIndex >= _boards.Count)
         {
-            throw new ArgumentOutOfRangeException(nameof(boardIndex), $"BoardIndex должен быть от 0 до {_boards.Count - 1}.");
+            throw new ArgumentOutOfRangeException(
+                nameof(boardIndex),
+                $"BoardIndex должен быть от 0 до {_boards.Count - 1}.");
         }
     }
 
-    private static void ValidateCards(IReadOnlyList<string> cards, int expectedCount)
+    private static void ValidateCards(
+        IReadOnlyList<string> cards,
+        int expectedCount)
     {
         ArgumentNullException.ThrowIfNull(cards);
 
         if (cards.Count != expectedCount)
         {
-            throw new ArgumentException($"Необходимо передать {expectedCount} карт.", nameof(cards));
+            throw new ArgumentException(
+                $"Необходимо передать {expectedCount} карт.",
+                nameof(cards));
         }
 
         if (cards.Any(string.IsNullOrWhiteSpace))
         {
-            throw new ArgumentException("Список содержит пустую карту.", nameof(cards));
+            throw new ArgumentException(
+                "Список содержит пустую карту.",
+                nameof(cards));
         }
 
         if (cards.Distinct().Count() != cards.Count)
         {
-            throw new ArgumentException("Список содержит повторяющиеся карты.", nameof(cards));
+            throw new ArgumentException(
+                "Список содержит повторяющиеся карты.",
+                nameof(cards));
         }
     }
 
-    private void ValidateRules()
+    private void ValidateRules(int seatCount)
     {
         if (_rules.InitialBoardCount <= 0)
         {
-            throw new InvalidOperationException("Начальное количество досок должно быть больше нуля.");
+            throw new InvalidOperationException(
+                "Начальное количество досок должно быть больше нуля.");
         }
 
         if (_rules.MaxRunoutCount <= 0)
         {
-            throw new InvalidOperationException("Максимальное количество runout должно быть больше нуля.");
+            throw new InvalidOperationException(
+                "Максимальное количество runout должно быть больше нуля.");
         }
 
         if (_rules.Rounds.Count == 0)
         {
-            throw new InvalidOperationException("В настройках отсутствуют раунды.");
+            throw new InvalidOperationException(
+                "В настройках отсутствуют раунды.");
         }
 
-        if (_rules.Rounds.Select(round => round.Type).Distinct().Count() != _rules.Rounds.Count)
+        if (_rules.Rounds
+                .Select(round => round.Type)
+                .Distinct()
+                .Count() != _rules.Rounds.Count)
         {
-            throw new InvalidOperationException("Типы раундов не должны повторяться.");
+            throw new InvalidOperationException(
+                "Типы раундов не должны повторяться.");
+        }
+
+        ValidateAnteRules();
+        ValidateStraddleRules(seatCount);
+    }
+
+    private void ValidateAnteRules()
+    {
+        AnteRules? ante = _rules.Ante;
+
+        if (ante is null)
+        {
+            return;
+        }
+
+        if (ante.Amount < 0)
+        {
+            throw new InvalidOperationException(
+                "Ante не может быть отрицательным.");
+        }
+    }
+
+    private void ValidateStraddleRules(int seatCount)
+    {
+        StraddleRules? straddle = _rules.Straddle;
+
+        if (straddle is null ||
+            straddle.Amounts.Count == 0)
+        {
+            return;
+        }
+
+        if (straddle.Amounts.Any(amount => amount <= 0))
+        {
+            throw new InvalidOperationException(
+                "Размер каждого страддла должен быть больше нуля.");
+        }
+
+        long previousAmount = _rules.BigBlind;
+
+        for (int index = 0;
+             index < straddle.Amounts.Count;
+             index++)
+        {
+            long amount = straddle.Amounts[index];
+
+            if (amount <= previousAmount)
+            {
+                throw new InvalidOperationException(
+                    $"Straddle #{index + 1} должен быть больше предыдущей live-ставки {previousAmount}.");
+            }
+
+            previousAmount = amount;
+        }
+
+        if (!straddle.IsMandatory)
+        {
+            return;
+        }
+
+        if (straddle.Type == StraddleType.Utg &&
+            straddle.Amounts.Count > seatCount - 2)
+        {
+            throw new InvalidOperationException(
+                "Количество обязательных UTG-страддлов превышает количество мест после big blind.");
+        }
+
+        if (straddle.Type == StraddleType.Button &&
+            straddle.Amounts.Count != 1)
+        {
+            throw new InvalidOperationException(
+                "Для обязательного Button straddle поддерживается только один страддл.");
         }
     }
 
     private static bool IsLivePost(PostType postType)
     {
-        return postType is PostType.SmallBlind or PostType.BigBlind or PostType.ExtraBlind or PostType.Straddle;
+        return postType is
+            PostType.SmallBlind or
+            PostType.BigBlind or
+            PostType.ExtraBlind or
+            PostType.Straddle;
     }
 
     private bool IsAutomated(Automation automation)
     {
-        return (_rules.Automation & automation) == automation;
+        return (_rules.Automation & automation) ==
+               automation;
     }
 
     private void EnsureStarted()
     {
         if (_state != HandState.Started)
         {
-            throw new InvalidOperationException("Раздача не запущена.");
+            throw new InvalidOperationException(
+                "Раздача не запущена.");
         }
     }
 
@@ -1365,7 +2031,8 @@ public sealed class PokerState : IPokerState
     {
         if (_state != expectedState)
         {
-            throw new InvalidOperationException($"Ожидалось состояние {expectedState}, текущее состояние {_state}.");
+            throw new InvalidOperationException(
+                $"Ожидалось состояние {expectedState}, текущее состояние {_state}.");
         }
     }
 
@@ -1376,19 +2043,32 @@ public sealed class PokerState : IPokerState
 
     private bool DeckWasAlreadyUsed(string card)
     {
-        return _seats.Any(seat => seat.HoleCards.Contains(card)) || _boards.Any(board => board.Contains(card));
+        return _seats.Any(
+                   seat => seat.HoleCards.Contains(card)) ||
+               _boards.Any(
+                   board => board.Contains(card));
     }
 
-    private sealed record PotSlice(int Index, long Amount, IReadOnlyList<int> EligibleSeatIds);
+    private sealed record PotSlice(
+        int Index,
+        long Amount,
+        IReadOnlyList<int> EligibleSeatIds);
 
-    private sealed record EvaluatedHand(long Strength, HandCategory Category, IReadOnlyList<string> BestCards);
+    private sealed record EvaluatedHand(
+        long Strength,
+        HandCategory Category,
+        IReadOnlyList<string> BestCards);
 
     private sealed class PotBuilder
     {
         public long Amount { get; set; }
 
-        public required IReadOnlyList<int> EligibleSeatIds { get; init; }
+        public required IReadOnlyList<int>
+            EligibleSeatIds
+        { get; init; }
 
-        public required Dictionary<int, long> Contributions { get; init; }
+        public required Dictionary<int, long>
+            Contributions
+        { get; init; }
     }
 }
