@@ -5,38 +5,27 @@ namespace PokerEngine.Models;
 public sealed class Round
 {
     /// <summary>
-    /// Тип раунда торговли: Preflop, Flop, Turn или River.
-    /// Определяет текущий этап раздачи.
+    /// Тип улицы торговли.
     /// </summary>
     public required RoundType Type { get; init; }
 
     /// <summary>
-    /// Указывает, требуется ли сжечь одну карту
-    /// перед раздачей карт на этом раунде.
+    /// Количество карт, раздаваемых на каждую доску в начале улицы.
     /// </summary>
-    public bool BurnCard { get; init; }
+    public int BoardCardCount { get; init; }
 
     /// <summary>
-    /// Количество общих карт, которые должны быть
-    /// разданы на каждую доску в начале этого раунда.
+    /// Размер ставки для этой улицы.
     ///
-    /// Для стандартного Hold'em:
-    /// Preflop — 0, Flop — 3, Turn — 1, River — 1.
+    /// В Fixed Limit определяет фиксированный размер bet и raise.
+    /// В No Limit и Pot Limit обычно равен минимальному размеру bet.
     /// </summary>
-    public int BoardDealingCount { get; init; }
+    public required long BetSize { get; init; }
 
     /// <summary>
-    /// Минимальный размер полной ставки или минимальный
-    /// размер полного повышения на этом раунде.
-    /// </summary>
-    public required long MinBet { get; init; }
-
-    /// <summary>
-    /// Максимальное количество полных повышений,
-    /// разрешённых в рамках этого раунда торговли.
-    ///
-    /// Значение null означает отсутствие фиксированного
-    /// ограничения на количество повышений.
+    /// Максимальное количество полных повышений на улице.
+    /// Null означает отсутствие ограничения.
+    /// Обычно используется только в Fixed Limit.
     /// </summary>
     public int? MaxRaises { get; init; }
 }

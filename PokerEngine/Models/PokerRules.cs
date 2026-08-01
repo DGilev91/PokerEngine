@@ -58,20 +58,6 @@ public sealed class PokerRules
     /// Обычно одна, для double board — две.
     /// </summary>
     public int BoardCount { get; init; } = 1;
-
-    /// <summary>
-    /// Количество карманных карт, которые необходимо использовать
-    /// при формировании итоговой комбинации.
-    /// Null означает, что строгого ограничения нет.
-    /// </summary>
-    public int? RequiredHoleCardsForHand { get; init; }
-
-    /// <summary>
-    /// Количество общих карт, которые необходимо использовать
-    /// при формировании итоговой комбинации.
-    /// Null означает, что строгого ограничения нет.
-    /// </summary>
-    public int? RequiredBoardCardsForHand { get; init; }
 }
 
 public sealed class StraddleRules

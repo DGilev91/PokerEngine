@@ -57,33 +57,29 @@ public sealed class NoLimitTexasHoldem : PokerGame
                 new Round
                 {
                     Type = RoundType.Preflop,
-                    BurnCard = false,
-                    BoardDealingCount = 0,
-                    MinBet = bigBlind,
+                    BoardCardCount = 0,
+                    BetSize = bigBlind,
                     MaxRaises = null
                 },
                 new Round
                 {
                     Type = RoundType.Flop,
-                    BurnCard = true,
-                    BoardDealingCount = 3,
-                    MinBet = bigBlind,
+                    BoardCardCount = 3,
+                    BetSize = bigBlind,
                     MaxRaises = null
                 },
                 new Round
                 {
                     Type = RoundType.Turn,
-                    BurnCard = true,
-                    BoardDealingCount = 1,
-                    MinBet = bigBlind,
+                    BoardCardCount = 1,
+                    BetSize = bigBlind,
                     MaxRaises = null
                 },
                 new Round
                 {
                     Type = RoundType.River,
-                    BurnCard = true,
-                    BoardDealingCount = 1,
-                    MinBet = bigBlind,
+                    BoardCardCount = 1,
+                    BetSize = bigBlind,
                     MaxRaises = null
                 }
             ],
@@ -94,9 +90,6 @@ public sealed class NoLimitTexasHoldem : PokerGame
             Straddle = straddle,
 
             BoardCount = boardCount,
-
-            RequiredHoleCardsForHand = null,
-            RequiredBoardCardsForHand = null
         };
     }
 
