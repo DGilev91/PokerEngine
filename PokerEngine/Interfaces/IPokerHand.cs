@@ -6,7 +6,7 @@ public interface IPokerHand
 {
     IReadOnlyList<Seat> Seats { get; }
 
-    IReadOnlyList<Pot> Pots { get; }
+    PotState PotState { get; }
 
     IReadOnlyList<IReadOnlyList<string>> Boards { get; }
 
