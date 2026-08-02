@@ -300,4 +300,239 @@ public sealed class RealHandRunoutTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 277_362);
     }
 
+    // ClubGG Hand #1723270650
+    [Fact]
+    public void Hand1723270650_AutomaticallyDealsTwoRunoutsAfterSelection()
+    {
+        PokerState state = RealHandTestFactory.CreateState(
+            maxRunoutCount: 2,
+            automation: Automation.DealBoard);
+
+        state.Initialize(
+        [
+            10_935,
+            29_447,
+            16_722,
+            1_725,
+            64_271,
+            19_700,
+            49_007,
+            94_604
+        ]);
+
+        state.PlayerPost(
+            0,
+            PostType.SmallBlind,
+            100);
+
+        state.PlayerPost(
+            1,
+            PostType.BigBlind,
+            200);
+
+        state.Start();
+
+        for (int seatId = 0;
+             seatId < state.Seats.Count;
+             seatId++)
+        {
+            state.DealHole(
+                seatId,
+                ["xx", "xx"]);
+        }
+
+        // Preflop
+        state.PlayerAction(2, ActionType.Fold);
+        state.PlayerAction(3, ActionType.Call);
+        state.PlayerAction(4, ActionType.Call);
+        state.PlayerAction(5, ActionType.Fold);
+        state.PlayerAction(6, ActionType.Fold);
+        state.PlayerAction(7, ActionType.Call);
+
+        state.PlayerAction(
+            0,
+            ActionType.RaiseTo,
+            600);
+
+        state.PlayerAction(
+            1,
+            ActionType.Call);
+
+        state.PlayerAction(
+            3,
+            ActionType.RaiseTo,
+            1_725);
+
+        state.PlayerAction(4, ActionType.Fold);
+        state.PlayerAction(7, ActionType.Fold);
+
+        state.PlayerAction(
+            0,
+            ActionType.Call);
+
+        state.PlayerAction(
+            1,
+            ActionType.Call);
+
+        // The flop must be dealt automatically.
+        Assert.Single(state.Boards);
+        Assert.Equal(3, state.Boards[0].Count);
+
+        BoardEvent flopEvent = Assert.Single(
+            state.Events
+                .OfType<BoardEvent>()
+                .Where(e =>
+                    e.round == RoundType.Flop));
+
+        Assert.Equal(0, flopEvent.boardIndex);
+        Assert.Equal(3, flopEvent.cards.Count);
+
+        // Flop action.
+        state.PlayerAction(
+            0,
+            ActionType.Bet,
+            2_787);
+
+        state.PlayerAction(
+            1,
+            ActionType.Fold);
+
+        // Seat 3 is all-in and seat 0 is the only actionable player.
+        // The engine must wait for the runout count.
+        WainingRunoutEvent waitingEvent = Assert.Single(
+            state.Events
+                .OfType<WainingRunoutEvent>());
+
+        // Turn and river must not be dealt before the decision.
+        Assert.Single(state.Boards);
+        Assert.Equal(3, state.Boards[0].Count);
+
+        Assert.DoesNotContain(
+            state.Events.OfType<BoardEvent>(),
+            e => e.round == RoundType.Turn);
+
+        Assert.DoesNotContain(
+            state.Events.OfType<BoardEvent>(),
+            e => e.round == RoundType.River);
+
+        int boardEventCountBeforeSelection = state.Events
+            .OfType<BoardEvent>()
+            .Count();
+
+        state.ShowCards(0, ["Th", "8s"]);
+        state.ShowCards(3, ["Qd", "5d"]);
+        state.SetRunoutCount(2);
+
+        // Two boards must now exist.
+        Assert.Equal(2, state.Boards.Count);
+
+        // Both boards inherit the same flop and receive
+        // separate turn and river cards.
+        Assert.All(
+            state.Boards,
+            board => Assert.Equal(5, board.Count));
+
+        Assert.Equal(
+            state.Boards[0].Take(3),
+            state.Boards[1].Take(3));
+
+        Assert.NotEqual(
+            state.Boards[0][3],
+            state.Boards[1][3]);
+
+        Assert.NotEqual(
+            state.Boards[0][4],
+            state.Boards[1][4]);
+
+        RunoutCountEvent runoutEvent = Assert.Single(
+            state.Events
+                .OfType<RunoutCountEvent>());
+
+        Assert.Equal(2, runoutEvent.count);
+
+        BoardEvent[] boardEvents = state.Events
+            .OfType<BoardEvent>()
+            .ToArray();
+
+        // One flop + two turns + two rivers.
+        Assert.Equal(
+            boardEventCountBeforeSelection + 4,
+            boardEvents.Length);
+
+        Assert.Equal(
+            2,
+            boardEvents.Count(e =>
+                e.round == RoundType.Turn));
+
+        Assert.Equal(
+            2,
+            boardEvents.Count(e =>
+                e.round == RoundType.River));
+
+        Assert.Contains(
+            boardEvents,
+            e =>
+                e.boardIndex == 0 &&
+                e.round == RoundType.Turn);
+
+        Assert.Contains(
+            boardEvents,
+            e =>
+                e.boardIndex == 0 &&
+                e.round == RoundType.River);
+
+        Assert.Contains(
+            boardEvents,
+            e =>
+                e.boardIndex == 1 &&
+                e.round == RoundType.Turn);
+
+        Assert.Contains(
+            boardEvents,
+            e =>
+                e.boardIndex == 1 &&
+                e.round == RoundType.River);
+
+
+
+        Assert.Equal(
+    RoundType.Showdown,
+    state.Round);
+
+        HandEvaluatedEvent[] evaluated = state.Events
+            .OfType<HandEvaluatedEvent>()
+            .ToArray();
+
+        // 2 players × 2 boards
+        Assert.Equal(4, evaluated.Length);
+
+        Assert.Equal(
+            2,
+            evaluated.Count(e => e.seatId == 0));
+
+        Assert.Equal(
+            2,
+            evaluated.Count(e => e.seatId == 3));
+
+        PotAwardedEvent[] awards = state.Events
+            .OfType<PotAwardedEvent>()
+            .ToArray();
+
+        Assert.NotEmpty(awards);
+
+        Assert.All(
+            awards,
+            award => Assert.Contains(
+                award.seatId,
+                [0, 3]));
+
+        Assert.Single(
+            state.Events.OfType<EndHandEvent>());
+
+        Assert.Equal(
+            HandState.Completed,
+            state.State);
+    }
+
+
 }
