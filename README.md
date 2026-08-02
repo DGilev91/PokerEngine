@@ -150,6 +150,7 @@ HandRank result = evaluator.Evaluate(
 Console.WriteLine(result.Category);
 Console.WriteLine(result.Strength);
 Console.WriteLine(string.Join(", ", result.Cards));
+```
 
 ## License
 
