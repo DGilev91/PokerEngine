@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <PackageId>PokerEngine</PackageId>
-    <Version>0.1.3</Version>
+    <Version>0.1.4</Version>
     <Authors>Dmitrii Gilev</Authors>
 
     <Description>
@@ -24,6 +24,10 @@
     <RepositoryUrl>
       https://github.com/DGilev91/PokerEngine
     </RepositoryUrl>
+
+    <PackageProjectUrl>
+      https://github.com/DGilev91/PokerEngine
+    </PackageProjectUrl>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
