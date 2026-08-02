@@ -17,14 +17,14 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         if (holeCards.Count != 2)
         {
             throw new ArgumentException(
-                "Texas Hold'em требует ровно две карманные карты.",
+                "Texas Hold'em requires exactly two hole cards.",
                 nameof(holeCards));
         }
 
         if (boardCards.Count is < 3 or > 5)
         {
             throw new ArgumentException(
-                "Доска должна содержать от трёх до пяти карт.",
+                "The board must contain between three and five cards.",
                 nameof(boardCards));
         }
 
@@ -371,7 +371,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
     private static int FindStraightHigh(int rankMask)
     {
-        // Обычные стриты: A-high до 6-high.
+        // Regular straights: ace-high through six-high.
         for (int highRank = 14; highRank >= 6; highRank--)
         {
             int requiredMask = 0b1_1111 << (highRank - 4);
@@ -382,7 +382,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
             }
         }
 
-        // Колесо: A-2-3-4-5.
+        // Wheel: A-2-3-4-5.
         const int wheelMask =
             (1 << 14) |
             (1 << 5) |
@@ -445,7 +445,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         }
 
         throw new InvalidOperationException(
-            "Не удалось найти старшую карту.");
+            "Unable to find the highest card.");
     }
 
     private static void FindHighestRanks(
@@ -471,7 +471,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         if (index != destination.Length)
         {
             throw new InvalidOperationException(
-                "Недостаточно рангов для определения кикеров.");
+                "Not enough ranks to determine the kickers.");
         }
     }
 
@@ -535,7 +535,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         }
 
         throw new InvalidOperationException(
-            "Не удалось найти карту стрита.");
+            "Unable to find a card for the straight.");
     }
 
     private static int SelectRankCards(
@@ -566,7 +566,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         if (selected != maximumCount)
         {
             throw new InvalidOperationException(
-                $"Не удалось выбрать {maximumCount} карт ранга {requiredRank}.");
+                $"Unable to select {maximumCount} cards of rank {requiredRank}.");
         }
 
         return destinationIndex;
@@ -611,7 +611,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         if (destinationIndex != requiredCount)
         {
             throw new InvalidOperationException(
-                "Недостаточно карт для формирования комбинации.");
+                "Not enough cards to build the hand.");
         }
     }
 
@@ -653,11 +653,11 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         ReadOnlySpan<int> comparisonRanks)
     {
         /*
-         * Основание 15:
+         * Base 15:
          *
-         * [категория][ранг 1][ранг 2][ранг 3][ранг 4][ранг 5]
+         * [category][rank 1][rank 2][rank 3][rank 4][rank 5]
          *
-         * Поэтому обычное сравнение long корректно сравнивает руки.
+         * This makes ordinary long comparison correctly order hands.
          */
         long strength = (int)category;
 
@@ -686,7 +686,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
             if ((cardMask & bit) != 0)
             {
                 throw new ArgumentException(
-                    $"Карта {CardTable.Decode(cards[i])} повторяется.");
+                    $"Card {CardTable.Decode(cards[i])} is duplicated.");
             }
 
             cardMask |= bit;
@@ -695,7 +695,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         if (BitOperations.PopCount(cardMask) != cards.Length)
         {
             throw new ArgumentException(
-                "Набор содержит повторяющиеся карты.");
+                "The card set contains duplicate cards.");
         }
     }
 }

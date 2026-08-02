@@ -19,11 +19,15 @@ public sealed class Deck : IDeck
 
     public void Shuffle()
     {
-        for (int i = _cards.Count - 1; i > 0; i--)
+        for (int index = _cards.Count - 1;
+             index > 0;
+             index--)
         {
-            int j = RandomNumberGenerator.GetInt32(i + 1);
+            int randomIndex =
+                RandomNumberGenerator.GetInt32(index + 1);
 
-            (_cards[i], _cards[j]) = (_cards[j], _cards[i]);
+            (_cards[index], _cards[randomIndex]) =
+                (_cards[randomIndex], _cards[index]);
         }
     }
 
@@ -32,11 +36,13 @@ public sealed class Deck : IDeck
         if (_cards.Count == 0)
         {
             throw new InvalidOperationException(
-                "В колоде больше нет карт.");
+                "The deck has no remaining cards.");
         }
 
         string card = _cards[^1];
-        _cards.RemoveAt(_cards.Count - 1);
+
+        _cards.RemoveAt(
+            _cards.Count - 1);
 
         return card;
     }
@@ -47,13 +53,14 @@ public sealed class Deck : IDeck
         {
             throw new ArgumentOutOfRangeException(
                 nameof(count),
-                "Количество карт не может быть отрицательным.");
+                count,
+                "Card count cannot be negative.");
         }
 
         if (count > _cards.Count)
         {
             throw new InvalidOperationException(
-                $"Недостаточно карт. Запрошено: {count}, осталось: {_cards.Count}.");
+                $"Not enough cards in the deck. Requested: {count}, remaining: {_cards.Count}.");
         }
 
         if (count == 0)
@@ -61,25 +68,28 @@ public sealed class Deck : IDeck
             return [];
         }
 
-        var dealtCards = new List<string>(count);
+        var dealtCards =
+            new string[count];
 
-        for (int i = 0; i < count; i++)
+        for (int index = 0;
+             index < count;
+             index++)
         {
-            dealtCards.Add(Deal());
+            dealtCards[index] = Deal();
         }
 
         return dealtCards;
     }
 
-
     public void Take(string card)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(card);
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            card);
 
         if (!_cards.Remove(card))
         {
             throw new InvalidOperationException(
-                $"Карты {card} нет в колоде.");
+                $"Card {card} is not available in the deck.");
         }
     }
 
@@ -87,32 +97,50 @@ public sealed class Deck : IDeck
     {
         ArgumentNullException.ThrowIfNull(cards);
 
-        if (cards.Count != cards.Distinct().Count())
+        if (cards.Count == 0)
         {
-            throw new ArgumentException(
-                "Список содержит повторяющиеся карты.",
-                nameof(cards));
+            return;
         }
+
+        var uniqueCards =
+            new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase);
 
         foreach (string card in cards)
         {
             if (string.IsNullOrWhiteSpace(card))
             {
                 throw new ArgumentException(
-                    "Список содержит пустую карту.",
+                    "The card list contains an empty value.",
                     nameof(cards));
             }
 
-            if (!_cards.Contains(card))
+            if (!uniqueCards.Add(card))
+            {
+                throw new ArgumentException(
+                    $"The card list contains duplicate card {card}.",
+                    nameof(cards));
+            }
+
+            if (!_cards.Contains(
+                    card,
+                    StringComparer.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(
-                    $"Карты {card} нет в колоде.");
+                    $"Card {card} is not available in the deck.");
             }
         }
 
         foreach (string card in cards)
         {
-            _cards.Remove(card);
+            int cardIndex = _cards.FindIndex(
+                existingCard =>
+                    string.Equals(
+                        existingCard,
+                        card,
+                        StringComparison.OrdinalIgnoreCase));
+
+            _cards.RemoveAt(cardIndex);
         }
     }
 }
