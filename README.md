@@ -42,6 +42,10 @@ dotnet test
 In manual mode, the caller posts blinds and deals cards.
 
 ```csharp
+using PokerEngine.Enums;
+using PokerEngine.Games;
+using PokerEngine.States;
+
 IPokerGame game = new NoLimitTexasHoldem(
     automation: Automation.None,
     smallBlind: 100,
@@ -77,6 +81,10 @@ In automatic mode, the engine posts blinds, shuffles the deck, and deals cards.
 Player decisions are still passed through `PlayerAction`.
 
 ```csharp
+using PokerEngine.Enums;
+using PokerEngine.Games;
+using PokerEngine.States;
+
 IPokerGame game = new NoLimitTexasHoldem(
     automation: Automation.All,
     smallBlind: 100,
