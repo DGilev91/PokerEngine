@@ -6,7 +6,6 @@ namespace PokerEngine.Tests.RealHands;
 
 public sealed class RealHandRunoutTests
 {
-    // ClubGG Hand #1723265531
     // Physical seats rotated to state seats: 4->state0, 5->state1, 6->state2, 7->state3, 8->state4, 1->state5, 2->state6, 3->state7
     [Fact]
     public void Hand1723265531_ReplaysExactPlayersAndActions()
@@ -61,7 +60,6 @@ public sealed class RealHandRunoutTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 281_617);
     }
 
-    // ClubGG Hand #1723268999
     // Physical seats rotated to state seats: 7->state0, 8->state1, 1->state2, 2->state3, 3->state4, 4->state5, 5->state6, 6->state7
     [Fact]
     public void Hand1723268999_ReplaysExactPlayersAndActions()
@@ -122,7 +120,6 @@ public sealed class RealHandRunoutTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 287_892);
     }
 
-    // ClubGG Hand #1723270650
     // Physical seats rotated to state seats: 8->state0, 1->state1, 2->state2, 3->state3, 4->state4, 5->state5, 6->state6, 7->state7
     [Fact]
     public void Hand1723270650_ReplaysExactPlayersAndActions()
@@ -185,7 +182,6 @@ public sealed class RealHandRunoutTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 286_411);
     }
 
-    // ClubGG Hand #1723296671
     // Physical seats rotated to state seats: 3->state0, 4->state1, 5->state2, 6->state3, 7->state4, 8->state5, 1->state6
     [Fact]
     public void Hand1723296671_ReplaysExactPlayersAndActions()
@@ -241,7 +237,6 @@ public sealed class RealHandRunoutTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 279_222);
     }
 
-    // ClubGG Hand #1723303237
     // Physical seats rotated to state seats: 8->state0, 1->state1, 3->state2, 4->state3, 5->state4, 6->state5, 7->state6
     [Fact]
     public void Hand1723303237_ReplaysExactPlayersAndActions()
@@ -300,7 +295,6 @@ public sealed class RealHandRunoutTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 277_362);
     }
 
-    // ClubGG Hand #1723270650
     [Fact]
     public void Hand1723270650_AutomaticallyDealsTwoRunoutsAfterSelection()
     {

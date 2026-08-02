@@ -6,7 +6,6 @@ namespace PokerEngine.Tests.RealHands;
 
 public sealed class RealHandFoldAndUncalledTests
 {
-    // ClubGG Hand #1723263323
     // Physical seats rotated to state seats: 2->state0, 3->state1, 4->state2, 5->state3, 6->state4, 7->state5, 8->state6, 1->state7
     [Fact]
     public void Hand1723263323_ReplaysExactPlayersAndActions()
@@ -51,7 +50,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 282_558);
     }
 
-    // ClubGG Hand #1723264247
     // Physical seats rotated to state seats: 3->state0, 4->state1, 5->state2, 6->state3, 7->state4, 8->state5, 1->state6, 2->state7
     [Fact]
     public void Hand1723264247_ReplaysExactPlayersAndActions()
@@ -96,7 +94,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 281_713);
     }
 
-    // ClubGG Hand #1723266523
     // Physical seats rotated to state seats: 5->state0, 6->state1, 7->state2, 8->state3, 1->state4, 2->state5, 4->state6
     [Fact]
     public void Hand1723266523_ReplaysExactPlayersAndActions()
@@ -132,7 +129,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 281_126);
     }
 
-    // ClubGG Hand #1723274151
     // Physical seats rotated to state seats: 2->state0, 3->state1, 6->state2, 7->state3, 1->state4
     [Fact]
     public void Hand1723274151_ReplaysExactPlayersAndActions()
@@ -172,7 +168,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 209_851);
     }
 
-    // ClubGG Hand #1723276046
     // Physical seats rotated to state seats: 6->state0, 7->state1, 1->state2, 2->state3, 3->state4
     [Fact]
     public void Hand1723276046_ReplaysExactPlayersAndActions()
@@ -219,7 +214,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 217_783);
     }
 
-    // ClubGG Hand #1723282882
     // Physical seats rotated to state seats: 4->state0, 5->state1, 6->state2, 7->state3, 1->state4
     [Fact]
     public void Hand1723282882_ReplaysExactPlayersAndActions()
@@ -253,7 +247,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 233_621);
     }
 
-    // ClubGG Hand #1723293859
     // Physical seats rotated to state seats: 8->state0, 1->state1, 3->state2, 4->state3, 5->state4, 6->state5, 7->state6
     [Fact]
     public void Hand1723293859_ReplaysExactPlayersAndActions()
@@ -298,7 +291,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 282_632);
     }
 
-    // ClubGG Hand #1723297882
     // Physical seats rotated to state seats: 4->state0, 5->state1, 6->state2, 7->state3, 8->state4, 1->state5, 3->state6
     [Fact]
     public void Hand1723297882_ReplaysExactPlayersAndActions()
@@ -350,7 +342,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 277_968);
     }
 
-    // ClubGG Hand #1723302241
     // Physical seats rotated to state seats: 7->state0, 8->state1, 1->state2, 3->state3, 4->state4, 5->state5, 6->state6
     [Fact]
     public void Hand1723302241_ReplaysExactPlayersAndActions()
@@ -388,7 +379,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 277_362);
     }
 
-    // ClubGG Hand #1723304568
     // Physical seats rotated to state seats: 1->state0, 4->state1, 5->state2, 6->state3, 7->state4, 8->state5
     [Fact]
     public void Hand1723304568_ReplaysExactPlayersAndActions()
@@ -431,7 +421,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 275_866);
     }
 
-    // ClubGG Hand #1723305741
     // Physical seats rotated to state seats: 4->state0, 5->state1, 6->state2, 7->state3, 8->state4, 1->state5
     [Fact]
     public void Hand1723305741_ReplaysExactPlayersAndActions()
@@ -472,7 +461,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 275_618);
     }
 
-    // ClubGG Hand #1723306504
     // Physical seats rotated to state seats: 5->state0, 6->state1, 7->state2, 8->state3, 1->state4, 4->state5
     [Fact]
     public void Hand1723306504_ReplaysExactPlayersAndActions()
@@ -507,7 +495,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 275_534);
     }
 
-    // ClubGG Hand #1723308546
     // Physical seats rotated to state seats: 7->state0, 8->state1, 1->state2, 4->state3, 5->state4, 6->state5
     [Fact]
     public void Hand1723308546_ReplaysExactPlayersAndActions()
@@ -541,7 +528,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 275_094);
     }
 
-    // ClubGG Hand #1723309012
     // Physical seats rotated to state seats: 8->state0, 1->state1, 4->state2, 5->state3, 6->state4, 7->state5
     [Fact]
     public void Hand1723309012_ReplaysExactPlayersAndActions()
@@ -576,7 +562,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 275_094);
     }
 
-    // ClubGG Hand #1723309980
     // Physical seats rotated to state seats: 1->state0, 4->state1, 5->state2, 6->state3, 7->state4, 8->state5
     [Fact]
     public void Hand1723309980_ReplaysExactPlayersAndActions()
@@ -620,7 +605,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 275_094);
     }
 
-    // ClubGG Hand #1723310959
     // Physical seats rotated to state seats: 4->state0, 5->state1, 6->state2, 7->state3, 8->state4, 1->state5
     [Fact]
     public void Hand1723310959_ReplaysExactPlayersAndActions()
@@ -663,7 +647,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 274_840);
     }
 
-    // ClubGG Hand #1723314780
     // Physical seats rotated to state seats: 8->state0, 1->state1, 2->state2, 3->state3, 4->state4, 5->state5, 6->state6, 7->state7
     [Fact]
     public void Hand1723314780_ReplaysExactPlayersAndActions()
@@ -704,7 +687,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 336_731);
     }
 
-    // ClubGG Hand #1723318430
     // Physical seats rotated to state seats: 3->state0, 5->state1, 6->state2, 7->state3, 8->state4, 1->state5, 2->state6
     [Fact]
     public void Hand1723318430_ReplaysExactPlayersAndActions()
@@ -747,7 +729,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 332_616);
     }
 
-    // ClubGG Hand #1723320484
     // Physical seats rotated to state seats: 6->state0, 7->state1, 8->state2, 1->state3, 2->state4, 3->state5, 5->state6
     [Fact]
     public void Hand1723320484_ReplaysExactPlayersAndActions()
@@ -783,7 +764,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 331_774);
     }
 
-    // ClubGG Hand #1723320940
     // Physical seats rotated to state seats: 7->state0, 8->state1, 1->state2, 2->state3, 3->state4, 5->state5, 6->state6
     [Fact]
     public void Hand1723320940_ReplaysExactPlayersAndActions()
@@ -820,7 +800,6 @@ public sealed class RealHandFoldAndUncalledTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 331_774);
     }
 
-    // ClubGG Hand #1723322037
     // Physical seats rotated to state seats: 1->state0, 2->state1, 3->state2, 4->state3, 5->state4, 6->state5, 7->state6, 8->state7
     [Fact]
     public void Hand1723322037_ReplaysExactPlayersAndActions()
