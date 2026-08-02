@@ -1024,6 +1024,11 @@ public sealed class PokerState : IPokerState
             }
         }
 
+        if (minRaiseTo > maxRaiseTo)
+        {
+            minRaiseTo = maxRaiseTo;
+        }
+
         _activeSeatId = seatId;
 
         Emit(new PlayerTurnEvent(
