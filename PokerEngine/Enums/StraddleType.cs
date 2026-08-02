@@ -3,26 +3,23 @@
 public enum StraddleType
 {
     /// <summary>
-    /// Классический страддл от UTG —
-    /// игрока сразу после большого блайнда.
+    /// A classic UTG straddle posted by the player immediately after the big blind.
     /// </summary>
     Utg,
 
     /// <summary>
-    /// Mississippi straddle.
-    /// Страддл может поставить игрок в любой разрешённой позиции,
-    /// часто включая баттон.
+    /// A Mississippi straddle that may be posted from any permitted position,
+    /// often including the button.
     /// </summary>
     Mississippi,
 
     /// <summary>
-    /// Страддл только с баттона.
+    /// A straddle that may only be posted from the button position.
     /// </summary>
     Button,
 
     /// <summary>
-    /// Страддл с конкретного места,
-    /// которое передаётся движку при выставлении.
+    /// A straddle posted from a specific seat supplied to the engine.
     /// </summary>
     AnyPosition
 }
