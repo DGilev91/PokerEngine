@@ -185,7 +185,7 @@ public interface IPokerState
     /// A value greater than one is only valid while the engine is waiting
     /// for a runout decision.
     /// </remarks>
-    void SetRunoutCount(int count);
+    void SelectRunoutCount(int count);
 
     /// <summary>
     /// Deals the cards required for the next street on the specified board.

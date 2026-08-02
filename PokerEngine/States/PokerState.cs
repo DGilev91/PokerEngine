@@ -296,7 +296,7 @@ public sealed class PokerState : IPokerState
     }
 
     /// <inheritdoc />
-    public void SetRunoutCount(int count)
+    public void SelectRunoutCount(int count)
     {
         EnsureStarted();
 
@@ -333,7 +333,7 @@ public sealed class PokerState : IPokerState
             _boards.Add([.. _boards[sourceBoardIndex]]);
         }
 
-        Emit(new RunoutCountEvent(count));
+        Emit(new RunoutCountSelectedEvent(count));
 
         ContinueAfterRunoutDecision();
     }

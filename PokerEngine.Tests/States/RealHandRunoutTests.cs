@@ -35,7 +35,7 @@ public sealed class RealHandRunoutTests
         state.PlayerAction(0, ActionType.Fold);
         state.PlayerAction(1, ActionType.Fold);
         state.PlayerAction(2, ActionType.Call);
-        state.SetRunoutCount(2);
+        state.SelectRunoutCount(2);
 
         state.DealBoard(0, ["3d", "6d", "6c"]);
         state.DealBoard(0, ["Qc"]);
@@ -97,7 +97,7 @@ public sealed class RealHandRunoutTests
         state.PlayerAction(4, ActionType.Fold);
         state.PlayerAction(1, ActionType.RaiseTo, 7_550);
         state.PlayerAction(3, ActionType.Call);
-        state.SetRunoutCount(2);
+        state.SelectRunoutCount(2);
 
         state.DealBoard(0, ["4h"]);
         state.DealBoard(0, ["9d"]);
@@ -156,7 +156,7 @@ public sealed class RealHandRunoutTests
         state.DealBoard(0, ["9s", "Ad", "7h"]);
         state.PlayerAction(0, ActionType.Bet, 2_787);
         state.PlayerAction(1, ActionType.Fold);
-        state.SetRunoutCount(2);
+        state.SelectRunoutCount(2);
 
         state.DealBoard(0, ["Ah"]);
         state.DealBoard(0, ["Jd"]);
@@ -214,7 +214,7 @@ public sealed class RealHandRunoutTests
         state.DealBoard(0, ["2c", "Qd", "3h"]);
         state.PlayerAction(0, ActionType.Bet, 3_438);
         state.PlayerAction(3, ActionType.Call);
-        state.SetRunoutCount(2);
+        state.SelectRunoutCount(2);
 
         state.DealBoard(0, ["2d"]);
         state.DealBoard(0, ["5s"]);
@@ -270,7 +270,7 @@ public sealed class RealHandRunoutTests
         state.PlayerAction(5, ActionType.Bet, 3_900);
         state.PlayerAction(2, ActionType.RaiseTo, 7_908);
         state.PlayerAction(5, ActionType.Call);
-        state.SetRunoutCount(3);
+        state.SelectRunoutCount(3);
 
         state.DealBoard(0, ["Js"]);
         state.DealBoard(0, ["3s"]);
@@ -414,7 +414,7 @@ public sealed class RealHandRunoutTests
             .Count();
 
 
-        state.SetRunoutCount(2);
+        state.SelectRunoutCount(2);
 
         // Two boards must now exist.
         Assert.Equal(2, state.Boards.Count);
@@ -437,9 +437,9 @@ public sealed class RealHandRunoutTests
             state.Boards[0][4],
             state.Boards[1][4]);
 
-        RunoutCountEvent runoutEvent = Assert.Single(
+        RunoutCountSelectedEvent runoutEvent = Assert.Single(
             state.Events
-                .OfType<RunoutCountEvent>());
+                .OfType<RunoutCountSelectedEvent>());
 
         Assert.Equal(2, runoutEvent.Count);
 

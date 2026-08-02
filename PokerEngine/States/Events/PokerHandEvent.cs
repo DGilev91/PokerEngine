@@ -100,7 +100,7 @@ public sealed record WaitingRunoutEvent(
 /// <param name="Count">
 /// The selected number of runouts.
 /// </param>
-public sealed record RunoutCountEvent(
+public sealed record RunoutCountSelectedEvent(
     int Count) : PokerHandEvent;
 
 /// <summary>
@@ -188,6 +188,7 @@ public sealed record PlayerTurnEvent(
 /// </param>
 /// <param name="Amount">
 /// The number of chips committed by this action.
+/// </param>
 /// <param name="IsAllIn">
 /// Indicates whether the action consumed the player's entire remaining stack.
 /// </param>
