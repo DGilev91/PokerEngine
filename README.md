@@ -134,6 +134,23 @@ Th = ten of hearts
 xx = unknown card
 ```
 
+## Hand evaluation
+
+PokerEngine includes a Texas Hold'em hand evaluator that selects the strongest five-card combination from the player's hole cards and the board.
+
+```csharp
+using PokerEngine.Evaluation;
+
+IHandEvaluator evaluator = new TexasHoldemEvaluator();
+
+HandRank result = evaluator.Evaluate(
+    holeCards: ["As", "Ks"],
+    boardCards: ["Qs", "Js", "Ts", "2d", "3c"]);
+
+Console.WriteLine(result.Category);
+Console.WriteLine(result.Strength);
+Console.WriteLine(string.Join(", ", result.Cards));
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
