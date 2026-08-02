@@ -29,7 +29,7 @@ public sealed class Pot
         Index = index;
     }
 
-    internal void AddContribution(
+    public void AddContribution(
         int seatId,
         long amount)
     {
@@ -49,7 +49,7 @@ public sealed class Pot
         _eligibleSeatIds.Add(seatId);
     }
 
-    internal void RemoveEligibility(int seatId)
+    public void RemoveEligibility(int seatId)
     {
         _eligibleSeatIds.Remove(seatId);
     }

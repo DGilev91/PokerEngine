@@ -27,20 +27,20 @@ public sealed class PotState
     public long TotalAmount =>
         PotAmount + UncalledAmount;
 
-    internal void Clear()
+    public void Clear()
     {
         _pots.Clear();
         UncalledBet = null;
     }
 
-    internal void AddPot(Pot pot)
+    public void AddPot(Pot pot)
     {
         ArgumentNullException.ThrowIfNull(pot);
 
         _pots.Add(pot);
     }
 
-    internal void SetUncalledBet(
+    public void SetUncalledBet(
         int seatId,
         long amount)
     {

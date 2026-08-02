@@ -7,6 +7,8 @@ namespace PokerEngine.States;
 
 public sealed class PokerState : IPokerState
 {
+    private const string UnknownCard = "xx";
+
     // Dependencies
 
     private readonly PokerRules _rules;
@@ -242,15 +244,32 @@ public sealed class PokerState : IPokerState
         }
         else
         {
-            ValidateCards(cards, cardCount);
+            ValidateCards(
+                cards,
+                cardCount,
+                allowUnknownCards: true);
 
-            dealtCards = cards.ToArray();
-            _deck.Take(dealtCards);
+            dealtCards = cards
+                .Select(NormalizeCard)
+                .ToArray();
+
+            string[] knownCards = dealtCards
+                .Where(card => !IsUnknownCard(card))
+                .ToArray();
+
+            EnsureCardsWereNotUsed(knownCards);
+
+            if (knownCards.Length > 0)
+            {
+                _deck.Take(knownCards);
+            }
         }
 
         seat.SetHoleCards(dealtCards);
 
-        Emit(new HoleCardsEvent(seatId, dealtCards));
+        Emit(new HoleCardsEvent(
+            seatId,
+            dealtCards));
     }
 
     public void SetRunoutCount(int count)
@@ -357,7 +376,7 @@ public sealed class PokerState : IPokerState
 
         if (IsFinalRound())
         {
-            if (AllRemainingPlayersAllIn())
+            if (IsBettingClosedByAllIn())
             {
                 StartShowdown();
             }
@@ -369,7 +388,7 @@ public sealed class PokerState : IPokerState
             return;
         }
 
-        if (AllRemainingPlayersAllIn())
+        if (IsBettingClosedByAllIn())
         {
             ContinueAllInRunout();
             return;
@@ -439,36 +458,49 @@ public sealed class PokerState : IPokerState
         ArgumentNullException.ThrowIfNull(cards);
 
         Seat seat = GetSeat(seatId);
+        int expectedCount = GetHoleCardCount();
 
-        if (cards.Count > 0)
+        ValidateCards(
+            cards,
+            expectedCount,
+            allowUnknownCards: false);
+
+        string[] shownCards = cards
+            .Select(NormalizeCard)
+            .ToArray();
+
+        if (seat.HoleCards.Count == 0)
         {
-            string[] shownCards = cards.ToArray();
+            EnsureCardsWereNotUsed(shownCards);
+            _deck.Take(shownCards);
+            seat.SetHoleCards(shownCards);
+        }
+        else
+        {
+            ValidateShownCardsMatchKnownCards(
+                seat,
+                shownCards);
 
-            if (seat.HoleCards.Count == 0)
-            {
-                seat.SetHoleCards(shownCards);
-            }
-            else if (!seat.HoleCards.SequenceEqual(shownCards))
-            {
-                throw new InvalidOperationException(
-                    $"Показанные карты игрока {seatId} не совпадают с выданными картами.");
-            }
-
-            string[] unknownCards = shownCards
-                .Where(card => !DeckWasAlreadyUsed(card))
+            string[] newlyRevealedCards = shownCards
+                .Where((card, index) =>
+                    IsUnknownCard(seat.HoleCards[index]))
                 .ToArray();
 
-            if (unknownCards.Length > 0)
+            EnsureCardsWereNotUsed(newlyRevealedCards);
+
+            if (newlyRevealedCards.Length > 0)
             {
-                _deck.Take(unknownCards);
+                _deck.Take(newlyRevealedCards);
             }
+
+            seat.SetHoleCards(shownCards);
         }
 
         _shownSeats.Add(seatId);
 
         Emit(new ShowCardsEvent(
             seatId,
-            cards.ToArray()));
+            shownCards));
 
         if (Round == RoundType.Showdown)
         {
@@ -635,7 +667,7 @@ public sealed class PokerState : IPokerState
         {
             ClearUncalledCandidate();
         }
-        else
+        else if (_uncalledSeatId.HasValue)
         {
             RefreshUncalledCandidate();
         }
@@ -850,7 +882,7 @@ public sealed class PokerState : IPokerState
             return;
         }
 
-        if (AllRemainingPlayersAllIn())
+        if (IsBettingClosedByAllIn())
         {
             ContinueAllInRunout();
             return;
@@ -1035,10 +1067,19 @@ public sealed class PokerState : IPokerState
             return false;
         }
 
-        ReturnUncalledBet();
-        RecalculatePots();
-
         Seat winner = remaining[0];
+
+        if (_uncalledSeatId.HasValue)
+        {
+            ReturnUncalledBet();
+        }
+        else
+        {
+            ReturnUncalledForcedPostOnPreflopWalk(
+                winner);
+        }
+
+        RecalculatePots();
 
         foreach (PotSlice pot in _potSlices)
         {
@@ -1088,7 +1129,9 @@ public sealed class PokerState : IPokerState
             .ToArray();
 
         if (contenders.Any(
-                seat => seat.HoleCards.Count == 0))
+                seat =>
+                    seat.HoleCards.Count != GetHoleCardCount() ||
+                    seat.HoleCards.Any(IsUnknownCard)))
         {
             return;
         }
@@ -1206,6 +1249,12 @@ public sealed class PokerState : IPokerState
         Seat seat,
         int boardIndex)
     {
+        if (seat.HoleCards.Any(IsUnknownCard))
+        {
+            throw new InvalidOperationException(
+                $"Нельзя определить комбинацию игрока {seat.SeatId}: не все карманные карты известны.");
+        }
+
         HandRank result = _handEvaluator.Evaluate(
             seat.HoleCards,
             _boards[boardIndex]);
@@ -1302,6 +1351,54 @@ public sealed class PokerState : IPokerState
             amount));
 
         ClearUncalledCandidate();
+    }
+
+    private void ReturnUncalledForcedPostOnPreflopWalk(
+        Seat winner)
+    {
+        if (Round != RoundType.Preflop)
+        {
+            return;
+        }
+
+        bool hasVoluntaryAggression = _events
+            .OfType<PlayerActionEvent>()
+            .Any(action =>
+                action.actionType is
+                    ActionType.Bet or
+                    ActionType.RaiseTo);
+
+        if (hasVoluntaryAggression)
+        {
+            return;
+        }
+
+        long winnerLivePostAmount = _events
+            .OfType<PlayerPostedEvent>()
+            .Where(post =>
+                post.seatId == winner.SeatId &&
+                post.postType is
+                    PostType.BigBlind or
+                    PostType.ExtraBlind or
+                    PostType.Straddle)
+            .Sum(post => post.amount);
+
+        long amount = Math.Min(
+            winner.RoundBet,
+            winnerLivePostAmount);
+
+        if (amount <= 0)
+        {
+            return;
+        }
+
+        winner.RoundBet -= amount;
+        winner.TotalBet -= amount;
+        winner.Stack += amount;
+
+        Emit(new UncalledBetReturnedEvent(
+            winner.SeatId,
+            amount));
     }
 
     // Pots
@@ -1642,14 +1739,22 @@ public sealed class PokerState : IPokerState
             !seat.IsAllIn);
     }
 
-    private bool AllRemainingPlayersAllIn()
+    private bool IsBettingClosedByAllIn()
     {
-        Seat[] remaining = _seats
-            .Where(seat => !seat.IsFolded)
-            .ToArray();
+        int remainingPlayerCount = _seats.Count(
+            seat => !seat.IsFolded);
 
-        return remaining.Length > 1 &&
-               remaining.All(seat => seat.IsAllIn);
+        if (remainingPlayerCount <= 1)
+        {
+            return false;
+        }
+
+        int actionablePlayerCount = _seats.Count(
+            seat =>
+                !seat.IsFolded &&
+                !seat.IsAllIn);
+
+        return actionablePlayerCount <= 1;
     }
 
     // Boards
@@ -1875,7 +1980,8 @@ public sealed class PokerState : IPokerState
 
     private static void ValidateCards(
         IReadOnlyList<string> cards,
-        int expectedCount)
+        int expectedCount,
+        bool allowUnknownCards = false)
     {
         ArgumentNullException.ThrowIfNull(cards);
 
@@ -1893,11 +1999,87 @@ public sealed class PokerState : IPokerState
                 nameof(cards));
         }
 
-        if (cards.Distinct().Count() != cards.Count)
+        if (!allowUnknownCards &&
+            cards.Any(IsUnknownCard))
         {
             throw new ArgumentException(
-                "Список содержит повторяющиеся карты.",
+                "Неизвестные карты здесь не разрешены.",
                 nameof(cards));
+        }
+
+        string[] knownCards = cards
+            .Where(card => !IsUnknownCard(card))
+            .Select(NormalizeCard)
+            .ToArray();
+
+        if (knownCards
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count() != knownCards.Length)
+        {
+            throw new ArgumentException(
+                "Список содержит повторяющиеся известные карты.",
+                nameof(cards));
+        }
+    }
+
+    private static bool IsUnknownCard(string card)
+    {
+        return string.Equals(
+            card,
+            UnknownCard,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeCard(string card)
+    {
+        return IsUnknownCard(card)
+            ? UnknownCard
+            : card;
+    }
+
+    private static void ValidateShownCardsMatchKnownCards(
+        Seat seat,
+        IReadOnlyList<string> shownCards)
+    {
+        if (seat.HoleCards.Count != shownCards.Count)
+        {
+            throw new InvalidOperationException(
+                $"Количество показанных карт игрока {seat.SeatId} не совпадает с количеством выданных.");
+        }
+
+        for (int index = 0;
+             index < shownCards.Count;
+             index++)
+        {
+            string existingCard =
+                seat.HoleCards[index];
+
+            if (IsUnknownCard(existingCard))
+            {
+                continue;
+            }
+
+            if (!string.Equals(
+                    existingCard,
+                    shownCards[index],
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Показанная карта {shownCards[index]} игрока {seat.SeatId} не совпадает с ранее известной картой {existingCard}.");
+            }
+        }
+    }
+
+    private void EnsureCardsWereNotUsed(
+        IReadOnlyList<string> cards)
+    {
+        foreach (string card in cards)
+        {
+            if (DeckWasAlreadyUsed(card))
+            {
+                throw new InvalidOperationException(
+                    $"Карта {card} уже используется в раздаче.");
+            }
         }
     }
 
@@ -2043,10 +2225,26 @@ public sealed class PokerState : IPokerState
 
     private bool DeckWasAlreadyUsed(string card)
     {
+        if (IsUnknownCard(card))
+        {
+            return false;
+        }
+
         return _seats.Any(
-                   seat => seat.HoleCards.Contains(card)) ||
+                   seat => seat.HoleCards.Any(
+                       existing =>
+                           !IsUnknownCard(existing) &&
+                           string.Equals(
+                               existing,
+                               card,
+                               StringComparison.OrdinalIgnoreCase))) ||
                _boards.Any(
-                   board => board.Contains(card));
+                   board => board.Any(
+                       existing =>
+                           string.Equals(
+                               existing,
+                               card,
+                               StringComparison.OrdinalIgnoreCase)));
     }
 
     private sealed record PotSlice(

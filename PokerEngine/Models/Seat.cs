@@ -17,17 +17,17 @@ public sealed class Seat
     /// <summary>
     /// Текущий оставшийся стек игрока.
     /// </summary>
-    public long Stack { get; internal set; }
+    public long Stack { get;  set; }
 
     /// <summary>
     /// Общая сумма фишек, вложенных игроком в текущую раздачу.
     /// </summary>
-    public long TotalBet { get; internal set; }
+    public long TotalBet { get;  set; }
 
     /// <summary>
     /// Сумма, вложенная игроком на текущей улице.
     /// </summary>
-    public long RoundBet { get; internal set; }
+    public long RoundBet { get;  set; }
 
     /// <summary>
     /// Карманные карты игрока.
@@ -37,7 +37,7 @@ public sealed class Seat
     /// <summary>
     /// Сбросил ли игрок карты.
     /// </summary>
-    public bool IsFolded { get; internal set; }
+    public bool IsFolded { get; set; }
 
     /// <summary>
     /// Находится ли игрок в олл-ине.
@@ -65,7 +65,7 @@ public sealed class Seat
         Stack = stack;
     }
 
-    internal void SetHoleCards(IEnumerable<string> cards)
+    public void SetHoleCards(IEnumerable<string> cards)
     {
         ArgumentNullException.ThrowIfNull(cards);
 
@@ -73,7 +73,7 @@ public sealed class Seat
         _holeCards.AddRange(cards);
     }
 
-    internal void ClearRoundBet()
+    public void ClearRoundBet()
     {
         RoundBet = 0;
     }
