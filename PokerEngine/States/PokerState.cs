@@ -889,6 +889,7 @@ public sealed class PokerState : IPokerState
             !_runoutCountWasSet)
         {
             _waitingForRunoutDecision = true;
+            Emit(new WainingRunoutEvent(_rules.MaxRunoutCount));
             return;
         }
 

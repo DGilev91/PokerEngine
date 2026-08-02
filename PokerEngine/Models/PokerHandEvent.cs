@@ -14,6 +14,8 @@ public sealed record HandStartedEvent : PokerHandEvent;
 
 public sealed record HoleCardsEvent(int seatId, IReadOnlyList<string> cards) : PokerHandEvent;
 
+public sealed record WainingRunoutEvent(int count) : PokerHandEvent;
+
 public sealed record RunoutCountEvent(int count) : PokerHandEvent;
 
 public sealed record BoardEvent(RoundType round, int boardIndex, IReadOnlyList<string> cards) : PokerHandEvent;
