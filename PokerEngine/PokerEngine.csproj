@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <PackageId>PokerEngine</PackageId>
-    <Version>0.1.4</Version>
+    <Version>0.1.5</Version>
     <Authors>Dmitrii Gilev</Authors>
 
     <Description>
@@ -19,7 +19,7 @@
 
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>
       https://github.com/DGilev91/PokerEngine
@@ -33,7 +33,10 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
+
+
   <ItemGroup>
+    <None Include="..\assets\icon.png" Pack="true" PackagePath="icon.png" />
     <None Include="..\README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
