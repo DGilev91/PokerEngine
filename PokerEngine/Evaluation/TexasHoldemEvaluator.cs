@@ -1,9 +1,8 @@
 ﻿using System.Numerics;
+using PokerEngine.Cards;
 using PokerEngine.Enums;
-using PokerEngine.Interfaces;
-using PokerEngine.Models;
 
-namespace PokerEngine.Cards;
+namespace PokerEngine.Evaluation;
 
 public sealed class TexasHoldemEvaluator : IHandEvaluator
 {

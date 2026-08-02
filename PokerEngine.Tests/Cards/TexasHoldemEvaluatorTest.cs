@@ -1,7 +1,6 @@
 ﻿using PokerEngine.Cards;
 using PokerEngine.Enums;
-using PokerEngine.Interfaces;
-using PokerEngine.Models;
+using PokerEngine.Evaluation;
 
 namespace PokerEngine.Tests.Cards;
 

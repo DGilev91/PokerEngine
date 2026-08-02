@@ -1,6 +1,6 @@
 using PokerEngine.Enums;
 
-namespace PokerEngine.Models;
+namespace PokerEngine.Rules;
 
 public sealed class PokerRules
 {
@@ -79,88 +79,4 @@ public sealed class PokerRules
     /// after betting has been closed by an all-in.
     /// </remarks>
     public int MaxRunoutCount { get; init; } = 1;
-}
-
-/// <summary>
-/// Defines the ante rules for a poker game.
-/// </summary>
-public sealed class AnteRules
-{
-    /// <summary>
-    /// Gets the position or group of players responsible for posting the ante.
-    /// </summary>
-    public required AnteType Type { get; init; }
-
-    /// <summary>
-    /// Gets the required ante amount.
-    /// </summary>
-    public required long Amount { get; init; }
-}
-
-/// <summary>
-/// Defines the straddle rules for a poker game.
-/// </summary>
-public sealed class StraddleRules
-{
-    /// <summary>
-    /// Gets the rule used to determine which position may post
-    /// the first straddle.
-    /// </summary>
-    public required StraddleType Type { get; init; }
-
-    /// <summary>
-    /// Gets the permitted amounts for consecutive straddles.
-    /// </summary>
-    /// <remarks>
-    /// The first item is the initial straddle amount.
-    /// The second item is the first restraddle amount,
-    /// followed by any additional restraddles.
-    ///
-    /// An empty collection means that straddles are disabled.
-    /// </remarks>
-    public required IReadOnlyList<long> Amounts { get; init; }
-
-    /// <summary>
-    /// Gets a value indicating whether the first straddle is mandatory.
-    /// </summary>
-    public bool IsMandatory { get; init; }
-}
-
-/// <summary>
-/// Defines the rules for a single betting round.
-/// </summary>
-public sealed class RoundRules
-{
-    /// <summary>
-    /// Gets the betting round type.
-    /// </summary>
-    public required RoundType Type { get; init; }
-
-    /// <summary>
-    /// Gets the number of cards dealt to each board
-    /// at the beginning of this round.
-    /// </summary>
-    public int BoardCardCount { get; init; }
-
-    /// <summary>
-    /// Gets the configured bet size for this round.
-    /// </summary>
-    /// <remarks>
-    /// In fixed-limit games, this value defines the fixed bet
-    /// and full raise size.
-    ///
-    /// In no-limit and pot-limit games, it commonly defines
-    /// the minimum full bet size.
-    /// </remarks>
-    public required long BetSize { get; init; }
-
-    /// <summary>
-    /// Gets the maximum number of full raises allowed
-    /// during this round.
-    /// </summary>
-    /// <remarks>
-    /// A value of <see langword="null"/> means that there is no limit.
-    /// This setting is commonly used only in fixed-limit games.
-    /// </remarks>
-    public int? MaxRaises { get; init; }
 }

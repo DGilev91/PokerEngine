@@ -1,7 +1,10 @@
 ﻿using PokerEngine.Cards;
 using PokerEngine.Enums;
-using PokerEngine.Interfaces;
-using PokerEngine.Models;
+using PokerEngine.Evaluation;
+using PokerEngine.Rules;
+using PokerEngine.States.Events;
+using PokerEngine.States.Pots;
+using PokerEngine.States.Seats;
 
 namespace PokerEngine.States;
 

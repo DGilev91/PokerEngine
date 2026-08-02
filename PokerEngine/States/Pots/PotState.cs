@@ -1,4 +1,4 @@
-﻿namespace PokerEngine.Models;
+﻿namespace PokerEngine.States.Pots;
 
 public sealed class PotState
 {

@@ -1,4 +1,3 @@
-using PokerEngine.Interfaces;
 using PokerEngine.States;
 
 namespace PokerEngine.Tests.Games;

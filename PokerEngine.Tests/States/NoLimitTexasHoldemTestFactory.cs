@@ -1,7 +1,7 @@
 using System.Reflection;
 using PokerEngine.Enums;
 using PokerEngine.Games;
-using PokerEngine.Models;
+using PokerEngine.Rules;
 using PokerEngine.States;
 
 namespace PokerEngine.Tests.Games;

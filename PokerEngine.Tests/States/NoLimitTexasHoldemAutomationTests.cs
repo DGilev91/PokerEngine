@@ -1,6 +1,6 @@
 using PokerEngine.Enums;
-using PokerEngine.Models;
 using PokerEngine.States;
+using PokerEngine.States.Events;
 
 namespace PokerEngine.Tests.Games;
 

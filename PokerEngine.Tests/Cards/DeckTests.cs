@@ -1,5 +1,4 @@
 ﻿using PokerEngine.Cards;
-using PokerEngine.Interfaces;
 
 namespace PokerEngine.Tests.Cards;
 

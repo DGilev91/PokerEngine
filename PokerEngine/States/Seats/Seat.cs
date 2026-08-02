@@ -1,4 +1,4 @@
-﻿namespace PokerEngine.Models;
+﻿namespace PokerEngine.States.Seats;
 
 public sealed class Seat
 {

@@ -1,4 +1,4 @@
-namespace PokerEngine.Interfaces;
+namespace PokerEngine.Cards;
 
 /// <summary>
 /// Represents a deck of playing cards used by the poker engine.

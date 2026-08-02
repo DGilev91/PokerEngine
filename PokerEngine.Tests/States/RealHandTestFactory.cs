@@ -1,7 +1,7 @@
 using PokerEngine.Enums;
 using PokerEngine.Games;
-using PokerEngine.Models;
 using PokerEngine.States;
+using PokerEngine.States.Events;
 
 namespace PokerEngine.Tests.RealHands;
 

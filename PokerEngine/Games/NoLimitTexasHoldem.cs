@@ -1,6 +1,5 @@
 using PokerEngine.Enums;
-using PokerEngine.Interfaces;
-using PokerEngine.Models;
+using PokerEngine.Rules;
 using PokerEngine.States;
 
 namespace PokerEngine.Games;

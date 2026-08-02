@@ -1,5 +1,5 @@
 using PokerEngine.Enums;
-using PokerEngine.Models;
+using PokerEngine.Rules;
 
 namespace PokerEngine.Tests.Games;
 

@@ -1,7 +1,9 @@
 ﻿using PokerEngine.Enums;
-using PokerEngine.Models;
+using PokerEngine.States.Events;
+using PokerEngine.States.Pots;
+using PokerEngine.States.Seats;
 
-namespace PokerEngine.Interfaces;
+namespace PokerEngine.States;
 
 /// <summary>
 /// Represents the mutable state of a single poker hand.

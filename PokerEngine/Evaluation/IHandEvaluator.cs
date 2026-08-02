@@ -1,6 +1,4 @@
-﻿using PokerEngine.Models;
-
-namespace PokerEngine.Interfaces;
+﻿namespace PokerEngine.Evaluation;
 
 /// <summary>
 /// Evaluates a player's poker hand against a board.

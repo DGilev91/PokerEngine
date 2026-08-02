@@ -1,6 +1,6 @@
 using PokerEngine.Enums;
 
-namespace PokerEngine.Models;
+namespace PokerEngine.States.Events;
 
 /// <summary>
 /// Represents an event emitted during a poker hand.

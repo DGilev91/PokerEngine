@@ -1,6 +1,6 @@
 ﻿using PokerEngine.Enums;
 
-namespace PokerEngine.Models;
+namespace PokerEngine.Evaluation;
 
 public sealed class HandRank
 {

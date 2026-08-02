@@ -1,4 +1,6 @@
-namespace PokerEngine.Interfaces;
+using PokerEngine.States;
+
+namespace PokerEngine.Games;
 
 /// <summary>
 /// Defines a poker game configuration capable of creating hand state instances.
