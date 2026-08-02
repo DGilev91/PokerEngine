@@ -754,4 +754,142 @@ public sealed class RealHandShowdownTests
         RealHandTestFactory.AssertCompletedAndConserved(state, 332_526);
     }
 
+
+    // ClubGG Hand #1723666678
+    // Physical seats rotated to state seats:
+    // physical 5 -> state 0, SB, pid42261396
+    // physical 3 -> state 1, BB, pid69676394
+    // physical 4 -> state 2, BTN, pid97347399
+    [Fact]
+    public void Hand1723666678_ReplaysExactPlayersAndActions()
+    {
+        PokerState state = RealHandTestFactory.CreateState(
+            smallBlind: 50,
+            bigBlind: 100,
+            maxRunoutCount: 1);
+
+        state.Initialize([
+            15_050, // state 0: physical seat 5, pid42261396
+        10_311, // state 1: physical seat 3, pid69676394
+        8_794   // state 2: physical seat 4, pid97347399
+        ]);
+
+        state.PlayerPost(
+            0,
+            PostType.SmallBlind,
+            50);
+
+        state.PlayerPost(
+            1,
+            PostType.BigBlind,
+            100);
+
+        state.Start();
+
+        state.DealHole(0, ["xx", "xx"]);
+        state.DealHole(1, ["xx", "xx"]);
+        state.DealHole(2, ["xx", "xx"]);
+
+        // Preflop
+        state.PlayerAction(
+            2,
+            ActionType.Fold);
+
+        state.PlayerAction(
+            0,
+            ActionType.Call);
+
+        state.PlayerAction(
+            1,
+            ActionType.Check);
+
+        // Flop: [3s 8c 5s]
+        state.DealBoard(
+            0,
+            ["3s", "8c", "5s"]);
+
+        state.PlayerAction(
+            0,
+            ActionType.Bet,
+            100);
+
+        state.PlayerAction(
+            1,
+            ActionType.Call);
+
+        // Turn: [8s]
+        state.DealBoard(
+            0,
+            ["8s"]);
+
+        state.PlayerAction(
+            0,
+            ActionType.Bet,
+            132);
+
+        state.PlayerAction(
+            1,
+            ActionType.Call);
+
+        // River: [Th]
+        state.DealBoard(
+            0,
+            ["Th"]);
+
+        state.PlayerAction(
+            0,
+            ActionType.Bet,
+            332);
+
+        state.PlayerAction(
+            1,
+            ActionType.Call);
+
+        // Showdown
+        state.ShowCards(
+            0,
+            ["Td", "5d"]);
+
+        state.ShowCards(
+            1,
+            ["Ts", "3h"]);
+
+        Assert.Empty(
+            state.Events
+                .OfType<UncalledBetReturnedEvent>());
+
+        PotAwardedEvent[] awards = state.Events
+            .OfType<PotAwardedEvent>()
+            .OrderBy(award => award.seatId)
+            .ToArray();
+
+        Assert.Equal(
+            2,
+            awards.Length);
+
+        Assert.Equal(
+            0,
+            awards[0].seatId);
+
+        Assert.Equal(
+            664,
+            awards[0].amount);
+
+        Assert.Equal(
+            1,
+            awards[1].seatId);
+
+        Assert.Equal(
+            664,
+            awards[1].amount);
+
+        Assert.Equal(
+            HandState.Completed,
+            state.State);
+
+        RealHandTestFactory.AssertCompletedAndConserved(
+            state,
+            34_155);
+    }
+
 }

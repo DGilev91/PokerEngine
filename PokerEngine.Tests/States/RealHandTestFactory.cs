@@ -7,12 +7,12 @@ namespace PokerEngine.Tests.RealHands;
 
 internal static class RealHandTestFactory
 {
-    public static PokerState CreateState(int maxRunoutCount = 1)
+    public static PokerState CreateState(int maxRunoutCount = 1, long smallBlind = 100, long bigBlind = 200)
     {
         NoLimitTexasHoldem game = new(
             Automation.None,
-            smallBlind: 100,
-            bigBlind: 200,
+            smallBlind: smallBlind,
+            bigBlind: bigBlind,
             ante: null,
             straddle: null,
             initialBoardCount: 1,
