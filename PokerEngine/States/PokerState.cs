@@ -700,7 +700,6 @@ public sealed class PokerState : IPokerState
             seat.SeatId,
             ActionType.Fold,
             0,
-            seat.RoundBet,
             false));
     }
 
@@ -720,7 +719,6 @@ public sealed class PokerState : IPokerState
             seat.SeatId,
             ActionType.Check,
             0,
-            seat.RoundBet,
             false));
     }
 
@@ -745,7 +743,6 @@ public sealed class PokerState : IPokerState
             seat.SeatId,
             ActionType.Call,
             paid,
-            seat.RoundBet,
             seat.IsAllIn));
 
         RecalculatePots();
@@ -790,7 +787,6 @@ public sealed class PokerState : IPokerState
             seat.SeatId,
             ActionType.Bet,
             paid,
-            seat.RoundBet,
             seat.IsAllIn));
 
         RecalculatePots();
@@ -864,7 +860,6 @@ public sealed class PokerState : IPokerState
             seat.SeatId,
             ActionType.RaiseTo,
             paid,
-            seat.RoundBet,
             seat.IsAllIn));
 
         RecalculatePots();

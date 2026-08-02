@@ -188,10 +188,6 @@ public sealed record PlayerTurnEvent(
 /// </param>
 /// <param name="Amount">
 /// The number of chips committed by this action.
-/// </param>
-/// <param name="AmountTo">
-/// The player's total wager for the current betting round after the action.
-/// </param>
 /// <param name="IsAllIn">
 /// Indicates whether the action consumed the player's entire remaining stack.
 /// </param>
@@ -199,7 +195,6 @@ public sealed record PlayerActionEvent(
     int SeatId,
     ActionType ActionType,
     long Amount,
-    long AmountTo,
     bool IsAllIn) : PokerHandEvent;
 
 /// <summary>
