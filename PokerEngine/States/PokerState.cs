@@ -23,6 +23,7 @@ public sealed class PokerState : IPokerState
     private readonly List<PotSlice> _potSlices = [];
 
     private readonly HashSet<int> _actedSeats = [];
+    private readonly HashSet<(int SeatId, PostType PostType)> _madePosts = [];
     private readonly PotState _potState = new();
 
     private HandState _state = HandState.None;
@@ -100,6 +101,7 @@ public sealed class PokerState : IPokerState
         _boards.Clear();
         _potSlices.Clear();
         _actedSeats.Clear();
+        _madePosts.Clear();
         _potState.Clear();
 
         _roundIndex = -1;
@@ -156,6 +158,8 @@ public sealed class PokerState : IPokerState
                 "Post amount must be greater than zero.");
         }
 
+        ValidatePost(seat, postType, amount);
+
         long paid = Math.Min(amount, seat.Stack);
 
         seat.Stack -= paid;
@@ -165,6 +169,8 @@ public sealed class PokerState : IPokerState
         {
             seat.RoundBet += paid;
         }
+
+        _madePosts.Add((seatId, postType));
 
         Emit(new PlayerPostedEvent(
             seatId,
@@ -1917,6 +1923,271 @@ public sealed class PokerState : IPokerState
         return cardCount;
     }
 
+    // Post validation
+
+    private void ValidatePost(
+        Seat seat,
+        PostType postType,
+        long amount)
+    {
+        if (!Enum.IsDefined(postType))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(postType),
+                postType,
+                "Unknown post type.");
+        }
+
+        if (seat.Stack <= 0)
+        {
+            throw new InvalidOperationException(
+                $"Seat {seat.SeatId} has no chips available.");
+        }
+
+        switch (postType)
+        {
+            case PostType.Ante:
+                ValidateAntePost(seat, amount);
+                break;
+
+            case PostType.SmallBlind:
+                ValidateSmallBlindPost(seat, amount);
+                break;
+
+            case PostType.BigBlind:
+                ValidateBigBlindPost(seat, amount);
+                break;
+
+            case PostType.Straddle:
+                ValidateStraddlePost(seat, amount);
+                break;
+
+            case PostType.ExtraBlind:
+                ValidateExtraBlindPost(seat);
+                break;
+
+            case PostType.DeadBlind:
+                ValidateDeadBlindPost(seat);
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(
+                    nameof(postType),
+                    postType,
+                    "Unsupported post type.");
+        }
+    }
+
+    private void ValidateAntePost(
+        Seat seat,
+        long amount)
+    {
+        AnteRules? ante = _rules.Ante;
+
+        if (ante is null || ante.Amount <= 0)
+        {
+            throw new InvalidOperationException(
+                "Ante is not enabled for this game.");
+        }
+
+        EnsurePostWasNotAlreadyMade(
+            seat.SeatId,
+            PostType.Ante);
+
+        if (amount != ante.Amount)
+        {
+            throw new InvalidOperationException(
+                $"Ante must be exactly {ante.Amount}.");
+        }
+
+        if (ante.Type != AnteType.EveryPlayer)
+        {
+            throw new NotSupportedException(
+                $"Ante type {ante.Type} is not supported yet.");
+        }
+    }
+
+    private void ValidateSmallBlindPost(
+        Seat seat,
+        long amount)
+    {
+        if (seat.SeatId != 0)
+        {
+            throw new InvalidOperationException(
+                "The small blind must be posted by seat 0.");
+        }
+
+        EnsurePostWasNotAlreadyMade(
+            seat.SeatId,
+            PostType.SmallBlind);
+
+        if (amount != _rules.SmallBlind)
+        {
+            throw new InvalidOperationException(
+                $"Small blind must be exactly {_rules.SmallBlind}.");
+        }
+    }
+
+    private void ValidateBigBlindPost(
+        Seat seat,
+        long amount)
+    {
+        if (seat.SeatId != 1)
+        {
+            throw new InvalidOperationException(
+                "The big blind must be posted by seat 1.");
+        }
+
+        EnsurePostWasNotAlreadyMade(
+            seat.SeatId,
+            PostType.BigBlind);
+
+        if (amount != _rules.BigBlind)
+        {
+            throw new InvalidOperationException(
+                $"Big blind must be exactly {_rules.BigBlind}.");
+        }
+    }
+
+    private void ValidateStraddlePost(
+        Seat seat,
+        long amount)
+    {
+        if (_seats.Count == 2)
+        {
+            throw new InvalidOperationException(
+                "Straddles are not supported in heads-up games.");
+        }
+
+        StraddleRules? straddle = _rules.Straddle;
+
+        if (straddle is null ||
+            straddle.Amounts.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "Straddle is not enabled for this game.");
+        }
+
+        EnsurePostWasNotAlreadyMade(
+            seat.SeatId,
+            PostType.Straddle);
+
+        long highestLivePost = GetHighestRoundBet();
+
+        if (amount <= highestLivePost)
+        {
+            throw new InvalidOperationException(
+                $"Straddle must exceed the current live wager of {highestLivePost}.");
+        }
+
+        if (!straddle.Amounts.Contains(amount))
+        {
+            throw new InvalidOperationException(
+                $"Straddle amount {amount} is not allowed.");
+        }
+
+        if (straddle.IsMandatory)
+        {
+            ValidateMandatoryStraddleSeat(
+                seat.SeatId,
+                straddle);
+        }
+    }
+
+    private void ValidateMandatoryStraddleSeat(
+        int seatId,
+        StraddleRules straddle)
+    {
+        int postedStraddleCount = CountPosts(
+            PostType.Straddle);
+
+        int expectedSeatId = straddle.Type switch
+        {
+            StraddleType.Utg =>
+                2 + postedStraddleCount,
+
+            StraddleType.Button =>
+                _seats.Count - 1,
+
+            StraddleType.Mississippi =>
+                throw new NotSupportedException(
+                    "Automatic Mississippi straddle requires an explicit first seat."),
+
+            StraddleType.AnyPosition =>
+                throw new NotSupportedException(
+                    "Automatic AnyPosition straddle requires an explicit seatId."),
+
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(straddle.Type),
+                straddle.Type,
+                "Unknown straddle type.")
+        };
+
+        if (seatId != expectedSeatId)
+        {
+            throw new InvalidOperationException(
+                $"The next mandatory straddle must be posted by seat {expectedSeatId}.");
+        }
+    }
+
+    private void ValidateExtraBlindPost(
+        Seat seat)
+    {
+        EnsurePostWasNotAlreadyMade(
+            seat.SeatId,
+            PostType.ExtraBlind);
+
+        if (HasPost(seat.SeatId, PostType.SmallBlind) ||
+            HasPost(seat.SeatId, PostType.BigBlind) ||
+            HasPost(seat.SeatId, PostType.Straddle))
+        {
+            throw new InvalidOperationException(
+                $"Seat {seat.SeatId} cannot post an extra blind after posting another live forced wager.");
+        }
+    }
+
+    private void ValidateDeadBlindPost(
+        Seat seat)
+    {
+        EnsurePostWasNotAlreadyMade(
+            seat.SeatId,
+            PostType.DeadBlind);
+    }
+
+    private bool HasPost(
+        int seatId,
+        PostType postType)
+    {
+        return _madePosts.Contains(
+            (seatId, postType));
+    }
+
+    private int CountPosts(PostType postType)
+    {
+        int count = 0;
+
+        foreach ((int _, PostType madePostType) in _madePosts)
+        {
+            if (madePostType == postType)
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private void EnsurePostWasNotAlreadyMade(
+        int seatId,
+        PostType postType)
+    {
+        if (HasPost(seatId, postType))
+        {
+            throw new InvalidOperationException(
+                $"Seat {seatId} has already posted {postType}.");
+        }
+    }
+
     // Validation and helpers
 
     private RoundRules GetCurrentRound()
@@ -2156,6 +2427,12 @@ public sealed class PokerState : IPokerState
             straddle.Amounts.Count == 0)
         {
             return;
+        }
+
+        if (seatCount == 2)
+        {
+            throw new InvalidOperationException(
+                "Straddles are not supported in heads-up games.");
         }
 
         if (straddle.Amounts.Any(amount => amount <= 0))

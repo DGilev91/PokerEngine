@@ -332,14 +332,14 @@ public sealed class RealHandRunoutTests
 
         state.Start();
 
-        for (int seatId = 0;
-             seatId < state.Seats.Count;
-             seatId++)
-        {
-            state.DealHole(
-                seatId,
-                ["xx", "xx"]);
-        }
+        state.DealHole(0, ["Th", "8s"]);
+        state.DealHole(1, ["Kh", "Kd"]);
+        state.DealHole(2, ["2c", "2d"]);
+        state.DealHole(3, ["Qd", "5d"]);
+        state.DealHole(4, ["Ac", "Jc"]);
+        state.DealHole(5, ["7h", "6h"]);
+        state.DealHole(6, ["9c", "9d"]);
+        state.DealHole(7, ["As", "Ks"]);
 
         // Preflop
         state.PlayerAction(2, ActionType.Fold);
@@ -419,8 +419,7 @@ public sealed class RealHandRunoutTests
             .OfType<BoardEvent>()
             .Count();
 
-        state.ShowCards(0, ["Th", "8s"]);
-        state.ShowCards(3, ["Qd", "5d"]);
+
         state.SetRunoutCount(2);
 
         // Two boards must now exist.
