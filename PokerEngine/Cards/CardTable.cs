@@ -27,48 +27,88 @@ public static class CardTable
         if (card.Length != 2)
         {
             throw new ArgumentException(
-                $"Некорректная карта: {card}.",
+                $"Invalid card: {card}.",
                 nameof(card));
         }
 
-        int rank = IndexOf(Ranks, card[0]);
+        int rank = GetRankIndex(card[0]);
 
         if (rank < 0)
         {
             throw new ArgumentException(
-                $"Неизвестный ранг карты: {card}.",
+                $"Unknown card rank: {card[0]}.",
                 nameof(card));
         }
 
-        int suit = IndexOf(Suits, card[1]);
+        int suit = GetSuitIndex(card[1]);
 
         if (suit < 0)
         {
             throw new ArgumentException(
-                $"Неизвестная масть карты: {card}.",
+                $"Unknown card suit: {card[1]}.",
                 nameof(card));
         }
+
+        return Encode(rank, suit);
+    }
+
+    public static int Encode(
+        int rank,
+        int suit)
+    {
+        ValidateRank(rank);
+        ValidateSuit(suit);
 
         return suit * RankCount + rank;
     }
 
+    public static bool TryEncode(
+        string? card,
+        out int encodedCard)
+    {
+        encodedCard = default;
+
+        if (card is not { Length: 2 })
+        {
+            return false;
+        }
+
+        int rank = GetRankIndex(card[0]);
+
+        if (rank < 0)
+        {
+            return false;
+        }
+
+        int suit = GetSuitIndex(card[1]);
+
+        if (suit < 0)
+        {
+            return false;
+        }
+
+        encodedCard = suit * RankCount + rank;
+
+        return true;
+    }
+
     public static string Decode(int card)
     {
-        Validate(card);
+        ValidateCard(card);
 
         return Cards[card];
     }
 
     public static int GetRank(int card)
     {
-        Validate(card);
+        ValidateCard(card);
 
         return card % RankCount;
     }
 
     public static int GetSuit(int card)
     {
-        Validate(card);
+        ValidateCard(card);
 
         return card / RankCount;
     }
@@ -90,53 +130,98 @@ public static class CardTable
 
     public static bool IsValid(string? card)
     {
-        if (string.IsNullOrWhiteSpace(card) ||
-            card.Length != 2)
-        {
-            return false;
-        }
+        return TryEncode(
+            card,
+            out _);
+    }
 
-        return IndexOf(Ranks, card[0]) >= 0 &&
-               IndexOf(Suits, card[1]) >= 0;
+    public static int GetRankIndex(char rank)
+    {
+        return rank switch
+        {
+            '2' => 0,
+            '3' => 1,
+            '4' => 2,
+            '5' => 3,
+            '6' => 4,
+            '7' => 5,
+            '8' => 6,
+            '9' => 7,
+            'T' => 8,
+            'J' => 9,
+            'Q' => 10,
+            'K' => 11,
+            'A' => 12,
+            _ => -1
+        };
+    }
+
+    public static int GetSuitIndex(char suit)
+    {
+        return suit switch
+        {
+            'c' => 0,
+            'd' => 1,
+            'h' => 2,
+            's' => 3,
+            _ => -1
+        };
     }
 
     private static IReadOnlyList<string> CreateCards()
     {
-        var cards = new List<string>(CardCount);
+        string[] cards = new string[CardCount];
 
-        foreach (char suit in Suits)
+        for (int suit = 0;
+             suit < SuitCount;
+             suit++)
         {
-            foreach (char rank in Ranks)
+            for (int rank = 0;
+                 rank < RankCount;
+                 rank++)
             {
-                cards.Add(string.Concat(rank, suit));
+                int card =
+                    suit * RankCount + rank;
+
+                cards[card] = string.Concat(
+                    Ranks[rank],
+                    Suits[suit]);
             }
         }
 
-        return cards.AsReadOnly();
+        return Array.AsReadOnly(cards);
     }
 
-    private static int IndexOf(
-        IReadOnlyList<char> values,
-        char value)
-    {
-        for (int index = 0; index < values.Count; index++)
-        {
-            if (values[index] == value)
-            {
-                return index;
-            }
-        }
-
-        return -1;
-    }
-
-    private static void Validate(int card)
+    private static void ValidateCard(int card)
     {
         if (!IsValid(card))
         {
             throw new ArgumentOutOfRangeException(
                 nameof(card),
-                $"Карта должна иметь значение от 0 до {CardCount - 1}.");
+                card,
+                $"Card value must be between 0 and {CardCount - 1}.");
+        }
+    }
+
+    private static void ValidateRank(int rank)
+    {
+        if ((uint)rank >= RankCount)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(rank),
+                rank,
+                $"Rank value must be between 0 and {RankCount - 1}.");
+        }
+    }
+
+    private static void ValidateSuit(int suit)
+    {
+        if ((uint)suit >= SuitCount)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(suit),
+                suit,
+                $"Suit value must be between 0 and {SuitCount - 1}.");
         }
     }
 }
