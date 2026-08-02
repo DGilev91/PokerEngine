@@ -4,7 +4,35 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <PackageId>PokerEngine</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Dmitrii Gilev</Authors>
+
+    <Description>
+      A deterministic poker rules engine written in C#.
+    </Description>
+
+    <PackageTags>
+      poker;texas-holdem;omaha;game-engine;cards
+    </PackageTags>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>
+      https://github.com/DGilev91/PokerEngine
+    </RepositoryUrl>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
- 
+  <ItemGroup>
+    <None Include="..\README.md"
+          Pack="true"
+          PackagePath="/" />
+  </ItemGroup>
+
 </Project>
