@@ -1,7 +1,7 @@
 using PokerEngine.Enums;
-using PokerEngine.States;
 using PokerEngine.Interfaces;
 using PokerEngine.Models;
+using PokerEngine.States;
 
 namespace PokerEngine.Games;
 
@@ -13,7 +13,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
         Automation automation,
         long smallBlind,
         long bigBlind,
-        AnteRules ante,
+        AnteRules? ante,
         StraddleRules? straddle,
         int initialBoardCount,
         int maxRunoutCount)
@@ -22,35 +22,40 @@ public sealed class NoLimitTexasHoldem : PokerGame
         {
             throw new ArgumentOutOfRangeException(
                 nameof(smallBlind),
-                "Small blind должен быть больше нуля.");
+                smallBlind,
+                "Small blind must be greater than zero.");
         }
 
         if (bigBlind <= smallBlind)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(bigBlind),
-                "Big blind должен быть больше small blind.");
+                bigBlind,
+                "Big blind must be greater than the small blind.");
         }
 
-        if (ante != null && ante.Amount < 0)
+        if (ante is not null && ante.Amount < 0)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(ante),
-                "Ante не может быть отрицательным.");
+                ante.Amount,
+                "Ante amount cannot be negative.");
         }
 
         if (initialBoardCount <= 0)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(initialBoardCount),
-                "Количество досок должно быть больше нуля.");
+                initialBoardCount,
+                "Initial board count must be greater than zero.");
         }
 
         if (maxRunoutCount <= 0)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(maxRunoutCount),
-                "Максимальное количество runout должно быть больше нуля.");
+                maxRunoutCount,
+                "Maximum runout count must be greater than zero.");
         }
 
         _rules = new PokerRules
@@ -97,7 +102,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
             Straddle = straddle,
 
             InitialBoardCount = initialBoardCount,
-            MaxRunoutCount = maxRunoutCount,
+            MaxRunoutCount = maxRunoutCount
         };
     }
 
