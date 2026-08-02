@@ -5,133 +5,162 @@ namespace PokerEngine.Models;
 public sealed class PokerRules
 {
     /// <summary>
-    /// Определяет, какие части раздачи выполняются автоматически.
-    /// Automation.None означает полностью ручной режим.
-    /// Automation.All означает максимально автоматический режим.
+    /// Defines which parts of the hand are performed automatically.
+    /// <see cref="Automation.None"/> enables fully manual mode.
+    /// <see cref="Automation.All"/> enables all available automation.
     /// </summary>
-    public required Automation Automation { get; init; } = Automation.None;
+    public required Automation Automation { get; init; } =
+        Automation.None;
 
     /// <summary>
-    /// Тип игры: Texas Hold'em, Omaha, и т. д.
+    /// Gets the poker game type, such as Texas Hold'em or Omaha.
     /// </summary>
     public required GameType GameType { get; init; }
 
     /// <summary>
-    /// Структура ставок: Fixed Limit, Pot Limit или No Limit.
+    /// Gets the betting structure, such as fixed limit,
+    /// pot limit, or no limit.
     /// </summary>
     public required GameLimit GameLimit { get; init; }
 
     /// <summary>
-    /// Последовательность улиц игры:
-    /// preflop, flop, turn, river и т. д.
+    /// Gets the ordered sequence of betting rounds,
+    /// such as preflop, flop, turn, and river.
     /// </summary>
     public required IReadOnlyList<RoundRules> Rounds { get; init; }
 
     /// <summary>
-    /// Размер малого блайнда.
-    /// Должен быть больше 0 и меньше размера большого блайнда.
+    /// Gets the required small blind amount.
+    /// The value must be greater than zero and lower than the big blind.
     /// </summary>
     public required long SmallBlind { get; init; }
-    
+
     /// <summary>
-    /// Размер большого блайнда.
-    /// Обычно также определяет минимальный размер полной ставки
-    /// для игр с одинаковым минимальным бетом на всех улицах.
+    /// Gets the required big blind amount.
+    /// It commonly also defines the minimum full bet size
+    /// in games that use the same minimum bet on every round.
     /// </summary>
     public required long BigBlind { get; init; }
 
     /// <summary>
-    /// Правила использования страддлов.
-    /// Null означает, что страддлы запрещены.
+    /// Gets the straddle configuration.
+    /// A value of <see langword="null"/> means that straddles are disabled.
     /// </summary>
     public StraddleRules? Straddle { get; init; }
 
     /// <summary>
-    /// Размер анте для каждого игрока.
-    /// Ноль означает отсутствие анте.
+    /// Gets the ante configuration.
+    /// A value of <see langword="null"/> means that antes are disabled.
     /// </summary>
     public AnteRules? Ante { get; init; }
 
-
     /// <summary>
-    /// Начальное количество независимых досок в раздаче.
-    ///
-    /// Обычно равно 1.
-    /// Для double-board форматов, например double-board bomb pot,
-    /// может быть равно 2.
-    ///
-    /// Это значение определяет количество досок,
-    /// которые существуют с самого начала раздачи.
+    /// Gets the number of independent boards created at the start of the hand.
     /// </summary>
+    /// <remarks>
+    /// The usual value is <c>1</c>.
+    /// Double-board formats, such as a double-board bomb pot,
+    /// may use a value of <c>2</c>.
+    ///
+    /// This value defines how many boards exist from the beginning
+    /// of the hand.
+    /// </remarks>
     public int InitialBoardCount { get; init; } = 1;
 
     /// <summary>
-    /// Максимальное количество runout, разрешённых для одной доски.
-    ///
-    /// Значение 1 означает, что Run It Twice запрещён.
-    /// Значение 2 разрешает Run It Twice.
-    /// Значение 3 разрешает Run It Three Times.
-    ///
-    /// Фактическое количество runout выбирается отдельно
-    /// для конкретной раздачи после all-in.
+    /// Gets the maximum number of runouts allowed for each initial board.
     /// </summary>
+    /// <remarks>
+    /// A value of <c>1</c> disables multiple runouts.
+    /// A value of <c>2</c> allows running the board twice.
+    /// A value of <c>3</c> allows running the board three times.
+    ///
+    /// The actual runout count is selected separately for a specific hand
+    /// after betting has been closed by an all-in.
+    /// </remarks>
     public int MaxRunoutCount { get; init; } = 1;
 }
 
+/// <summary>
+/// Defines the ante rules for a poker game.
+/// </summary>
 public sealed class AnteRules
 {
+    /// <summary>
+    /// Gets the position or group of players responsible for posting the ante.
+    /// </summary>
     public required AnteType Type { get; init; }
 
+    /// <summary>
+    /// Gets the required ante amount.
+    /// </summary>
     public required long Amount { get; init; }
 }
 
+/// <summary>
+/// Defines the straddle rules for a poker game.
+/// </summary>
 public sealed class StraddleRules
 {
     /// <summary>
-    /// Режим определения позиции первого игрока,
-    /// который может поставить страддл.
+    /// Gets the rule used to determine which position may post
+    /// the first straddle.
     /// </summary>
     public required StraddleType Type { get; init; }
 
     /// <summary>
-    /// Размеры последовательных страддлов.
-    /// Первый элемент — первый страддл,
-    /// второй — restraddle и так далее.
-    /// Пустой список означает отсутствие страддлов.
+    /// Gets the permitted amounts for consecutive straddles.
     /// </summary>
+    /// <remarks>
+    /// The first item is the initial straddle amount.
+    /// The second item is the first restraddle amount,
+    /// followed by any additional restraddles.
+    ///
+    /// An empty collection means that straddles are disabled.
+    /// </remarks>
     public required IReadOnlyList<long> Amounts { get; init; }
 
     /// <summary>
-    /// Является ли первый страддл обязательным.
+    /// Gets a value indicating whether the first straddle is mandatory.
     /// </summary>
     public bool IsMandatory { get; init; }
 }
 
+/// <summary>
+/// Defines the rules for a single betting round.
+/// </summary>
 public sealed class RoundRules
 {
     /// <summary>
-    /// Тип улицы торговли.
+    /// Gets the betting round type.
     /// </summary>
     public required RoundType Type { get; init; }
 
     /// <summary>
-    /// Количество карт, раздаваемых на каждую доску в начале улицы.
+    /// Gets the number of cards dealt to each board
+    /// at the beginning of this round.
     /// </summary>
     public int BoardCardCount { get; init; }
 
     /// <summary>
-    /// Размер ставки для этой улицы.
-    ///
-    /// В Fixed Limit определяет фиксированный размер bet и raise.
-    /// В No Limit и Pot Limit обычно равен минимальному размеру bet.
+    /// Gets the configured bet size for this round.
     /// </summary>
+    /// <remarks>
+    /// In fixed-limit games, this value defines the fixed bet
+    /// and full raise size.
+    ///
+    /// In no-limit and pot-limit games, it commonly defines
+    /// the minimum full bet size.
+    /// </remarks>
     public required long BetSize { get; init; }
 
     /// <summary>
-    /// Максимальное количество полных повышений на улице.
-    /// Null означает отсутствие ограничения.
-    /// Обычно используется только в Fixed Limit.
+    /// Gets the maximum number of full raises allowed
+    /// during this round.
     /// </summary>
+    /// <remarks>
+    /// A value of <see langword="null"/> means that there is no limit.
+    /// This setting is commonly used only in fixed-limit games.
+    /// </remarks>
     public int? MaxRaises { get; init; }
 }
-

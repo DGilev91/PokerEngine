@@ -20,7 +20,7 @@ public sealed class HandRank
         if (cards.Count != 5)
         {
             throw new ArgumentException(
-                "Покерная комбинация должна состоять из пяти карт.",
+                "A poker hand must contain exactly five cards.",
                 nameof(cards));
         }
 

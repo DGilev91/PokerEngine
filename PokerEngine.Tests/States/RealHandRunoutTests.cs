@@ -170,7 +170,7 @@ public sealed class RealHandRunoutTests
         state.ShowCards(3, ["Qd", "5d"]);
 
         UncalledBetReturnedEvent[] uncalled = state.Events.OfType<UncalledBetReturnedEvent>().ToArray();
-        Assert.Equal(1, uncalled.Length);
+        Assert.Single(uncalled);
         Assert.Equal(0, uncalled[0].seatId);
         Assert.Equal(2_787, uncalled[0].amount);
 
@@ -399,9 +399,9 @@ public sealed class RealHandRunoutTests
 
         // Seat 3 is all-in and seat 0 is the only actionable player.
         // The engine must wait for the runout count.
-        WainingRunoutEvent waitingEvent = Assert.Single(
+        WaitingRunoutEvent waitingEvent = Assert.Single(
             state.Events
-                .OfType<WainingRunoutEvent>());
+                .OfType<WaitingRunoutEvent>());
 
         // Turn and river must not be dealt before the decision.
         Assert.Single(state.Boards);
