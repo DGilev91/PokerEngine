@@ -42,12 +42,12 @@ dotnet test
 In manual mode, the caller posts blinds and deals cards.
 
 ```csharp
-NoLimitTexasHoldem game = new(
+IPokerGame game = new NoLimitTexasHoldem(
     automation: Automation.None,
     smallBlind: 100,
     bigBlind: 200);
 
-PokerState state = game.CreateState();
+IPokerState state = game.CreateState();
 
 state.Initialize([10_000, 10_000, 10_000]);
 
@@ -62,6 +62,12 @@ state.DealHole(2, ["7c", "7d"]);
 state.PlayerAction(2, ActionType.RaiseTo, 600);
 state.PlayerAction(0, ActionType.Fold);
 state.PlayerAction(1, ActionType.Fold);
+
+//History
+foreach(var e in state.Events)
+{
+    Console.WriteLine($"{e}");
+}
 ```
 
 ## Automatic mode
@@ -71,12 +77,12 @@ In automatic mode, the engine posts blinds, shuffles the deck, and deals cards.
 Player decisions are still passed through `PlayerAction`.
 
 ```csharp
-NoLimitTexasHoldem game = new(
+IPokerGame game = new NoLimitTexasHoldem(
     automation: Automation.All,
     smallBlind: 100,
     bigBlind: 200);
 
-PokerState state = game.CreateState();
+IPokerState state = game.CreateState();
 
 state.Initialize([10_000, 10_000, 10_000]);
 state.Start();
@@ -84,6 +90,12 @@ state.Start();
 state.PlayerAction(2, ActionType.RaiseTo, 600);
 state.PlayerAction(0, ActionType.Fold);
 state.PlayerAction(1, ActionType.Fold);
+
+//History
+foreach(var e in state.Events)
+{
+    Console.WriteLine($"{e}");
+}
 ```
 
 ## Events

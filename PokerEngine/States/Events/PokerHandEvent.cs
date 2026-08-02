@@ -1,11 +1,19 @@
 using PokerEngine.Enums;
+using System.Collections;
+using System.Reflection;
 
 namespace PokerEngine.States.Events;
 
 /// <summary>
 /// Represents an event emitted during a poker hand.
 /// </summary>
-public abstract record PokerHandEvent;
+public abstract record PokerHandEvent
+{
+    private protected static string FormatList<T>(IEnumerable<T> values)
+    {
+        return $"[{string.Join(", ", values)}]";
+    }
+}
 
 /// <summary>
 /// Indicates that a new hand has been created.
@@ -19,7 +27,15 @@ public sealed record NewHandEvent : PokerHandEvent;
 /// The initial stacks ordered by seat identifier.
 /// </param>
 public sealed record SeatsEvent(
-    IReadOnlyList<long> Stacks) : PokerHandEvent;
+    IReadOnlyList<long> Stacks) : PokerHandEvent
+{
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{nameof(SeatsEvent)} {{ " +
+               $"Stacks = {FormatList(Stacks)} }}";
+    }
+}
 
 /// <summary>
 /// Indicates that a player posted an ante, blind, or straddle.
@@ -58,7 +74,16 @@ public sealed record HandStartedEvent : PokerHandEvent;
 /// </param>
 public sealed record HoleCardsEvent(
     int SeatId,
-    IReadOnlyList<string> Cards) : PokerHandEvent;
+    IReadOnlyList<string> Cards) : PokerHandEvent
+{
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{nameof(HoleCardsEvent)} {{ " +
+               $"SeatId = {SeatId}, " +
+               $"Cards = {FormatList(Cards)} }}";
+    }
+}
 
 /// <summary>
 /// Indicates that the engine is waiting for a runout-count decision.
@@ -93,7 +118,17 @@ public sealed record RunoutCountEvent(
 public sealed record BoardEvent(
     RoundType Round,
     int BoardIndex,
-    IReadOnlyList<string> Cards) : PokerHandEvent;
+    IReadOnlyList<string> Cards) : PokerHandEvent
+{
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{nameof(BoardEvent)} {{ " +
+               $"Round = {Round}, " +
+               $"BoardIndex = {BoardIndex}, " +
+               $"Cards = {FormatList(Cards)} }}";
+    }
+}
 
 /// <summary>
 /// Indicates that a player is expected to act.
@@ -126,7 +161,21 @@ public sealed record PlayerTurnEvent(
     long MinBet,
     long MaxBet,
     long MinRaiseTo,
-    long MaxRaiseTo) : PokerHandEvent;
+    long MaxRaiseTo) : PokerHandEvent
+{
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{nameof(PlayerTurnEvent)} {{ " +
+               $"SeatId = {SeatId}, " +
+               $"Actions = {FormatList(Actions)}, " +
+               $"CallAmount = {CallAmount}, " +
+               $"MinBet = {MinBet}, " +
+               $"MaxBet = {MaxBet}, " +
+               $"MinRaiseTo = {MinRaiseTo}, " +
+               $"MaxRaiseTo = {MaxRaiseTo} }}";
+    }
+}
 
 /// <summary>
 /// Indicates that a player performed a betting action.
@@ -177,7 +226,16 @@ public sealed record UncalledBetReturnedEvent(
 /// </param>
 public sealed record ShowCardsEvent(
     int SeatId,
-    IReadOnlyList<string> Cards) : PokerHandEvent;
+    IReadOnlyList<string> Cards) : PokerHandEvent
+{
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{nameof(ShowCardsEvent)} {{ " +
+               $"SeatId = {SeatId}, " +
+               $"Cards = {FormatList(Cards)} }}";
+    }
+}
 
 /// <summary>
 /// Contains the evaluated hand for a seat on a specific board.
@@ -198,7 +256,18 @@ public sealed record HandEvaluatedEvent(
     int SeatId,
     int BoardIndex,
     HandCategory Category,
-    IReadOnlyList<string> BestCards) : PokerHandEvent;
+    IReadOnlyList<string> BestCards) : PokerHandEvent
+{
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{nameof(HandEvaluatedEvent)} {{ " +
+               $"SeatId = {SeatId}, " +
+               $"BoardIndex = {BoardIndex}, " +
+               $"Category = {Category}, " +
+               $"BestCards = {FormatList(BestCards)} }}";
+    }
+}
 
 /// <summary>
 /// Indicates that chips from a pot were awarded to a player.
