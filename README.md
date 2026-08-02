@@ -1,7 +1,7 @@
 <p align="center">
   <img src="assets/pokerengine-logo.png"
        alt="PokerEngine"
-       width="450">
+       width="600">
 </p>
 
 <h1 align="center">PokerEngine</h1>
@@ -76,7 +76,38 @@ state.PlayerAction(2, ActionType.RaiseTo, 600);
 state.PlayerAction(0, ActionType.Fold);
 state.PlayerAction(1, ActionType.Fold);
 
+// Current state
+Console.WriteLine($"State: {state.State}");
+Console.WriteLine($"Round: {state.Round}");
+
+foreach (var seat in state.Seats)
+{
+    Console.WriteLine(
+        $"Seat {seat.SeatId}: " +
+        $"Stack={seat.Stack}, " +
+        $"RoundBet={seat.RoundBet}, " +
+        $"TotalBet={seat.TotalBet}, " +
+        $"Folded={seat.IsFolded}, " +
+        $"AllIn={seat.IsAllIn}");
+}
+
+foreach (var pot in state.PotState.Pots)
+{
+    Console.WriteLine(
+        $"Pot {pot.Index}: " +
+        $"Amount={pot.Amount}, " +
+        $"Eligible=[{string.Join(", ", pot.EligibleSeatIds)}]");
+}
+
+for (int boardIndex = 0; boardIndex < state.Boards.Count; boardIndex++)
+{
+    Console.WriteLine(
+        $"Board {boardIndex}: " +
+        $"[{string.Join(", ", state.Boards[boardIndex])}]");
+}
+
 //History
+ Console.WriteLine($"History");
 foreach(var e in state.Events)
 {
     Console.WriteLine($"{e}");
@@ -108,7 +139,38 @@ state.PlayerAction(2, ActionType.RaiseTo, 600);
 state.PlayerAction(0, ActionType.Fold);
 state.PlayerAction(1, ActionType.Fold);
 
+// Current state
+Console.WriteLine($"State: {state.State}");
+Console.WriteLine($"Round: {state.Round}");
+
+foreach (var seat in state.Seats)
+{
+    Console.WriteLine(
+        $"Seat {seat.SeatId}: " +
+        $"Stack={seat.Stack}, " +
+        $"RoundBet={seat.RoundBet}, " +
+        $"TotalBet={seat.TotalBet}, " +
+        $"Folded={seat.IsFolded}, " +
+        $"AllIn={seat.IsAllIn}");
+}
+
+foreach (var pot in state.PotState.Pots)
+{
+    Console.WriteLine(
+        $"Pot {pot.Index}: " +
+        $"Amount={pot.Amount}, " +
+        $"Eligible=[{string.Join(", ", pot.EligibleSeatIds)}]");
+}
+
+for (int boardIndex = 0; boardIndex < state.Boards.Count; boardIndex++)
+{
+    Console.WriteLine(
+        $"Board {boardIndex}: " +
+        $"[{string.Join(", ", state.Boards[boardIndex])}]");
+}
+
 //History
+ Console.WriteLine($"History");
 foreach(var e in state.Events)
 {
     Console.WriteLine($"{e}");
