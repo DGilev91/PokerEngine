@@ -1,5 +1,8 @@
 namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines the supported poker game variants.
+/// </summary>
 public enum GameType
 {
     /// <summary>

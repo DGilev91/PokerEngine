@@ -1,5 +1,8 @@
 ﻿namespace PokerEngine.States.Seats;
 
+/// <summary>
+/// Represents a player seat and its mutable state during a poker hand.
+/// </summary>
 public sealed class Seat
 {
     private readonly List<string> _holeCards = [];
@@ -48,6 +51,19 @@ public sealed class Seat
         Stack == 0 &&
         !IsFolded;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Seat"/> class.
+    /// </summary>
+    /// <param name="seatId">
+    /// The zero-based seat identifier.
+    /// </param>
+    /// <param name="stack">
+    /// The player's initial stack.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="seatId"/> or
+    /// <paramref name="stack"/> is negative.
+    /// </exception>
     public Seat(
         int seatId,
         long stack)
@@ -73,6 +89,16 @@ public sealed class Seat
         Stack = stack;
     }
 
+    /// <summary>
+    /// Replaces the player's current hole cards.
+    /// </summary>
+    /// <param name="cards">
+    /// The hole cards to assign to the seat.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="cards"/> is
+    /// <see langword="null"/>.
+    /// </exception>
     public void SetHoleCards(
         IEnumerable<string> cards)
     {
@@ -82,6 +108,9 @@ public sealed class Seat
         _holeCards.AddRange(cards);
     }
 
+    /// <summary>
+    /// Resets the amount committed during the current betting round.
+    /// </summary>
     public void ClearRoundBet()
     {
         RoundBet = 0;

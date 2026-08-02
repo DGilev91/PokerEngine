@@ -2,6 +2,9 @@ using PokerEngine.Enums;
 
 namespace PokerEngine.Rules;
 
+/// <summary>
+/// Defines the rules and configuration used to run a poker game.
+/// </summary>
 public sealed class PokerRules
 {
     /// <summary>

@@ -1,5 +1,8 @@
 ﻿namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines the lifecycle state of a poker hand.
+/// </summary>
 public enum HandState
 {
     /// <summary>

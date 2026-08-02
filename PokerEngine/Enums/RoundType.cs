@@ -1,5 +1,8 @@
 namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines the current betting round or terminal showdown stage of a poker hand.
+/// </summary>
 public enum RoundType
 {
     /// <summary>

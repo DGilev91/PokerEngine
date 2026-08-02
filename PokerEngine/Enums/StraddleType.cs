@@ -1,5 +1,8 @@
 ﻿namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines the supported straddle position rules.
+/// </summary>
 public enum StraddleType
 {
     /// <summary>

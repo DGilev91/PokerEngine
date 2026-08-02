@@ -1,5 +1,9 @@
 namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines which poker hand operations are performed automatically.
+/// Multiple options can be combined.
+/// </summary>
 [Flags]
 public enum Automation
 {

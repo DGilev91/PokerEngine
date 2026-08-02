@@ -1,5 +1,8 @@
 ﻿namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines how an ante is collected from players.
+/// </summary>
 public enum AnteType
 {
     /// <summary>

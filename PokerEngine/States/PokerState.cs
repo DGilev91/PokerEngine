@@ -8,6 +8,9 @@ using PokerEngine.States.Seats;
 
 namespace PokerEngine.States;
 
+/// <summary>
+/// Represents the mutable state of a single poker hand.
+/// </summary>
 public sealed class PokerState : IPokerState
 {
     private const string UnknownCard = "xx";
@@ -42,6 +45,15 @@ public sealed class PokerState : IPokerState
     private long _lastFullRaiseSize;
     private int _raiseCount;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PokerState"/> class.
+    /// </summary>
+    /// <param name="rules">
+    /// The rules used to configure the hand.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="rules"/> is <see langword="null"/>.
+    /// </exception>
     public PokerState(PokerRules rules)
     {
         _rules = rules ?? throw new ArgumentNullException(nameof(rules));
@@ -55,16 +67,22 @@ public sealed class PokerState : IPokerState
         };
     }
 
+    /// <inheritdoc />
     public IReadOnlyList<PokerHandEvent> Events => _events;
 
+    /// <inheritdoc />
     public IReadOnlyList<Seat> Seats => _seats;
 
+    /// <inheritdoc />
     public PotState PotState => _potState;
 
+    /// <inheritdoc />
     public IReadOnlyList<IReadOnlyList<string>> Boards => _boards;
 
+    /// <inheritdoc />
     public HandState State => _state;
 
+    /// <inheritdoc />
     public RoundType Round =>
         _roundIndex == _rules.Rounds.Count
             ? RoundType.Showdown
@@ -72,6 +90,7 @@ public sealed class PokerState : IPokerState
                 ? _rules.Rounds[_roundIndex].Type
                 : RoundType.None;
 
+    /// <inheritdoc />
     public void Initialize(IReadOnlyList<long> stacks)
     {
         ArgumentNullException.ThrowIfNull(stacks);
@@ -146,6 +165,7 @@ public sealed class PokerState : IPokerState
         PostMandatoryStraddlesAutomatically();
     }
 
+    /// <inheritdoc />
     public void PlayerPost(int seatId, PostType postType, long amount)
     {
         EnsureState(HandState.Initialized);
@@ -182,6 +202,7 @@ public sealed class PokerState : IPokerState
         RecalculatePots();
     }
 
+    /// <inheritdoc />
     public void Start()
     {
         EnsureState(HandState.Initialized);
@@ -216,6 +237,7 @@ public sealed class PokerState : IPokerState
         BeginBettingRound();
     }
 
+    /// <inheritdoc />
     public void DealHole(
         int seatId,
         IReadOnlyList<string>? cards = null)
@@ -273,6 +295,7 @@ public sealed class PokerState : IPokerState
             dealtCards));
     }
 
+    /// <inheritdoc />
     public void SetRunoutCount(int count)
     {
         EnsureStarted();
@@ -315,6 +338,7 @@ public sealed class PokerState : IPokerState
         ContinueAfterRunoutDecision();
     }
 
+    /// <inheritdoc />
     public void DealBoard(
         int boardIndex = 0,
         IReadOnlyList<string>? cards = null)
@@ -397,6 +421,7 @@ public sealed class PokerState : IPokerState
         BeginBettingRound();
     }
 
+    /// <inheritdoc />
     public void PlayerAction(
         int seatId,
         ActionType actionType,
@@ -450,6 +475,7 @@ public sealed class PokerState : IPokerState
         ContinueAfterAction(seatId);
     }
 
+    /// <inheritdoc />
     public void ShowCards(
         int seatId,
         IReadOnlyList<string> cards)

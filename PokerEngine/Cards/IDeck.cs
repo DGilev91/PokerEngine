@@ -3,7 +3,7 @@ namespace PokerEngine.Cards;
 /// <summary>
 /// Represents a deck of playing cards used by the poker engine.
 /// </summary>
-public interface IDeck
+internal interface IDeck
 {
     /// <summary>
     /// Gets the cards that are currently available in the deck.

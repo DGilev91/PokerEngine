@@ -4,8 +4,13 @@ using PokerEngine.Enums;
 
 namespace PokerEngine.Evaluation;
 
+/// <summary>
+/// Evaluates Texas Hold'em hands and selects the strongest five-card combination.
+/// </summary>
 public sealed class TexasHoldemEvaluator : IHandEvaluator
 {
+
+    /// <inheritdoc />
     public HandRank Evaluate(
         IReadOnlyList<string> holeCards,
         IReadOnlyList<string> boardCards)

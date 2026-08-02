@@ -1,5 +1,8 @@
 ﻿namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines the ranking category of a poker hand.
+/// </summary>
 public enum HandCategory
 {
     /// <summary>

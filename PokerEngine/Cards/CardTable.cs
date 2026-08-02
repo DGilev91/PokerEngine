@@ -2,7 +2,7 @@
 
 namespace PokerEngine.Cards;
 
-public static class CardTable
+internal static class CardTable
 {
     public const int RankCount = 13;
     public const int SuitCount = 4;

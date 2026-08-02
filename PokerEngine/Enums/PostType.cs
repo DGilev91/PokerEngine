@@ -1,5 +1,8 @@
 ﻿namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines the types of forced contributions that may be posted before or during hand setup.
+/// </summary>
 public enum PostType
 {
     /// <summary>

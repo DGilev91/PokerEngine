@@ -1,5 +1,8 @@
 ﻿namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines the betting actions available to a player.
+/// </summary>
 public enum ActionType
 {
     /// <summary>

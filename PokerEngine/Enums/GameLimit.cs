@@ -1,5 +1,8 @@
 namespace PokerEngine.Enums;
 
+/// <summary>
+/// Defines the betting limit structure used by a poker game.
+/// </summary>
 public enum GameLimit
 {
     /// <summary>

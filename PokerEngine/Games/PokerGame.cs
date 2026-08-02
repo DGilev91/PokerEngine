@@ -2,7 +2,11 @@ using PokerEngine.States;
 
 namespace PokerEngine.Games;
 
+/// <summary>
+/// Represents a poker game definition that can create new hand states.
+/// </summary>
 public abstract class PokerGame : IPokerGame
 {
-   public abstract IPokerState CreateState();
+    /// <inheritdoc />
+    public abstract IPokerState CreateState();
 }

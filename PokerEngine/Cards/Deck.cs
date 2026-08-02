@@ -2,7 +2,7 @@
 
 namespace PokerEngine.Cards;
 
-public sealed class Deck : IDeck
+internal sealed class Deck : IDeck
 {
     private readonly List<string> _cards;
 
