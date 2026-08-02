@@ -35,7 +35,6 @@ public sealed class PokerState : IPokerState
     private int? _uncalledSeatId;
     private long _uncalledAmount;
 
-    private int _runoutCount = 1;
     private bool _runoutCountWasSet;
     private bool _waitingForRunoutDecision;
     private bool _dealingRemainingBoardsAutomatically;
@@ -113,7 +112,6 @@ public sealed class PokerState : IPokerState
         _uncalledSeatId = null;
         _uncalledAmount = 0;
 
-        _runoutCount = 1;
         _runoutCountWasSet = false;
         _waitingForRunoutDecision = false;
         _dealingRemainingBoardsAutomatically = false;
@@ -298,7 +296,6 @@ public sealed class PokerState : IPokerState
                 "Multiple runouts cannot be selected in the current state.");
         }
 
-        _runoutCount = count;
         _runoutCountWasSet = true;
         _waitingForRunoutDecision = false;
 
