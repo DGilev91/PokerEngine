@@ -1,3 +1,12 @@
+<p align="center">
+  <img src="assets/pokerengine-logo.png"
+       alt="PokerEngine"
+       width="450">
+</p>
+
+<h1 align="center">PokerEngine</h1>
+
+
 # PokerEngine
 
 PokerEngine is a deterministic poker rules engine written in C#.
