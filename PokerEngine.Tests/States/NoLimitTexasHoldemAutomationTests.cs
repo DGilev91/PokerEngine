@@ -2,7 +2,7 @@ using PokerEngine.Enums;
 using PokerEngine.States;
 using PokerEngine.States.Events;
 
-namespace PokerEngine.Tests.Games;
+namespace PokerEngine.Tests.States;
 
 public sealed class NoLimitTexasHoldemAutomationTests
 {
@@ -109,8 +109,8 @@ public sealed class NoLimitTexasHoldemAutomationTests
 
         PlayerTurnEvent turn = Assert.IsType<PlayerTurnEvent>(state.Events.Last());
 
-        Assert.Equal(3, turn.seatId);
-        Assert.Equal(200, turn.callAmount);
-        Assert.Equal(400, turn.minRaiseTo);
+        Assert.Equal(3, turn.SeatId);
+        Assert.Equal(200, turn.CallAmount);
+        Assert.Equal(400, turn.MinRaiseTo);
     }
 }

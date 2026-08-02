@@ -12,7 +12,7 @@ public sealed class Deck : IDeck
 
     public Deck()
     {
-        _cards = new List<string>(CardTable.Cards);
+        _cards = [.. CardTable.Cards];
         Shuffle();
     }
 

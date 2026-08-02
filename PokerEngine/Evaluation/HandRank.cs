@@ -26,7 +26,7 @@ public sealed class HandRank
 
         Category = category;
         Strength = strength;
-        Cards = cards.ToArray();
+        Cards = [.. cards];
     }
 
     public int CompareTo(HandRank? other)

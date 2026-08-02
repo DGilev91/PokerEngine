@@ -52,7 +52,7 @@ public sealed class RealHandRunoutTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -113,7 +113,7 @@ public sealed class RealHandRunoutTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -171,12 +171,12 @@ public sealed class RealHandRunoutTests
 
         UncalledBetReturnedEvent[] uncalled = state.Events.OfType<UncalledBetReturnedEvent>().ToArray();
         Assert.Single(uncalled);
-        Assert.Equal(0, uncalled[0].seatId);
-        Assert.Equal(2_787, uncalled[0].amount);
+        Assert.Equal(0, uncalled[0].SeatId);
+        Assert.Equal(2_787, uncalled[0].Amount);
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -232,7 +232,7 @@ public sealed class RealHandRunoutTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -291,7 +291,7 @@ public sealed class RealHandRunoutTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -382,10 +382,10 @@ public sealed class RealHandRunoutTests
             state.Events
                 .OfType<BoardEvent>()
                 .Where(e =>
-                    e.round == RoundType.Flop));
+                    e.Round == RoundType.Flop));
 
-        Assert.Equal(0, flopEvent.boardIndex);
-        Assert.Equal(3, flopEvent.cards.Count);
+        Assert.Equal(0, flopEvent.BoardIndex);
+        Assert.Equal(3, flopEvent.Cards.Count);
 
         // Flop action.
         state.PlayerAction(
@@ -409,11 +409,11 @@ public sealed class RealHandRunoutTests
 
         Assert.DoesNotContain(
             state.Events.OfType<BoardEvent>(),
-            e => e.round == RoundType.Turn);
+            e => e.Round == RoundType.Turn);
 
         Assert.DoesNotContain(
             state.Events.OfType<BoardEvent>(),
-            e => e.round == RoundType.River);
+            e => e.Round == RoundType.River);
 
         int boardEventCountBeforeSelection = state.Events
             .OfType<BoardEvent>()
@@ -447,7 +447,7 @@ public sealed class RealHandRunoutTests
             state.Events
                 .OfType<RunoutCountEvent>());
 
-        Assert.Equal(2, runoutEvent.count);
+        Assert.Equal(2, runoutEvent.Count);
 
         BoardEvent[] boardEvents = state.Events
             .OfType<BoardEvent>()
@@ -461,36 +461,36 @@ public sealed class RealHandRunoutTests
         Assert.Equal(
             2,
             boardEvents.Count(e =>
-                e.round == RoundType.Turn));
+                e.Round == RoundType.Turn));
 
         Assert.Equal(
             2,
             boardEvents.Count(e =>
-                e.round == RoundType.River));
+                e.Round == RoundType.River));
 
         Assert.Contains(
             boardEvents,
             e =>
-                e.boardIndex == 0 &&
-                e.round == RoundType.Turn);
+                e.BoardIndex == 0 &&
+                e.Round == RoundType.Turn);
 
         Assert.Contains(
             boardEvents,
             e =>
-                e.boardIndex == 0 &&
-                e.round == RoundType.River);
+                e.BoardIndex == 0 &&
+                e.Round == RoundType.River);
 
         Assert.Contains(
             boardEvents,
             e =>
-                e.boardIndex == 1 &&
-                e.round == RoundType.Turn);
+                e.BoardIndex == 1 &&
+                e.Round == RoundType.Turn);
 
         Assert.Contains(
             boardEvents,
             e =>
-                e.boardIndex == 1 &&
-                e.round == RoundType.River);
+                e.BoardIndex == 1 &&
+                e.Round == RoundType.River);
 
 
 
@@ -507,11 +507,11 @@ public sealed class RealHandRunoutTests
 
         Assert.Equal(
             2,
-            evaluated.Count(e => e.seatId == 0));
+            evaluated.Count(e => e.SeatId == 0));
 
         Assert.Equal(
             2,
-            evaluated.Count(e => e.seatId == 3));
+            evaluated.Count(e => e.SeatId == 3));
 
         PotAwardedEvent[] awards = state.Events
             .OfType<PotAwardedEvent>()
@@ -522,7 +522,7 @@ public sealed class RealHandRunoutTests
         Assert.All(
             awards,
             award => Assert.Contains(
-                award.seatId,
+                award.SeatId,
                 [0, 3]));
 
         Assert.Single(

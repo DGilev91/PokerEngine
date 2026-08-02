@@ -1,6 +1,6 @@
 using PokerEngine.States;
 
-namespace PokerEngine.Tests.Games;
+namespace PokerEngine.Tests.States;
 
 public sealed class NoLimitTexasHoldemStateFactoryTests
 {

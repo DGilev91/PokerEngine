@@ -1,4 +1,6 @@
-﻿namespace PokerEngine.Cards;
+﻿using System.Collections.ObjectModel;
+
+namespace PokerEngine.Cards;
 
 public static class CardTable
 {
@@ -168,7 +170,7 @@ public static class CardTable
         };
     }
 
-    private static IReadOnlyList<string> CreateCards()
+    private static ReadOnlyCollection<string> CreateCards()
     {
         string[] cards = new string[CardCount];
 

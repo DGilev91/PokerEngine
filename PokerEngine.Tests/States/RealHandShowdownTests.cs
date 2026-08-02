@@ -48,7 +48,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -105,7 +105,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -166,13 +166,13 @@ public sealed class RealHandShowdownTests
         state.ShowCards(7, ["Ts", "Th"]);
 
         UncalledBetReturnedEvent[] uncalled = state.Events.OfType<UncalledBetReturnedEvent>().ToArray();
-        Assert.Equal(1, uncalled.Length);
-        Assert.Equal(6, uncalled[0].seatId);
-        Assert.Equal(19_126, uncalled[0].amount);
+        Assert.Single(uncalled);
+        Assert.Equal(6, uncalled[0].SeatId);
+        Assert.Equal(19_126, uncalled[0].Amount);
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -226,7 +226,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -282,13 +282,13 @@ public sealed class RealHandShowdownTests
         state.ShowCards(4, ["Qs", "Jc"]);
 
         UncalledBetReturnedEvent[] uncalled = state.Events.OfType<UncalledBetReturnedEvent>().ToArray();
-        Assert.Equal(1, uncalled.Length);
-        Assert.Equal(4, uncalled[0].seatId);
-        Assert.Equal(2_291, uncalled[0].amount);
+        Assert.Single(uncalled);
+        Assert.Equal(4, uncalled[0].SeatId);
+        Assert.Equal(2_291, uncalled[0].Amount);
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -347,13 +347,13 @@ public sealed class RealHandShowdownTests
         state.ShowCards(3, ["Ac", "Js"]);
 
         UncalledBetReturnedEvent[] uncalled = state.Events.OfType<UncalledBetReturnedEvent>().ToArray();
-        Assert.Equal(1, uncalled.Length);
-        Assert.Equal(1, uncalled[0].seatId);
-        Assert.Equal(1_501, uncalled[0].amount);
+        Assert.Single(uncalled);
+        Assert.Equal(1, uncalled[0].SeatId);
+        Assert.Equal(1_501, uncalled[0].Amount);
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -412,7 +412,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -466,7 +466,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -518,7 +518,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -577,7 +577,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -626,7 +626,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -684,13 +684,13 @@ public sealed class RealHandShowdownTests
         state.ShowCards(1, ["Ah", "3d"]);
 
         UncalledBetReturnedEvent[] uncalled = state.Events.OfType<UncalledBetReturnedEvent>().ToArray();
-        Assert.Equal(1, uncalled.Length);
-        Assert.Equal(1, uncalled[0].seatId);
-        Assert.Equal(18_115, uncalled[0].amount);
+        Assert.Single(uncalled);
+        Assert.Equal(1, uncalled[0].SeatId);
+        Assert.Equal(18_115, uncalled[0].Amount);
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -745,7 +745,7 @@ public sealed class RealHandShowdownTests
 
         int[] awardedSeats = state.Events
             .OfType<PotAwardedEvent>()
-            .Select(award => award.seatId)
+            .Select(award => award.SeatId)
             .Distinct()
             .Order()
             .ToArray();
@@ -860,7 +860,7 @@ public sealed class RealHandShowdownTests
 
         PotAwardedEvent[] awards = state.Events
             .OfType<PotAwardedEvent>()
-            .OrderBy(award => award.seatId)
+            .OrderBy(award => award.SeatId)
             .ToArray();
 
         Assert.Equal(
@@ -869,19 +869,19 @@ public sealed class RealHandShowdownTests
 
         Assert.Equal(
             0,
-            awards[0].seatId);
+            awards[0].SeatId);
 
         Assert.Equal(
             664,
-            awards[0].amount);
+            awards[0].Amount);
 
         Assert.Equal(
             1,
-            awards[1].seatId);
+            awards[1].SeatId);
 
         Assert.Equal(
             664,
-            awards[1].amount);
+            awards[1].Amount);
 
         Assert.Equal(
             HandState.Completed,

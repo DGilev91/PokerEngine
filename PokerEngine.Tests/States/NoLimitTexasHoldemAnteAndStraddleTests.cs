@@ -2,7 +2,7 @@ using PokerEngine.Enums;
 using PokerEngine.States;
 using PokerEngine.States.Events;
 
-namespace PokerEngine.Tests.Games;
+namespace PokerEngine.Tests.States;
 
 public sealed class NoLimitTexasHoldemAnteAndStraddleTests
 {
@@ -18,8 +18,8 @@ public sealed class NoLimitTexasHoldemAnteAndStraddleTests
 
         PlayerTurnEvent turn = Assert.IsType<PlayerTurnEvent>(state.Events.Last());
 
-        Assert.Equal(2, turn.seatId);
-        Assert.Equal(100, turn.callAmount);
+        Assert.Equal(2, turn.SeatId);
+        Assert.Equal(100, turn.CallAmount);
         Assert.Equal(25, state.Seats[2].TotalBet);
         Assert.Equal(0, state.Seats[2].RoundBet);
     }
@@ -40,9 +40,9 @@ public sealed class NoLimitTexasHoldemAnteAndStraddleTests
 
         PlayerTurnEvent turn = Assert.IsType<PlayerTurnEvent>(state.Events.Last());
 
-        Assert.Equal(4, turn.seatId);
-        Assert.Equal(400, turn.callAmount);
-        Assert.Equal(800, turn.minRaiseTo);
+        Assert.Equal(4, turn.SeatId);
+        Assert.Equal(400, turn.CallAmount);
+        Assert.Equal(800, turn.MinRaiseTo);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public sealed class NoLimitTexasHoldemAnteAndStraddleTests
         Assert.Empty(
             state.Events
                 .OfType<PlayerPostedEvent>()
-                .Where(post => post.postType == PostType.Straddle));
+                .Where(post => post.PostType == PostType.Straddle));
     }
 
     [Fact]
@@ -80,10 +80,10 @@ public sealed class NoLimitTexasHoldemAnteAndStraddleTests
         PlayerPostedEvent post = Assert.Single(
             state.Events
                 .OfType<PlayerPostedEvent>()
-                .Where(e => e.postType == PostType.Straddle));
+                .Where(e => e.PostType == PostType.Straddle));
 
-        Assert.Equal(3, post.seatId);
-        Assert.Equal(200, post.amount);
+        Assert.Equal(3, post.SeatId);
+        Assert.Equal(200, post.Amount);
     }
 
     [Fact]
@@ -109,10 +109,10 @@ public sealed class NoLimitTexasHoldemAnteAndStraddleTests
 
         Assert.All(
             posts.Take(4),
-            post => Assert.Equal(PostType.Ante, post.postType));
+            post => Assert.Equal(PostType.Ante, post.PostType));
 
-        Assert.Equal(PostType.SmallBlind, posts[4].postType);
-        Assert.Equal(PostType.BigBlind, posts[5].postType);
-        Assert.Equal(PostType.Straddle, posts[6].postType);
+        Assert.Equal(PostType.SmallBlind, posts[4].PostType);
+        Assert.Equal(PostType.BigBlind, posts[5].PostType);
+        Assert.Equal(PostType.Straddle, posts[6].PostType);
     }
 }

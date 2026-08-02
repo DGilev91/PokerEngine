@@ -1368,7 +1368,7 @@ public sealed class PokerState : IPokerState
         bool hasVoluntaryAggression = _events
             .OfType<PlayerActionEvent>()
             .Any(action =>
-                action.actionType is
+                action.ActionType is
                     ActionType.Bet or
                     ActionType.RaiseTo);
 
@@ -1380,12 +1380,12 @@ public sealed class PokerState : IPokerState
         long winnerLivePostAmount = _events
             .OfType<PlayerPostedEvent>()
             .Where(post =>
-                post.seatId == winner.SeatId &&
-                post.postType is
+                post.SeatId == winner.SeatId &&
+                post.PostType is
                     PostType.BigBlind or
                     PostType.ExtraBlind or
                     PostType.Straddle)
-            .Sum(post => post.amount);
+            .Sum(post => post.Amount);
 
         long amount = Math.Min(
             winner.RoundBet,
@@ -1701,8 +1701,8 @@ public sealed class PokerState : IPokerState
             int? lastStraddleSeatId = _events
                 .OfType<PlayerPostedEvent>()
                 .Where(post =>
-                    post.postType == PostType.Straddle)
-                .Select(post => (int?)post.seatId)
+                    post.PostType == PostType.Straddle)
+                .Select(post => (int?)post.SeatId)
                 .LastOrDefault();
 
             if (lastStraddleSeatId.HasValue)
