@@ -20,19 +20,19 @@ public sealed class Seat
     /// <summary>
     /// Gets or sets the player's current remaining stack.
     /// </summary>
-    public long Stack { get; set; }
+    public long Stack { get; internal set; }
 
     /// <summary>
     /// Gets or sets the total number of chips committed
     /// by the player during the current hand.
     /// </summary>
-    public long TotalBet { get; set; }
+    public long TotalBet { get; internal set; }
 
     /// <summary>
     /// Gets or sets the number of chips committed
     /// by the player during the current betting round.
     /// </summary>
-    public long RoundBet { get; set; }
+    public long RoundBet { get; internal set; }
 
     /// <summary>
     /// Gets the player's hole cards.
@@ -42,7 +42,7 @@ public sealed class Seat
     /// <summary>
     /// Gets or sets a value indicating whether the player has folded.
     /// </summary>
-    public bool IsFolded { get; set; }
+    public bool IsFolded { get; internal set; }
 
     /// <summary>
     /// Gets a value indicating whether the player is all-in.
@@ -64,7 +64,7 @@ public sealed class Seat
     /// Thrown when <paramref name="seatId"/> or
     /// <paramref name="stack"/> is negative.
     /// </exception>
-    public Seat(
+    internal Seat(
         int seatId,
         long stack)
     {
@@ -99,7 +99,7 @@ public sealed class Seat
     /// Thrown when <paramref name="cards"/> is
     /// <see langword="null"/>.
     /// </exception>
-    public void SetHoleCards(
+    internal void SetHoleCards(
         IEnumerable<string> cards)
     {
         ArgumentNullException.ThrowIfNull(cards);
