@@ -26,8 +26,6 @@ public sealed class PokerState : IPokerState
     private readonly List<PokerHandEvent> _events = [];
     private readonly List<Seat> _seats = [];
     private readonly List<List<string>> _boards = [];
-    private readonly List<PotSlice> _potSlices = [];
-
     private readonly HashSet<int> _actedSeats = [];
     private readonly HashSet<(int SeatId, PostType PostType)> _madePosts = [];
     private readonly PotState _potState = new();
@@ -35,9 +33,6 @@ public sealed class PokerState : IPokerState
     private HandState _state = HandState.None;
     private int _roundIndex = -1;
     private int? _activeSeatId;
-    private int? _uncalledSeatId;
-    private long _uncalledAmount;
-
     private bool _runoutCountWasSet;
     private bool _waitingForRunoutDecision;
     private bool _dealingRemainingBoardsAutomatically;
@@ -120,16 +115,12 @@ public sealed class PokerState : IPokerState
         _events.Clear();
         _seats.Clear();
         _boards.Clear();
-        _potSlices.Clear();
         _actedSeats.Clear();
         _madePosts.Clear();
         _potState.Clear();
 
         _roundIndex = -1;
         _activeSeatId = null;
-
-        _uncalledSeatId = null;
-        _uncalledAmount = 0;
 
         _runoutCountWasSet = false;
         _waitingForRunoutDecision = false;
@@ -687,20 +678,15 @@ public sealed class PokerState : IPokerState
         seat.IsFolded = true;
         _actedSeats.Add(seat.SeatId);
 
-        if (_uncalledSeatId == seat.SeatId)
-        {
-            ClearUncalledCandidate();
-        }
-        else if (_uncalledSeatId.HasValue)
-        {
-            RefreshUncalledCandidate();
-        }
+        _potState.RefreshUncalledBet(_seats);
 
         Emit(new PlayerActionEvent(
             seat.SeatId,
             ActionType.Fold,
             0,
             false));
+
+        RecalculatePots();
     }
 
     private void Check(Seat seat)
@@ -737,7 +723,7 @@ public sealed class PokerState : IPokerState
 
         _actedSeats.Add(seat.SeatId);
 
-        RefreshUncalledCandidate();
+        _potState.RefreshUncalledBet(_seats);
 
         Emit(new PlayerActionEvent(
             seat.SeatId,
@@ -781,7 +767,7 @@ public sealed class PokerState : IPokerState
             Math.Max(betSize, round.BetSize);
 
         ResetActedAfterAggression(seat.SeatId);
-        SetUncalledCandidate(seat.SeatId);
+        _potState.SetUncalledCandidate(seat.SeatId, _seats);
 
         Emit(new PlayerActionEvent(
             seat.SeatId,
@@ -854,7 +840,7 @@ public sealed class PokerState : IPokerState
             _actedSeats.Add(seat.SeatId);
         }
 
-        SetUncalledCandidate(seat.SeatId);
+        _potState.SetUncalledCandidate(seat.SeatId, _seats);
 
         Emit(new PlayerActionEvent(
             seat.SeatId,
@@ -1091,7 +1077,7 @@ public sealed class PokerState : IPokerState
 
         Seat winner = remaining[0];
 
-        if (_uncalledSeatId.HasValue)
+        if (_potState.UncalledBet is not null)
         {
             ReturnUncalledBet();
         }
@@ -1103,7 +1089,7 @@ public sealed class PokerState : IPokerState
 
         RecalculatePots();
 
-        foreach (PotSlice pot in _potSlices)
+        foreach (Pot pot in _potState.Pots)
         {
             winner.Stack += pot.Amount;
 
@@ -1195,7 +1181,7 @@ public sealed class PokerState : IPokerState
             }
         }
 
-        foreach (PotSlice pot in _potSlices)
+        foreach (Pot pot in _potState.Pots)
         {
             long boardShare =
                 pot.Amount / _boards.Count;
@@ -1304,75 +1290,27 @@ public sealed class PokerState : IPokerState
 
     // Uncalled bet
 
-    private void SetUncalledCandidate(int seatId)
-    {
-        _uncalledSeatId = seatId;
-
-        RefreshUncalledCandidate();
-    }
-
-    private void RefreshUncalledCandidate()
-    {
-        if (!_uncalledSeatId.HasValue)
-        {
-            _uncalledAmount = 0;
-            return;
-        }
-
-        Seat candidate =
-            GetSeat(_uncalledSeatId.Value);
-
-        if (candidate.IsFolded)
-        {
-            ClearUncalledCandidate();
-            return;
-        }
-
-        long highestOtherLiveBet = _seats
-            .Where(seat =>
-                seat.SeatId != candidate.SeatId)
-            .Select(seat => seat.RoundBet)
-            .DefaultIfEmpty(0)
-            .Max();
-
-        _uncalledAmount = Math.Max(
-            0,
-            candidate.RoundBet - highestOtherLiveBet);
-
-        if (_uncalledAmount == 0)
-        {
-            ClearUncalledCandidate();
-        }
-    }
-
-    private void ClearUncalledCandidate()
-    {
-        _uncalledSeatId = null;
-        _uncalledAmount = 0;
-    }
-
     private void ReturnUncalledBet()
     {
-        RefreshUncalledCandidate();
+        UncalledBet? uncalledBet =
+            _potState.TakeUncalledBet(_seats);
 
-        if (!_uncalledSeatId.HasValue ||
-            _uncalledAmount <= 0)
+        if (uncalledBet is null)
         {
             return;
         }
 
-        Seat seat = GetSeat(_uncalledSeatId.Value);
-        long amount = _uncalledAmount;
+        Seat seat = GetSeat(uncalledBet.SeatId);
 
-        seat.RoundBet -= amount;
-        seat.TotalBet -= amount;
-        seat.Stack += amount;
+        seat.RoundBet -= uncalledBet.Amount;
+        seat.TotalBet -= uncalledBet.Amount;
+        seat.Stack += uncalledBet.Amount;
 
         Emit(new UncalledBetReturnedEvent(
             seat.SeatId,
-            amount));
+            uncalledBet.Amount));
 
-        ClearUncalledCandidate();
+        RecalculatePots();
     }
 
     private void ReturnUncalledForcedPostOnPreflopWalk(
@@ -1427,113 +1365,7 @@ public sealed class PokerState : IPokerState
 
     private void RecalculatePots()
     {
-        _potSlices.Clear();
-        _potState.Clear();
-
-        long[] levels = _seats
-            .Select(seat => seat.TotalBet)
-            .Where(amount => amount > 0)
-            .Distinct()
-            .Order()
-            .ToArray();
-
-        long previousLevel = 0;
-
-        List<PotBuilder> builders = [];
-
-        foreach (long level in levels)
-        {
-            Seat[] contributors = _seats
-                .Where(seat => seat.TotalBet >= level)
-                .ToArray();
-
-            long contributionPerSeat =
-                level - previousLevel;
-
-            if (contributionPerSeat <= 0 ||
-                contributors.Length == 0)
-            {
-                previousLevel = level;
-                continue;
-            }
-
-            long amount =
-                contributionPerSeat *
-                contributors.Length;
-
-            int[] eligibleSeatIds = contributors
-                .Where(seat => !seat.IsFolded)
-                .Select(seat => seat.SeatId)
-                .Order()
-                .ToArray();
-
-            Dictionary<int, long> contributions =
-                contributors.ToDictionary(
-                    seat => seat.SeatId,
-                    _ => contributionPerSeat);
-
-            PotBuilder? previousBuilder =
-                builders.LastOrDefault();
-
-            if (previousBuilder is not null &&
-                previousBuilder.EligibleSeatIds
-                    .SequenceEqual(eligibleSeatIds))
-            {
-                previousBuilder.Amount += amount;
-
-                foreach ((
-                    int seatId,
-                    long contribution) in contributions)
-                {
-                    previousBuilder.Contributions[seatId] =
-                        previousBuilder.Contributions
-                            .GetValueOrDefault(seatId) +
-                        contribution;
-                }
-            }
-            else
-            {
-                builders.Add(new PotBuilder
-                {
-                    Amount = amount,
-                    EligibleSeatIds = eligibleSeatIds,
-                    Contributions = contributions
-                });
-            }
-
-            previousLevel = level;
-        }
-
-        for (int potIndex = 0;
-             potIndex < builders.Count;
-             potIndex++)
-        {
-            PotBuilder builder = builders[potIndex];
-
-            _potSlices.Add(new PotSlice(
-                potIndex,
-                builder.Amount,
-                builder.EligibleSeatIds));
-
-            Pot pot = new(potIndex);
-
-            foreach ((
-                int seatId,
-                long contribution) in builder.Contributions)
-            {
-                pot.AddContribution(
-                    seatId,
-                    contribution);
-            }
-
-            foreach (Seat seat in _seats.Where(
-                         seat => seat.IsFolded))
-            {
-                pot.RemoveEligibility(seat.SeatId);
-            }
-
-            _potState.AddPot(pot);
-        }
+        _potState.Rebuild(_seats);
     }
 
     private long CommitTo(Seat seat, long amountTo)
@@ -1572,9 +1404,7 @@ public sealed class PokerState : IPokerState
         _actedSeats.Clear();
 
         _activeSeatId = null;
-
-        _uncalledSeatId = null;
-        _uncalledAmount = 0;
+        _potState.ClearUncalledBet();
 
         _raiseCount = 0;
 
@@ -2561,26 +2391,9 @@ public sealed class PokerState : IPokerState
                                StringComparison.OrdinalIgnoreCase)));
     }
 
-    private sealed record PotSlice(
-        int Index,
-        long Amount,
-        IReadOnlyList<int> EligibleSeatIds);
-
     private sealed record EvaluatedHand(
         long Strength,
         HandCategory Category,
         IReadOnlyList<string> BestCards);
 
-    private sealed class PotBuilder
-    {
-        public long Amount { get; set; }
-
-        public required IReadOnlyList<int>
-            EligibleSeatIds
-        { get; init; }
-
-        public required Dictionary<int, long>
-            Contributions
-        { get; init; }
-    }
 }

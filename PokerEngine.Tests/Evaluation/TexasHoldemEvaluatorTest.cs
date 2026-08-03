@@ -2,7 +2,7 @@
 using PokerEngine.Enums;
 using PokerEngine.Evaluation;
 
-namespace PokerEngine.Tests.Cards;
+namespace PokerEngine.Tests.Evaluation;
 
 public sealed class TexasHoldemEvaluatorTest
 {
