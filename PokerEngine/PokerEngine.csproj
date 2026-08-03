@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <PackageId>PokerEngine</PackageId>
-    <Version>0.1.6</Version>
+    <Version>0.1.7</Version>
     <Authors>Dmitrii Gilev</Authors>
 
     <Description>
