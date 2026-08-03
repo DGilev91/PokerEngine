@@ -18,14 +18,7 @@ public sealed class RealHandExtraBlindTests
         state.PlayerPost(5, PostType.ExtraBlind, 200);
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
-        state.DealHole(7, ["xx", "xx"]);
+
 
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.Fold);
@@ -80,12 +73,6 @@ public sealed class RealHandExtraBlindTests
         state.PlayerPost(3, PostType.ExtraBlind, 200);
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
 
         state.PlayerAction(2, ActionType.RaiseTo, 800);
         state.PlayerAction(3, ActionType.RaiseTo, 2_700);

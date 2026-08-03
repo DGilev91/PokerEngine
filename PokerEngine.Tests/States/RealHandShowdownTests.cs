@@ -17,14 +17,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
-
         state.PlayerAction(2, ActionType.RaiseTo, 800);
         state.PlayerAction(3, ActionType.Fold);
         state.PlayerAction(4, ActionType.Fold);
@@ -66,14 +58,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(0, PostType.SmallBlind, 100);
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
-
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
 
         state.PlayerAction(2, ActionType.Call);
         state.PlayerAction(3, ActionType.Call);
@@ -122,15 +106,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(0, PostType.SmallBlind, 100);
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
-
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
-        state.DealHole(7, ["xx", "xx"]);
 
         state.PlayerAction(2, ActionType.Call);
         state.PlayerAction(3, ActionType.Fold);
@@ -188,13 +163,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.RaiseTo, 400);
         state.PlayerAction(4, ActionType.Fold);
@@ -241,13 +209,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(0, PostType.SmallBlind, 100);
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
-
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
 
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.Call);
@@ -302,14 +263,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(0, PostType.SmallBlind, 100);
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
-
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
 
         state.PlayerAction(2, ActionType.Call);
         state.PlayerAction(3, ActionType.RaiseTo, 700);
@@ -367,14 +320,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
-
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.Fold);
         state.PlayerAction(4, ActionType.Call);
@@ -425,14 +370,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
-
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.Fold);
         state.PlayerAction(4, ActionType.Call);
@@ -478,13 +415,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.Fold);
         state.PlayerAction(4, ActionType.RaiseTo, 700);
@@ -528,14 +458,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(0, PostType.SmallBlind, 100);
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
-
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
 
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.Fold);
@@ -587,15 +509,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
-        state.DealHole(7, ["xx", "xx"]);
-
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.RaiseTo, 4_762);
         state.PlayerAction(4, ActionType.Fold);
@@ -634,14 +547,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(0, PostType.SmallBlind, 100);
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
-
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
 
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.RaiseTo, 400);
@@ -697,14 +602,6 @@ public sealed class RealHandShowdownTests
         state.PlayerPost(0, PostType.SmallBlind, 100);
         state.PlayerPost(1, PostType.BigBlind, 200);
         state.Start();
-
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
-        state.DealHole(3, ["xx", "xx"]);
-        state.DealHole(4, ["xx", "xx"]);
-        state.DealHole(5, ["xx", "xx"]);
-        state.DealHole(6, ["xx", "xx"]);
 
         state.PlayerAction(2, ActionType.Fold);
         state.PlayerAction(3, ActionType.Fold);
@@ -768,9 +665,6 @@ public sealed class RealHandShowdownTests
 
         state.Start();
 
-        state.DealHole(0, ["xx", "xx"]);
-        state.DealHole(1, ["xx", "xx"]);
-        state.DealHole(2, ["xx", "xx"]);
 
         // Preflop
         state.PlayerAction(

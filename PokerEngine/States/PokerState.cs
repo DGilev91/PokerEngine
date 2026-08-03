@@ -13,8 +13,6 @@ namespace PokerEngine.States;
 /// </summary>
 public sealed class PokerState : IPokerState
 {
-    private const string UnknownCard = "xx";
-
     // Dependencies
 
     private readonly PokerRules _rules;
@@ -254,29 +252,20 @@ public sealed class PokerState : IPokerState
                     "Hole cards must be provided in manual mode.");
             }
 
-            dealtCards = _deck.Deal(cardCount).ToArray();
+            dealtCards =
+                _deck.Deal(cardCount).ToArray();
         }
         else
         {
             ValidateCards(
                 cards,
-                cardCount,
-                allowUnknownCards: true);
+                cardCount);
 
-            dealtCards = cards
-                .Select(NormalizeCard)
-                .ToArray();
+            dealtCards =
+                cards.ToArray();
 
-            string[] knownCards = dealtCards
-                .Where(card => !IsUnknownCard(card))
-                .ToArray();
-
-            EnsureCardsWereNotUsed(knownCards);
-
-            if (knownCards.Length > 0)
-            {
-                _deck.Take(knownCards);
-            }
+            EnsureCardsWereNotUsed(dealtCards);
+            _deck.Take(dealtCards);
         }
 
         seat.SetHoleCards(dealtCards);
@@ -479,38 +468,23 @@ public sealed class PokerState : IPokerState
 
         ValidateCards(
             cards,
-            expectedCount,
-            allowUnknownCards: false);
+            expectedCount);
 
-        string[] shownCards = cards
-            .Select(NormalizeCard)
-            .ToArray();
+        string[] shownCards =
+            cards.ToArray();
 
         if (seat.HoleCards.Count == 0)
         {
             EnsureCardsWereNotUsed(shownCards);
             _deck.Take(shownCards);
+
             seat.SetHoleCards(shownCards);
         }
         else
         {
-            ValidateShownCardsMatchKnownCards(
+            ValidateShownCardsMatchDealtCards(
                 seat,
                 shownCards);
-
-            string[] newlyRevealedCards = shownCards
-                .Where((card, index) =>
-                    IsUnknownCard(seat.HoleCards[index]))
-                .ToArray();
-
-            EnsureCardsWereNotUsed(newlyRevealedCards);
-
-            if (newlyRevealedCards.Length > 0)
-            {
-                _deck.Take(newlyRevealedCards);
-            }
-
-            seat.SetHoleCards(shownCards);
         }
 
         Emit(new ShowCardsEvent(
@@ -1138,8 +1112,7 @@ public sealed class PokerState : IPokerState
 
         if (contenders.Any(
                 seat =>
-                    seat.HoleCards.Count != GetHoleCardCount() ||
-                    seat.HoleCards.Any(IsUnknownCard)))
+                    seat.HoleCards.Count != GetHoleCardCount()))
         {
             return;
         }
@@ -1257,10 +1230,11 @@ public sealed class PokerState : IPokerState
         Seat seat,
         int boardIndex)
     {
-        if (seat.HoleCards.Any(IsUnknownCard))
+        if (seat.HoleCards.Count !=
+            GetHoleCardCount())
         {
             throw new InvalidOperationException(
-                $"Cannot evaluate seat {seat.SeatId}: not all hole cards are known.");
+                $"Cannot evaluate seat {seat.SeatId}: hole cards are not known.");
         }
 
         HandRank result = _handEvaluator.Evaluate(
@@ -2117,9 +2091,8 @@ public sealed class PokerState : IPokerState
     }
 
     private static void ValidateCards(
-        IReadOnlyList<string> cards,
-        int expectedCount,
-        bool allowUnknownCards = false)
+    IReadOnlyList<string> cards,
+    int expectedCount)
     {
         ArgumentNullException.ThrowIfNull(cards);
 
@@ -2137,76 +2110,26 @@ public sealed class PokerState : IPokerState
                 nameof(cards));
         }
 
-        if (!allowUnknownCards &&
-            cards.Any(IsUnknownCard))
+        foreach (string card in cards)
         {
-            throw new ArgumentException(
-                "Unknown cards are not allowed here.",
-                nameof(cards));
+            if (!CardTable.IsValid(card))
+            {
+                throw new ArgumentException(
+                    $"Invalid card: {card}.",
+                    nameof(cards));
+            }
         }
 
-        string[] knownCards = cards
-            .Where(card => !IsUnknownCard(card))
-            .Select(NormalizeCard)
-            .ToArray();
-
-        if (knownCards
+        if (cards
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Count() != knownCards.Length)
+                .Count() != cards.Count)
         {
             throw new ArgumentException(
-                "The card list contains duplicate known cards.",
+                "The card list contains duplicate cards.",
                 nameof(cards));
         }
     }
 
-    private static bool IsUnknownCard(string card)
-    {
-        return string.Equals(
-            card,
-            UnknownCard,
-            StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string NormalizeCard(string card)
-    {
-        return IsUnknownCard(card)
-            ? UnknownCard
-            : card;
-    }
-
-    private static void ValidateShownCardsMatchKnownCards(
-        Seat seat,
-        IReadOnlyList<string> shownCards)
-    {
-        if (seat.HoleCards.Count != shownCards.Count)
-        {
-            throw new InvalidOperationException(
-                $"The number of shown cards for seat {seat.SeatId} does not match the number of dealt cards.");
-        }
-
-        for (int index = 0;
-             index < shownCards.Count;
-             index++)
-        {
-            string existingCard =
-                seat.HoleCards[index];
-
-            if (IsUnknownCard(existingCard))
-            {
-                continue;
-            }
-
-            if (!string.Equals(
-                    existingCard,
-                    shownCards[index],
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException(
-                    $"Shown card {shownCards[index]} for seat {seat.SeatId} does not match the previously known card {existingCard}.");
-            }
-        }
-    }
 
     private void EnsureCardsWereNotUsed(
         IReadOnlyList<string> cards)
@@ -2367,17 +2290,37 @@ public sealed class PokerState : IPokerState
         _events.Add(handEvent);
     }
 
-    private bool DeckWasAlreadyUsed(string card)
+
+    private static void ValidateShownCardsMatchDealtCards(
+    Seat seat,
+    IReadOnlyList<string> shownCards)
     {
-        if (IsUnknownCard(card))
+        if (seat.HoleCards.Count != shownCards.Count)
         {
-            return false;
+            throw new InvalidOperationException(
+                $"The number of shown cards for seat {seat.SeatId} does not match the number of dealt cards.");
         }
 
+        for (int index = 0;
+             index < shownCards.Count;
+             index++)
+        {
+            if (!string.Equals(
+                    seat.HoleCards[index],
+                    shownCards[index],
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Shown card {shownCards[index]} for seat {seat.SeatId} does not match the dealt card {seat.HoleCards[index]}.");
+            }
+        }
+    }
+
+    private bool DeckWasAlreadyUsed(string card)
+    {
         return _seats.Any(
                    seat => seat.HoleCards.Any(
                        existing =>
-                           !IsUnknownCard(existing) &&
                            string.Equals(
                                existing,
                                card,
