@@ -66,49 +66,43 @@ state.Initialize([10_000, 10_000, 10_000]);
 
 state.PlayerPost(0, PostType.SmallBlind, 100);
 state.PlayerPost(1, PostType.BigBlind, 200);
+
 state.Start();
 
 state.DealHole(0, ["As", "Ad"]);
 state.DealHole(1, ["Kh", "Qh"]);
-state.DealHole(2, ["7c", "7d"]);
+state.DealHole(2, ["7c", "7s"]);
 
+// Preflop
 state.PlayerAction(2, ActionType.RaiseTo, 600);
-state.PlayerAction(0, ActionType.Fold);
-state.PlayerAction(1, ActionType.Fold);
+state.PlayerAction(0, ActionType.Call);
+state.PlayerAction(1, ActionType.Call);
 
-// Current state
-Console.WriteLine($"State: {state.State}");
-Console.WriteLine($"Round: {state.Round}");
+// Flop
+state.DealBoard(0, ["2c", "7d", "Jh"]);
 
-foreach (var seat in state.Seats)
-{
-    Console.WriteLine(
-        $"Seat {seat.SeatId}: " +
-        $"Stack={seat.Stack}, " +
-        $"RoundBet={seat.RoundBet}, " +
-        $"TotalBet={seat.TotalBet}, " +
-        $"Folded={seat.IsFolded}, " +
-        $"AllIn={seat.IsAllIn}");
-}
+state.PlayerAction(0, ActionType.Check);
+state.PlayerAction(1, ActionType.Check);
+state.PlayerAction(2, ActionType.Check);
 
-foreach (var pot in state.PotState.Pots)
-{
-    Console.WriteLine(
-        $"Pot {pot.Index}: " +
-        $"Amount={pot.Amount}, " +
-        $"Eligible=[{string.Join(", ", pot.EligibleSeatIds)}]");
-}
+// Turn
+state.DealBoard(0, ["Qs"]);
 
-for (int boardIndex = 0; boardIndex < state.Boards.Count; boardIndex++)
-{
-    Console.WriteLine(
-        $"Board {boardIndex}: " +
-        $"[{string.Join(", ", state.Boards[boardIndex])}]");
-}
+state.PlayerAction(0, ActionType.Check);
+state.PlayerAction(1, ActionType.Check);
+state.PlayerAction(2, ActionType.Check);
+
+// River
+state.DealBoard(0, ["9c"]);
+
+state.PlayerAction(0, ActionType.Check);
+state.PlayerAction(1, ActionType.Check);
+state.PlayerAction(2, ActionType.Check);
+
 
 //History
- Console.WriteLine($"History");
-foreach(var e in state.Events)
+Console.WriteLine("*** HISTORY ***");
+foreach (var e in state.Events)
 {
     Console.WriteLine($"{e}");
 }
@@ -135,43 +129,29 @@ IPokerState state = game.CreateState();
 state.Initialize([10_000, 10_000, 10_000]);
 state.Start();
 
+// Preflop
 state.PlayerAction(2, ActionType.RaiseTo, 600);
-state.PlayerAction(0, ActionType.Fold);
-state.PlayerAction(1, ActionType.Fold);
+state.PlayerAction(0, ActionType.Call);
+state.PlayerAction(1, ActionType.Call);
 
-// Current state
-Console.WriteLine($"State: {state.State}");
-Console.WriteLine($"Round: {state.Round}");
+// Flop
+state.PlayerAction(0, ActionType.Check);
+state.PlayerAction(1, ActionType.Check);
+state.PlayerAction(2, ActionType.Check);
 
-foreach (var seat in state.Seats)
-{
-    Console.WriteLine(
-        $"Seat {seat.SeatId}: " +
-        $"Stack={seat.Stack}, " +
-        $"RoundBet={seat.RoundBet}, " +
-        $"TotalBet={seat.TotalBet}, " +
-        $"Folded={seat.IsFolded}, " +
-        $"AllIn={seat.IsAllIn}");
-}
+// Turn
+state.PlayerAction(0, ActionType.Check);
+state.PlayerAction(1, ActionType.Check);
+state.PlayerAction(2, ActionType.Check);
 
-foreach (var pot in state.PotState.Pots)
-{
-    Console.WriteLine(
-        $"Pot {pot.Index}: " +
-        $"Amount={pot.Amount}, " +
-        $"Eligible=[{string.Join(", ", pot.EligibleSeatIds)}]");
-}
-
-for (int boardIndex = 0; boardIndex < state.Boards.Count; boardIndex++)
-{
-    Console.WriteLine(
-        $"Board {boardIndex}: " +
-        $"[{string.Join(", ", state.Boards[boardIndex])}]");
-}
+// River
+state.PlayerAction(0, ActionType.Check);
+state.PlayerAction(1, ActionType.Check);
+state.PlayerAction(2, ActionType.Check);
 
 //History
- Console.WriteLine($"History");
-foreach(var e in state.Events)
+Console.WriteLine("*** HISTORY ***");
+foreach (var e in state.Events)
 {
     Console.WriteLine($"{e}");
 }
@@ -210,7 +190,6 @@ As = ace of spades
 Kd = king of diamonds
 Th = ten of hearts
 2c = two of clubs
-xx = unknown card
 ```
 
 ## Hand evaluation
