@@ -1000,9 +1000,9 @@ public sealed class PokerState : IPokerState
 
         List<ActionType> actions = [];
 
+        actions.Add(ActionType.Fold);
         if (callAmount > 0)
         {
-            actions.Add(ActionType.Fold);
             actions.Add(ActionType.Call);
 
             if (CanRaise(seat))
