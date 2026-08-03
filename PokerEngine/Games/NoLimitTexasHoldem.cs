@@ -7,7 +7,7 @@ namespace PokerEngine.Games;
 /// <summary>
 /// Represents a No-Limit Texas Hold'em game definition.
 /// </summary>
-public sealed class NoLimitTexasHoldem : PokerGame
+public sealed class NoLimitTexasHoldem : IPokerGame
 {
     private readonly PokerRules _rules;
 
@@ -136,7 +136,7 @@ public sealed class NoLimitTexasHoldem : PokerGame
     }
 
     /// <inheritdoc />
-    public override IPokerState CreateState()
+    public IPokerState CreateState()
     {
         return new PokerState(_rules);
     }
