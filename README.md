@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/pokerengine-logo.png"
+  <img src="assets/pokerengine-logo_1.png"
        alt="PokerEngine"
        width="450">
 </p>
