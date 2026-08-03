@@ -1131,7 +1131,7 @@ public sealed class PokerState : IPokerState
 
         Dictionary<
             (int seatId, int boardIndex),
-            EvaluatedHand> evaluations = [];
+            HandRank> evaluations = [];
 
         foreach (Seat seat in _seats.Where(
                      seat => !seat.IsFolded))
@@ -1140,7 +1140,7 @@ public sealed class PokerState : IPokerState
                  boardIndex < _boards.Count;
                  boardIndex++)
             {
-                EvaluatedHand evaluation =
+                HandRank evaluation =
                     EvaluateHand(seat, boardIndex);
 
                 evaluations[(seat.SeatId, boardIndex)] =
@@ -1150,7 +1150,7 @@ public sealed class PokerState : IPokerState
                     seat.SeatId,
                     boardIndex,
                     evaluation.Category,
-                    evaluation.BestCards));
+                    evaluation.Cards));
             }
         }
 
@@ -1226,7 +1226,7 @@ public sealed class PokerState : IPokerState
         }
     }
 
-    private EvaluatedHand EvaluateHand(
+    private HandRank EvaluateHand(
         Seat seat,
         int boardIndex)
     {
@@ -1237,14 +1237,9 @@ public sealed class PokerState : IPokerState
                 $"Cannot evaluate seat {seat.SeatId}: hole cards are not known.");
         }
 
-        HandRank result = _handEvaluator.Evaluate(
+        return _handEvaluator.Evaluate(
             seat.HoleCards,
             _boards[boardIndex]);
-
-        return new EvaluatedHand(
-            result.Strength,
-            result.Category,
-            result.Cards.ToArray());
     }
 
     private void CompleteHand()
@@ -2333,10 +2328,4 @@ public sealed class PokerState : IPokerState
                                card,
                                StringComparison.OrdinalIgnoreCase)));
     }
-
-    private sealed record EvaluatedHand(
-        long Strength,
-        HandCategory Category,
-        IReadOnlyList<string> BestCards);
-
 }
