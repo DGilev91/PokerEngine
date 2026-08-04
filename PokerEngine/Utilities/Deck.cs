@@ -1,4 +1,4 @@
-namespace PokerKit.Utilities;
+namespace PokerEngine.Utilities;
 
 public static class Deck
 {

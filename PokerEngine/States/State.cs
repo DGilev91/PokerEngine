@@ -1,4 +1,4 @@
-namespace PokerKit.States;
+namespace PokerEngine.States;
 
 /// <summary>
 /// Minimal forward declaration used by the utilities port.

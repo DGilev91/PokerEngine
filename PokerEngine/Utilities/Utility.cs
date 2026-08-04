@@ -1,8 +1,8 @@
-using PokerKit.States;
+using PokerEngine.States;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace PokerKit.Utilities;
+namespace PokerEngine.Utilities;
 
 public static class Utility
 {

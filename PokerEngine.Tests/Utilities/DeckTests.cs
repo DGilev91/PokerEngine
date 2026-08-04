@@ -1,6 +1,6 @@
-using PokerKit.Utilities;
+using PokerEngine.Utilities;
 
-namespace PokerKit.Tests.Utilities;
+namespace PokerEngine.Tests.Utilities;
 
 public sealed class DeckTests
 {

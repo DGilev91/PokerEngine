@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace PokerKit.Utilities;
+namespace PokerEngine.Utilities;
 
 public readonly record struct Card(Rank Rank, Suit Suit)
 {
