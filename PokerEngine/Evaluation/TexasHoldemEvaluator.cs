@@ -4,36 +4,24 @@ using PokerEngine.Enums;
 
 namespace PokerEngine.Evaluation;
 
-/// <summary>
-/// Evaluates Texas Hold'em hands and selects the strongest five-card combination.
-/// </summary>
 public sealed class TexasHoldemEvaluator : IHandEvaluator
 {
-
-    /// <inheritdoc />
-    public HandRank Evaluate(
-        IReadOnlyList<string> holeCards,
-        IReadOnlyList<string> boardCards)
+    public HandRank Evaluate(IReadOnlyList<string> holeCards, IReadOnlyList<string> boardCards)
     {
         ArgumentNullException.ThrowIfNull(holeCards);
         ArgumentNullException.ThrowIfNull(boardCards);
 
         if (holeCards.Count != 2)
         {
-            throw new ArgumentException(
-                "Texas Hold'em requires exactly two hole cards.",
-                nameof(holeCards));
+            throw new ArgumentException("Texas Hold'em requires exactly two hole cards.", nameof(holeCards));
         }
 
         if (boardCards.Count is < 3 or > 5)
         {
-            throw new ArgumentException(
-                "The board must contain between three and five cards.",
-                nameof(boardCards));
+            throw new ArgumentException("The board must contain between three and five cards.", nameof(boardCards));
         }
 
         int cardCount = holeCards.Count + boardCards.Count;
-
         Span<int> cards = stackalloc int[7];
 
         cards[0] = CardTable.Encode(holeCards[0]);
@@ -51,8 +39,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         return EvaluateEncoded(cards);
     }
 
-    private static HandRank EvaluateEncoded(
-        ReadOnlySpan<int> cards)
+    private static HandRank EvaluateEncoded(ReadOnlySpan<int> cards)
     {
         Span<byte> rankCounts = stackalloc byte[15];
         Span<byte> suitCounts = stackalloc byte[4];
@@ -63,7 +50,6 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         for (int i = 0; i < cards.Length; i++)
         {
             int encodedCard = cards[i];
-
             int rank = CardTable.GetRank(encodedCard) + 2;
             int suit = CardTable.GetSuit(encodedCard);
 
@@ -76,7 +62,6 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
             suitRankMasks[suit] |= rankBit;
         }
 
-        // Straight flush / Royal flush
         for (int suit = 0; suit < CardTable.SuitCount; suit++)
         {
             if (suitCounts[suit] < 5)
@@ -84,8 +69,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
                 continue;
             }
 
-            int straightHigh =
-                FindStraightHigh(suitRankMasks[suit]);
+            int straightHigh = FindStraightHigh(suitRankMasks[suit]);
 
             if (straightHigh == 0)
             {
@@ -94,96 +78,42 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
             Span<int> bestCards = stackalloc int[5];
 
-            SelectStraight(
-                cards,
-                straightHigh,
-                suit,
-                bestCards);
+            SelectStraight(cards, straightHigh, suit, bestCards);
 
-            HandCategory category =
-                straightHigh == 14
-                    ? HandCategory.RoyalFlush
-                    : HandCategory.StraightFlush;
+            HandCategory category = straightHigh == 14 ? HandCategory.RoyalFlush : HandCategory.StraightFlush;
 
-            return CreateResult(
-                category,
-                bestCards,
-                straightHigh);
+            return CreateResult(category, bestCards, straightHigh);
         }
 
-        int fourRank = FindRankWithCount(
-            rankCounts,
-            requiredCount: 4);
+        int fourRank = FindRankWithCount(rankCounts, 4);
 
-        // Four of a kind
         if (fourRank != 0)
         {
-            int kicker = FindHighestRank(
-                rankCounts,
-                excludedRank1: fourRank);
+            int kicker = FindHighestRank(rankCounts, fourRank);
 
             Span<int> bestCards = stackalloc int[5];
 
-            int index = SelectRankCards(
-                cards,
-                fourRank,
-                bestCards,
-                destinationIndex: 0,
-                maximumCount: 4);
+            int index = SelectRankCards(cards, fourRank, bestCards, 0, 4);
 
-            SelectRankCards(
-                cards,
-                kicker,
-                bestCards,
-                index,
-                maximumCount: 1);
+            SelectRankCards(cards, kicker, bestCards, index, 1);
 
-            return CreateResult(
-                HandCategory.FourCard,
-                bestCards,
-                fourRank,
-                kicker);
+            return CreateResult(HandCategory.FourCard, bestCards, fourRank, kicker);
         }
 
-        int firstThreeRank = FindRankWithCount(
-            rankCounts,
-            requiredCount: 3);
+        int firstThreeRank = FindRankWithCount(rankCounts, 3);
+        int secondPairRank = firstThreeRank == 0 ? 0 : FindRankWithMinimumCount(rankCounts, 2, firstThreeRank);
 
-        int secondPairRank = firstThreeRank == 0
-            ? 0
-            : FindRankWithMinimumCount(
-                rankCounts,
-                minimumCount: 2,
-                excludedRank: firstThreeRank);
-
-        // Full house
-        if (firstThreeRank != 0 &&
-            secondPairRank != 0)
+        if (firstThreeRank != 0 && secondPairRank != 0)
         {
             Span<int> bestCards = stackalloc int[5];
 
-            int index = SelectRankCards(
-                cards,
-                firstThreeRank,
-                bestCards,
-                destinationIndex: 0,
-                maximumCount: 3);
+            int index = SelectRankCards(cards, firstThreeRank, bestCards, 0, 3);
 
-            SelectRankCards(
-                cards,
-                secondPairRank,
-                bestCards,
-                index,
-                maximumCount: 2);
+            SelectRankCards(cards, secondPairRank, bestCards, index, 2);
 
-            return CreateResult(
-                HandCategory.FullHouse,
-                bestCards,
-                firstThreeRank,
-                secondPairRank);
+            return CreateResult(HandCategory.FullHouse, bestCards, firstThreeRank, secondPairRank);
         }
 
-        // Flush
         for (int suit = 0; suit < CardTable.SuitCount; suit++)
         {
             if (suitCounts[suit] < 5)
@@ -194,188 +124,83 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
             Span<int> bestCards = stackalloc int[5];
             Span<int> comparisonRanks = stackalloc int[5];
 
-            SelectHighestCards(
-                cards,
-                bestCards,
-                comparisonRanks,
-                requiredCount: 5,
-                requiredSuit: suit);
+            SelectHighestCards(cards, bestCards, comparisonRanks, 5, suit);
 
-            return CreateResult(
-                HandCategory.Flush,
-                bestCards,
-                comparisonRanks);
+            return CreateResult(HandCategory.Flush, bestCards, comparisonRanks);
         }
 
         int straightRank = FindStraightHigh(rankMask);
 
-        // Straight
         if (straightRank != 0)
         {
             Span<int> bestCards = stackalloc int[5];
 
-            SelectStraight(
-                cards,
-                straightRank,
-                requiredSuit: -1,
-                bestCards);
+            SelectStraight(cards, straightRank, -1, bestCards);
 
-            return CreateResult(
-                HandCategory.Straight,
-                bestCards,
-                straightRank);
+            return CreateResult(HandCategory.Straight, bestCards, straightRank);
         }
 
-        // Three of a kind
         if (firstThreeRank != 0)
         {
             Span<int> bestCards = stackalloc int[5];
             Span<int> kickers = stackalloc int[2];
 
-            int index = SelectRankCards(
-                cards,
-                firstThreeRank,
-                bestCards,
-                destinationIndex: 0,
-                maximumCount: 3);
+            int index = SelectRankCards(cards, firstThreeRank, bestCards, 0, 3);
 
-            FindHighestRanks(
-                rankCounts,
-                kickers,
-                firstThreeRank);
+            FindHighestRanks(rankCounts, kickers, firstThreeRank);
 
-            index = SelectRankCards(
-                cards,
-                kickers[0],
-                bestCards,
-                index,
-                maximumCount: 1);
+            index = SelectRankCards(cards, kickers[0], bestCards, index, 1);
 
-            SelectRankCards(
-                cards,
-                kickers[1],
-                bestCards,
-                index,
-                maximumCount: 1);
+            SelectRankCards(cards, kickers[1], bestCards, index, 1);
 
-            return CreateResult(
-                HandCategory.ThreeCard,
-                bestCards,
-                firstThreeRank,
-                kickers[0],
-                kickers[1]);
+            return CreateResult(HandCategory.ThreeCard, bestCards, firstThreeRank, kickers[0], kickers[1]);
         }
 
-        int firstPairRank = FindRankWithCount(
-            rankCounts,
-            requiredCount: 2);
+        int firstPairRank = FindRankWithCount(rankCounts, 2);
+        int secondPairRankForTwoPair = firstPairRank == 0 ? 0 : FindRankWithCount(rankCounts, 2, firstPairRank);
 
-        int secondPairRankForTwoPair =
-            firstPairRank == 0
-                ? 0
-                : FindRankWithCount(
-                    rankCounts,
-                    requiredCount: 2,
-                    excludedRank: firstPairRank);
-
-        // Two pair
         if (secondPairRankForTwoPair != 0)
         {
-            int kicker = FindHighestRank(
-                rankCounts,
-                firstPairRank,
-                secondPairRankForTwoPair);
+            int kicker = FindHighestRank(rankCounts, firstPairRank, secondPairRankForTwoPair);
 
             Span<int> bestCards = stackalloc int[5];
 
-            int index = SelectRankCards(
-                cards,
-                firstPairRank,
-                bestCards,
-                destinationIndex: 0,
-                maximumCount: 2);
+            int index = SelectRankCards(cards, firstPairRank, bestCards, 0, 2);
 
-            index = SelectRankCards(
-                cards,
-                secondPairRankForTwoPair,
-                bestCards,
-                index,
-                maximumCount: 2);
+            index = SelectRankCards(cards, secondPairRankForTwoPair, bestCards, index, 2);
 
-            SelectRankCards(
-                cards,
-                kicker,
-                bestCards,
-                index,
-                maximumCount: 1);
+            SelectRankCards(cards, kicker, bestCards, index, 1);
 
-            return CreateResult(
-                HandCategory.TwoPair,
-                bestCards,
-                firstPairRank,
-                secondPairRankForTwoPair,
-                kicker);
+            return CreateResult(HandCategory.TwoPair, bestCards, firstPairRank, secondPairRankForTwoPair, kicker);
         }
 
-        // One pair
         if (firstPairRank != 0)
         {
             Span<int> bestCards = stackalloc int[5];
             Span<int> kickers = stackalloc int[3];
 
-            int index = SelectRankCards(
-                cards,
-                firstPairRank,
-                bestCards,
-                destinationIndex: 0,
-                maximumCount: 2);
+            int index = SelectRankCards(cards, firstPairRank, bestCards, 0, 2);
 
-            FindHighestRanks(
-                rankCounts,
-                kickers,
-                firstPairRank);
+            FindHighestRanks(rankCounts, kickers, firstPairRank);
 
             for (int i = 0; i < kickers.Length; i++)
             {
-                index = SelectRankCards(
-                    cards,
-                    kickers[i],
-                    bestCards,
-                    index,
-                    maximumCount: 1);
+                index = SelectRankCards(cards, kickers[i], bestCards, index, 1);
             }
 
-            return CreateResult(
-                HandCategory.OnePair,
-                bestCards,
-                firstPairRank,
-                kickers[0],
-                kickers[1],
-                kickers[2]);
+            return CreateResult(HandCategory.OnePair, bestCards, firstPairRank, kickers[0], kickers[1], kickers[2]);
         }
 
-        // High card
-        {
-            Span<int> bestCards = stackalloc int[5];
-            Span<int> comparisonRanks = stackalloc int[5];
+        Span<int> highCards = stackalloc int[5];
+        Span<int> highRanks = stackalloc int[5];
 
-            SelectHighestCards(
-                cards,
-                bestCards,
-                comparisonRanks,
-                requiredCount: 5,
-                requiredSuit: -1);
+        SelectHighestCards(cards, highCards, highRanks, 5, -1);
 
-            return CreateResult(
-                HandCategory.HighCard,
-                bestCards,
-                comparisonRanks);
-        }
+        return CreateResult(HandCategory.HighCard, highCards, highRanks);
     }
 
     private static int FindStraightHigh(int rankMask)
     {
-        // Regular straights: ace-high through six-high.
         for (int highRank = 14; highRank >= 6; highRank--)
         {
             int requiredMask = 0b1_1111 << (highRank - 4);
@@ -386,28 +211,16 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
             }
         }
 
-        // Wheel: A-2-3-4-5.
-        const int wheelMask =
-            (1 << 14) |
-            (1 << 5) |
-            (1 << 4) |
-            (1 << 3) |
-            (1 << 2);
+        const int wheelMask = (1 << 14) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2);
 
-        return (rankMask & wheelMask) == wheelMask
-            ? 5
-            : 0;
+        return (rankMask & wheelMask) == wheelMask ? 5 : 0;
     }
 
-    private static int FindRankWithCount(
-        ReadOnlySpan<byte> rankCounts,
-        int requiredCount,
-        int excludedRank = 0)
+    private static int FindRankWithCount(ReadOnlySpan<byte> rankCounts, int requiredCount, int excludedRank = 0)
     {
         for (int rank = 14; rank >= 2; rank--)
         {
-            if (rank != excludedRank &&
-                rankCounts[rank] == requiredCount)
+            if (rank != excludedRank && rankCounts[rank] == requiredCount)
             {
                 return rank;
             }
@@ -416,15 +229,11 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         return 0;
     }
 
-    private static int FindRankWithMinimumCount(
-        ReadOnlySpan<byte> rankCounts,
-        int minimumCount,
-        int excludedRank = 0)
+    private static int FindRankWithMinimumCount(ReadOnlySpan<byte> rankCounts, int minimumCount, int excludedRank = 0)
     {
         for (int rank = 14; rank >= 2; rank--)
         {
-            if (rank != excludedRank &&
-                rankCounts[rank] >= minimumCount)
+            if (rank != excludedRank && rankCounts[rank] >= minimumCount)
             {
                 return rank;
             }
@@ -433,38 +242,26 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         return 0;
     }
 
-    private static int FindHighestRank(
-        ReadOnlySpan<byte> rankCounts,
-        int excludedRank1 = 0,
-        int excludedRank2 = 0)
+    private static int FindHighestRank(ReadOnlySpan<byte> rankCounts, int excludedRank1 = 0, int excludedRank2 = 0)
     {
         for (int rank = 14; rank >= 2; rank--)
         {
-            if (rankCounts[rank] != 0 &&
-                rank != excludedRank1 &&
-                rank != excludedRank2)
+            if (rankCounts[rank] != 0 && rank != excludedRank1 && rank != excludedRank2)
             {
                 return rank;
             }
         }
 
-        throw new InvalidOperationException(
-            "Unable to find the highest card.");
+        throw new InvalidOperationException("Unable to find the highest card.");
     }
 
-    private static void FindHighestRanks(
-        ReadOnlySpan<byte> rankCounts,
-        Span<int> destination,
-        int excludedRank = 0)
+    private static void FindHighestRanks(ReadOnlySpan<byte> rankCounts, Span<int> destination, int excludedRank = 0)
     {
         int index = 0;
 
-        for (int rank = 14;
-             rank >= 2 && index < destination.Length;
-             rank--)
+        for (int rank = 14; rank >= 2 && index < destination.Length; rank--)
         {
-            if (rank == excludedRank ||
-                rankCounts[rank] == 0)
+            if (rank == excludedRank || rankCounts[rank] == 0)
             {
                 continue;
             }
@@ -474,16 +271,11 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
         if (index != destination.Length)
         {
-            throw new InvalidOperationException(
-                "Not enough ranks to determine the kickers.");
+            throw new InvalidOperationException("Not enough ranks to determine the kickers.");
         }
     }
 
-    private static void SelectStraight(
-        ReadOnlySpan<int> cards,
-        int straightHigh,
-        int requiredSuit,
-        Span<int> destination)
+    private static void SelectStraight(ReadOnlySpan<int> cards, int straightHigh, int requiredSuit, Span<int> destination)
     {
         int destinationIndex = 0;
 
@@ -498,25 +290,13 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
             return;
         }
 
-        for (int rank = straightHigh;
-             rank >= straightHigh - 4;
-             rank--)
+        for (int rank = straightHigh; rank >= straightHigh - 4; rank--)
         {
-            SelectCard(
-                cards,
-                rank,
-                requiredSuit,
-                destination,
-                ref destinationIndex);
+            SelectCard(cards, rank, requiredSuit, destination, ref destinationIndex);
         }
     }
 
-    private static void SelectCard(
-        ReadOnlySpan<int> cards,
-        int requiredRank,
-        int requiredSuit,
-        Span<int> destination,
-        ref int destinationIndex)
+    private static void SelectCard(ReadOnlySpan<int> cards, int requiredRank, int requiredSuit, Span<int> destination, ref int destinationIndex)
     {
         for (int i = 0; i < cards.Length; i++)
         {
@@ -528,8 +308,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
                 continue;
             }
 
-            if (requiredSuit >= 0 &&
-                CardTable.GetSuit(card) != requiredSuit)
+            if (requiredSuit >= 0 && CardTable.GetSuit(card) != requiredSuit)
             {
                 continue;
             }
@@ -538,22 +317,14 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
             return;
         }
 
-        throw new InvalidOperationException(
-            "Unable to find a card for the straight.");
+        throw new InvalidOperationException("Unable to find a card for the straight.");
     }
 
-    private static int SelectRankCards(
-        ReadOnlySpan<int> cards,
-        int requiredRank,
-        Span<int> destination,
-        int destinationIndex,
-        int maximumCount)
+    private static int SelectRankCards(ReadOnlySpan<int> cards, int requiredRank, Span<int> destination, int destinationIndex, int maximumCount)
     {
         int selected = 0;
 
-        for (int i = 0;
-             i < cards.Length && selected < maximumCount;
-             i++)
+        for (int i = 0; i < cards.Length && selected < maximumCount; i++)
         {
             int card = cards[i];
             int rank = CardTable.GetRank(card) + 2;
@@ -569,29 +340,19 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
         if (selected != maximumCount)
         {
-            throw new InvalidOperationException(
-                $"Unable to select {maximumCount} cards of rank {requiredRank}.");
+            throw new InvalidOperationException($"Unable to select {maximumCount} cards of rank {requiredRank}.");
         }
 
         return destinationIndex;
     }
 
-    private static void SelectHighestCards(
-        ReadOnlySpan<int> cards,
-        Span<int> destinationCards,
-        Span<int> destinationRanks,
-        int requiredCount,
-        int requiredSuit)
+    private static void SelectHighestCards(ReadOnlySpan<int> cards, Span<int> destinationCards, Span<int> destinationRanks, int requiredCount, int requiredSuit)
     {
         int destinationIndex = 0;
 
-        for (int rank = 14;
-             rank >= 2 && destinationIndex < requiredCount;
-             rank--)
+        for (int rank = 14; rank >= 2 && destinationIndex < requiredCount; rank--)
         {
-            for (int i = 0;
-                 i < cards.Length && destinationIndex < requiredCount;
-                 i++)
+            for (int i = 0; i < cards.Length && destinationIndex < requiredCount; i++)
             {
                 int card = cards[i];
 
@@ -600,8 +361,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
                     continue;
                 }
 
-                if (requiredSuit >= 0 &&
-                    CardTable.GetSuit(card) != requiredSuit)
+                if (requiredSuit >= 0 && CardTable.GetSuit(card) != requiredSuit)
                 {
                     continue;
                 }
@@ -614,31 +374,18 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
         if (destinationIndex != requiredCount)
         {
-            throw new InvalidOperationException(
-                "Not enough cards to build the hand.");
+            throw new InvalidOperationException("Not enough cards to build the hand.");
         }
     }
 
-    private static HandRank CreateResult(
-        HandCategory category,
-        ReadOnlySpan<int> cards,
-        params int[] comparisonRanks)
+    private static HandRank CreateResult(HandCategory category, ReadOnlySpan<int> cards, params int[] comparisonRanks)
     {
-        return CreateResult(
-            category,
-            cards,
-            comparisonRanks.AsSpan());
+        return CreateResult(category, cards, comparisonRanks.AsSpan());
     }
 
-    private static HandRank CreateResult(
-        HandCategory category,
-        ReadOnlySpan<int> cards,
-        ReadOnlySpan<int> comparisonRanks)
+    private static HandRank CreateResult(HandCategory category, ReadOnlySpan<int> cards, ReadOnlySpan<int> comparisonRanks)
     {
-        long strength = BuildStrength(
-            category,
-            comparisonRanks);
-
+        long strength = BuildStrength(category, comparisonRanks);
         var bestCards = new string[5];
 
         for (int i = 0; i < bestCards.Length; i++)
@@ -646,23 +393,11 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
             bestCards[i] = CardTable.Decode(cards[i]);
         }
 
-        return new HandRank(
-            category,
-            strength,
-            bestCards);
+        return new HandRank(category, strength, bestCards);
     }
 
-    private static long BuildStrength(
-        HandCategory category,
-        ReadOnlySpan<int> comparisonRanks)
+    private static long BuildStrength(HandCategory category, ReadOnlySpan<int> comparisonRanks)
     {
-        /*
-         * Base 15:
-         *
-         * [category][rank 1][rank 2][rank 3][rank 4][rank 5]
-         *
-         * This makes ordinary long comparison correctly order hands.
-         */
         long strength = (int)category;
 
         for (int i = 0; i < 5; i++)
@@ -678,8 +413,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
         return strength;
     }
 
-    private static void ValidateUnique(
-        ReadOnlySpan<int> cards)
+    private static void ValidateUnique(ReadOnlySpan<int> cards)
     {
         ulong cardMask = 0;
 
@@ -689,8 +423,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
             if ((cardMask & bit) != 0)
             {
-                throw new ArgumentException(
-                    $"Card {CardTable.Decode(cards[i])} is duplicated.");
+                throw new ArgumentException($"Card {CardTable.Decode(cards[i])} is duplicated.");
             }
 
             cardMask |= bit;
@@ -698,8 +431,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
         if (BitOperations.PopCount(cardMask) != cards.Length)
         {
-            throw new ArgumentException(
-                "The card set contains duplicate cards.");
+            throw new ArgumentException("The card set contains duplicate cards.");
         }
     }
 }

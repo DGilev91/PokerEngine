@@ -18,15 +18,11 @@ internal sealed class Deck : IDeck
 
     public void Shuffle()
     {
-        for (int index = _cards.Count - 1;
-             index > 0;
-             index--)
+        for (int index = _cards.Count - 1; index > 0; index--)
         {
-            int randomIndex =
-                RandomNumberGenerator.GetInt32(index + 1);
+            int randomIndex = RandomNumberGenerator.GetInt32(index + 1);
 
-            (_cards[index], _cards[randomIndex]) =
-                (_cards[randomIndex], _cards[index]);
+            (_cards[index], _cards[randomIndex]) = (_cards[randomIndex], _cards[index]);
         }
     }
 
@@ -34,14 +30,12 @@ internal sealed class Deck : IDeck
     {
         if (_cards.Count == 0)
         {
-            throw new InvalidOperationException(
-                "The deck has no remaining cards.");
+            throw new InvalidOperationException("The deck has no remaining cards.");
         }
 
         string card = _cards[^1];
 
-        _cards.RemoveAt(
-            _cards.Count - 1);
+        _cards.RemoveAt(_cards.Count - 1);
 
         return card;
     }
@@ -50,16 +44,12 @@ internal sealed class Deck : IDeck
     {
         if (count < 0)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(count),
-                count,
-                "Card count cannot be negative.");
+            throw new ArgumentOutOfRangeException(nameof(count), count, "Card count cannot be negative.");
         }
 
         if (count > _cards.Count)
         {
-            throw new InvalidOperationException(
-                $"Not enough cards in the deck. Requested: {count}, remaining: {_cards.Count}.");
+            throw new InvalidOperationException($"Not enough cards in the deck. Requested: {count}, remaining: {_cards.Count}.");
         }
 
         if (count == 0)
@@ -67,12 +57,9 @@ internal sealed class Deck : IDeck
             return [];
         }
 
-        var dealtCards =
-            new string[count];
+        var dealtCards = new string[count];
 
-        for (int index = 0;
-             index < count;
-             index++)
+        for (int index = 0; index < count; index++)
         {
             dealtCards[index] = Deal();
         }
@@ -82,14 +69,16 @@ internal sealed class Deck : IDeck
 
     public void Take(string card)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(
-            card);
+        ArgumentException.ThrowIfNullOrWhiteSpace(card);
 
-        if (!_cards.Remove(card))
+        int cardIndex = _cards.FindIndex(existingCard => string.Equals(existingCard, card, StringComparison.OrdinalIgnoreCase));
+
+        if (cardIndex < 0)
         {
-            throw new InvalidOperationException(
-                $"Card {card} is not available in the deck.");
+            throw new InvalidOperationException($"Card {card} is not available in the deck.");
         }
+
+        _cards.RemoveAt(cardIndex);
     }
 
     public void Take(IReadOnlyList<string> cards)
@@ -101,43 +90,29 @@ internal sealed class Deck : IDeck
             return;
         }
 
-        var uniqueCards =
-            new HashSet<string>(
-                StringComparer.OrdinalIgnoreCase);
+        var uniqueCards = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (string card in cards)
         {
             if (string.IsNullOrWhiteSpace(card))
             {
-                throw new ArgumentException(
-                    "The card list contains an empty value.",
-                    nameof(cards));
+                throw new ArgumentException("The card list contains an empty value.", nameof(cards));
             }
 
             if (!uniqueCards.Add(card))
             {
-                throw new ArgumentException(
-                    $"The card list contains duplicate card {card}.",
-                    nameof(cards));
+                throw new ArgumentException($"The card list contains duplicate card {card}.", nameof(cards));
             }
 
-            if (!_cards.Contains(
-                    card,
-                    StringComparer.OrdinalIgnoreCase))
+            if (!_cards.Contains(card, StringComparer.OrdinalIgnoreCase))
             {
-                throw new InvalidOperationException(
-                    $"Card {card} is not available in the deck.");
+                throw new InvalidOperationException($"Card {card} is not available in the deck.");
             }
         }
 
         foreach (string card in cards)
         {
-            int cardIndex = _cards.FindIndex(
-                existingCard =>
-                    string.Equals(
-                        existingCard,
-                        card,
-                        StringComparison.OrdinalIgnoreCase));
+            int cardIndex = _cards.FindIndex(existingCard => string.Equals(existingCard, card, StringComparison.OrdinalIgnoreCase));
 
             _cards.RemoveAt(cardIndex);
         }
