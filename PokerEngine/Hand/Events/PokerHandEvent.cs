@@ -8,7 +8,11 @@ public sealed record NewHandEvent : PokerHandEvent;
 
 public sealed record SeatsEvent(IReadOnlyList<long> Stacks) : PokerHandEvent;
 
-public sealed record PlayerPostedEvent(int SeatId, PostType PostType, long Amount, bool IsAllIn) : PokerHandEvent;
+public sealed record AntePostedEvent(int SeatId, long Amount, bool IsAllIn) : PokerHandEvent;
+
+public sealed record BlindPostedEvent(int SeatId, BlindType Type, long Amount, bool IsAllIn) : PokerHandEvent;
+
+public sealed record StraddlePostedEvent(int SeatId, long Amount, bool IsAllIn) : PokerHandEvent;
 
 public sealed record HandStartedEvent : PokerHandEvent;
 

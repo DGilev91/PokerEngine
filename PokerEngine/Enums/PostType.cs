@@ -2,8 +2,6 @@
 
 public enum PostType
 {
-    Ante,
-
     SmallBlind,
 
     BigBlind,
