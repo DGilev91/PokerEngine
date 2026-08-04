@@ -6,11 +6,6 @@ namespace PokerEngine.Enums;
 public enum RoundType
 {
     /// <summary>
-    /// No betting round is currently active.
-    /// </summary>
-    None,
-
-    /// <summary>
     /// The betting round before any board cards are dealt.
     /// </summary>
     Preflop,
