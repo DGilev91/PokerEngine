@@ -1,18 +1,14 @@
 using PokerEngine.Enums;
-using System.Collections;
-using System.Reflection;
 
-namespace PokerEngine.States.Events;
+
+namespace PokerEngine.Hand.Events;
 
 /// <summary>
 /// Represents an event emitted during a poker hand.
 /// </summary>
 public abstract record PokerHandEvent
 {
-    private protected static string FormatList<T>(IEnumerable<T> values)
-    {
-        return $"[{string.Join(", ", values)}]";
-    }
+
 }
 
 /// <summary>
@@ -29,12 +25,7 @@ public sealed record NewHandEvent : PokerHandEvent;
 public sealed record SeatsEvent(
     IReadOnlyList<long> Stacks) : PokerHandEvent
 {
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"{nameof(SeatsEvent)} {{ " +
-               $"Stacks = {FormatList(Stacks)} }}";
-    }
+
 }
 
 /// <summary>
@@ -76,13 +67,6 @@ public sealed record HoleCardsEvent(
     int SeatId,
     IReadOnlyList<string> Cards) : PokerHandEvent
 {
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"{nameof(HoleCardsEvent)} {{ " +
-               $"SeatId = {SeatId}, " +
-               $"Cards = {FormatList(Cards)} }}";
-    }
 }
 
 /// <summary>
@@ -121,13 +105,6 @@ public sealed record BoardEvent(
     IReadOnlyList<string> Cards) : PokerHandEvent
 {
     /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"{nameof(BoardEvent)} {{ " +
-               $"Round = {Round}, " +
-               $"BoardIndex = {BoardIndex}, " +
-               $"Cards = {FormatList(Cards)} }}";
-    }
 }
 
 /// <summary>
@@ -163,40 +140,18 @@ public sealed record PlayerTurnEvent(
     long MinRaiseTo,
     long MaxRaiseTo) : PokerHandEvent
 {
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"{nameof(PlayerTurnEvent)} {{ " +
-               $"SeatId = {SeatId}, " +
-               $"Actions = {FormatList(Actions)}, " +
-               $"CallAmount = {CallAmount}, " +
-               $"MinBet = {MinBet}, " +
-               $"MaxBet = {MaxBet}, " +
-               $"MinRaiseTo = {MinRaiseTo}, " +
-               $"MaxRaiseTo = {MaxRaiseTo} }}";
-    }
+
 }
 
-/// <summary>
-/// Indicates that a player performed a betting action.
-/// </summary>
-/// <param name="SeatId">
-/// The seat that performed the action.
-/// </param>
-/// <param name="ActionType">
-/// The performed action.
-/// </param>
-/// <param name="Amount">
-/// The number of chips committed by this action.
-/// </param>
-/// <param name="IsAllIn">
-/// Indicates whether the action consumed the player's entire remaining stack.
-/// </param>
-public sealed record PlayerActionEvent(
-    int SeatId,
-    ActionType ActionType,
-    long Amount,
-    bool IsAllIn) : PokerHandEvent;
+public sealed record FoldEvent(int SeatId) : PokerHandEvent;
+
+public sealed record CheckEvent(int SeatId) : PokerHandEvent;
+
+public sealed record CallEvent(int SeatId, long Amount, bool IsAllIn) : PokerHandEvent;
+
+public sealed record BetEvent(int SeatId, long Amount, bool IsAllIn) : PokerHandEvent;
+
+public sealed record RaiseToEvent(int SeatId, long RaiseAmount, long AmountTo, bool IsAllIn) : PokerHandEvent;
 
 /// <summary>
 /// Indicates that an unmatched portion of a wager was returned.
@@ -225,12 +180,6 @@ public sealed record ShowCardsEvent(
     IReadOnlyList<string> Cards) : PokerHandEvent
 {
     /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"{nameof(ShowCardsEvent)} {{ " +
-               $"SeatId = {SeatId}, " +
-               $"Cards = {FormatList(Cards)} }}";
-    }
 }
 
 /// <summary>
@@ -254,15 +203,6 @@ public sealed record HandEvaluatedEvent(
     HandCategory Category,
     IReadOnlyList<string> BestCards) : PokerHandEvent
 {
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"{nameof(HandEvaluatedEvent)} {{ " +
-               $"SeatId = {SeatId}, " +
-               $"BoardIndex = {BoardIndex}, " +
-               $"Category = {Category}, " +
-               $"BestCards = {FormatList(BestCards)} }}";
-    }
 }
 
 /// <summary>

@@ -1,4 +1,4 @@
-using PokerEngine.States;
+using PokerEngine.Hand;
 
 namespace PokerEngine.Games;
 
@@ -11,7 +11,7 @@ public interface IPokerGame
     /// Creates a new state instance for a single poker hand.
     /// </summary>
     /// <returns>
-    /// A new <see cref="IPokerState"/> configured with this game's rules.
+    /// A new <see cref="IPokerHand"/> configured with this game's rules.
     /// </returns>
-    IPokerState CreateState();
+    IPokerHand CreateHand();
 }

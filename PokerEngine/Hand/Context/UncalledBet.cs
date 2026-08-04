@@ -1,4 +1,4 @@
-﻿namespace PokerEngine.States.Pots;
+﻿namespace PokerEngine.Hand.Context;
 
 /// <summary>
 /// Represents an unmatched wager that must be returned to a player.

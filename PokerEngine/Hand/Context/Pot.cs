@@ -1,4 +1,4 @@
-﻿namespace PokerEngine.States.Pots;
+﻿namespace PokerEngine.Hand.Context;
 
 /// <summary>
 /// Represents a main pot or side pot created during a poker hand.
@@ -69,9 +69,7 @@ public sealed class Pot
     /// <summary>
     /// Adds a seat contribution to this pot.
     /// </summary>
-    internal void AddContribution(
-        int seatId,
-        long amount)
+    internal void AddContribution(int seatId, long amount)
     {
         if (seatId < 0)
         {
