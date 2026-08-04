@@ -1,6 +1,6 @@
 ﻿namespace PokerEngine.Enums;
 
-public enum ActionType
+public enum PlayerActionType
 {
     Fold,
     Check,

@@ -2,7 +2,8 @@
 
 public enum BlindType
 {
-    SmallBlind,
-    BigBlind,
-    DeadBlind
+    Small,
+    Big,
+    Dead,
+    Straddle
 }

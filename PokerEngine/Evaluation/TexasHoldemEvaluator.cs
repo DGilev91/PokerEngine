@@ -97,7 +97,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
             SelectRankCards(cards, kicker, bestCards, index, 1);
 
-            return CreateResult(HandCategory.FourCard, bestCards, fourRank, kicker);
+            return CreateResult(HandCategory.FourOfAKind, bestCards, fourRank, kicker);
         }
 
         int firstThreeRank = FindRankWithCount(rankCounts, 3);
@@ -153,7 +153,7 @@ public sealed class TexasHoldemEvaluator : IHandEvaluator
 
             SelectRankCards(cards, kickers[1], bestCards, index, 1);
 
-            return CreateResult(HandCategory.ThreeCard, bestCards, firstThreeRank, kickers[0], kickers[1]);
+            return CreateResult(HandCategory.ThreeOfAKind, bestCards, firstThreeRank, kickers[0], kickers[1]);
         }
 
         int firstPairRank = FindRankWithCount(rankCounts, 2);
