@@ -10,6 +10,5 @@ public enum HandCategory
     Flush = 5,
     FullHouse = 6,
     FourOfAKind = 7,
-    StraightFlush = 8,
-    RoyalFlush = 9
+    StraightFlush = 8
 }
