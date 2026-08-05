@@ -5,10 +5,10 @@ namespace PokerEngine.Games;
 
 public interface IGameState
 {
-    void InitializeSeats(IReadOnlyList<long> stacks);
+    IReadOnlyList<GameEvent> Events { get; }
 
-    void SetButton(int seatId);
-
+    void Initialize(IReadOnlyList<long> stacks, int buttonSeatId);
+    
     void PostAnte(Ante ante);
 
     void PostBlindsOrStraddles(IReadOnlyList<Post> posts);

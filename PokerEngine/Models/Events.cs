@@ -4,9 +4,7 @@ namespace PokerEngine.Models;
 
 public abstract record GameEvent;
 
-public sealed record SeatsInitializedEvent(IReadOnlyList<long> Stacks) : GameEvent;
-
-public sealed record ButtonSetEvent(int SeatId) : GameEvent;
+public sealed record GameInitializedEvent(IReadOnlyList<long> Stacks, int ButtonSeatId) : GameEvent;
 
 public sealed record AntePostedEvent(int SeatId, long Amount, bool IsAllIn) : GameEvent;
 
@@ -24,6 +22,10 @@ public sealed record CardBurnedEvent(string Card) : GameEvent;
 
 public sealed record BoardCardsDealtEvent(RoundType Round, IReadOnlyList<string> Cards, int BoardIndex) : GameEvent;
 
-public sealed record CardsShownEvent(int SeatId, IReadOnlyList<string> Cards) : GameEvent;
+public sealed record CardsShownOrMuckedEvent(int SeatId, IReadOnlyList<string> Cards) : GameEvent;
 
-public sealed record CardsMuckedEvent(int SeatId) : GameEvent;
+public sealed record UncalledBetReturnedEvent(int SeatId, long Amount) : GameEvent;
+
+public sealed record PotAwardedEvent(int PotIndex, int BoardIndex, int SeatId, long Amount) : GameEvent;
+
+public sealed record GameEndedEvent : GameEvent;
