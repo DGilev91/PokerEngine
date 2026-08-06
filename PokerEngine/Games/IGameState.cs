@@ -14,6 +14,14 @@ public interface IGameState
 
     int? RoundIndex { get; }
 
+    int? ActorSeatId { get; }
+
+    long? CallAmount { get; }
+
+    long? MinBetOrRaiseToAmount { get; }
+
+    long? MaxBetOrRaiseToAmount { get; }
+
     bool IsActive { get; }
 
     bool CanPostAnte { get; }
@@ -44,13 +52,6 @@ public interface IGameState
 
     bool CanPullChips { get; }
 
-    int? ActorSeatId { get; }
-
-    long CheckingOrCallingAmount { get; }
-
-    long? MinBetOrRaiseToAmount { get; }
-
-    long? MaxBetOrRaiseToAmount { get; }
 
     GameInitialization Initialize(IReadOnlyList<long> stacks, Ante ante, IReadOnlyList<BlindOrStraddle> blindsOrStraddles);
 
