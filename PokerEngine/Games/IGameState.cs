@@ -42,7 +42,7 @@ public interface IGameState
 
     bool CanDealBoard { get; }
 
-    bool CanShowOrMuckCards { get; }
+    bool CanShowOrMuckHoleCards { get; }
 
     bool CanKillHand { get; }
 
@@ -73,7 +73,7 @@ public interface IGameState
 
     BoardDealing DealBoard(IReadOnlyList<string> cards, int boardIndex);
 
-    HoleCardsShowingOrMucking ShowOrMuckCards(IReadOnlyList<string> cards);
+    HoleCardsShowingOrMucking ShowOrMuckHoleCards(IReadOnlyList<string> cards);
 
     HandKilling KillHand();
 
