@@ -1,5 +1,4 @@
-﻿using PokerEngine.Enums;
-using PokerEngine.Models;
+﻿using PokerEngine.Models;
 
 namespace PokerEngine.Games;
 
@@ -7,21 +6,13 @@ public interface IGameState
 {
     IReadOnlyList<GameOperation> Operations { get; }
 
-    IReadOnlyList<long> StartingStacks { get; }
-
-    IReadOnlyList<long> Stacks { get; }
-
-    IReadOnlyList<bool> Statuses { get; }
-
-    IReadOnlyList<long> Contributions { get; }
-
-    IReadOnlyList<long> RoundBets { get; }
+    IReadOnlyList<Player> Players { get; }
 
     IReadOnlyList<Pot> Pots { get; }
 
     IReadOnlyList<Board> Boards { get; }
 
-    RoundType? CurrentRound { get; }
+    int? RoundIndex { get; }
 
     bool IsActive { get; }
 
@@ -45,9 +36,13 @@ public interface IGameState
 
     bool CanShowOrMuckCards { get; }
 
+    bool CanKillHand { get; }
+
     bool CanCollectBets { get; }
 
     bool CanPushChips { get; }
+
+    bool CanPullChips { get; }
 
     int? ActorSeatId { get; }
 
@@ -71,15 +66,19 @@ public interface IGameState
 
     BettingOrRaisingTo BetOrRaiseTo(long amount);
 
-    RunoutCountSelection SelectRunoutCount(int? count);
+    RunoutCountSelection SelectRunoutCount(int count);
 
     CardBurning BurnCard(string card);
 
-    BoardDealing DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
+    BoardDealing DealBoard(IReadOnlyList<string> cards, int boardIndex);
 
-    HoleCardsShowingOrMucking ShowOrMuckCards(IReadOnlyList<string>? cards = null);
+    HoleCardsShowingOrMucking ShowOrMuckCards(IReadOnlyList<string> cards);
+
+    HandKilling KillHand();
 
     BetCollection CollectBets();
 
-    IReadOnlyList<ChipsPushing> PushChips();
+    ChipsPushing PushChips();
+
+    ChipsPulling PullChips();
 }

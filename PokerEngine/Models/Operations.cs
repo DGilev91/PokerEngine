@@ -26,6 +26,8 @@ public sealed record BoardDealing(RoundType Round, int BoardIndex, IReadOnlyList
 
 public sealed record HoleCardsShowingOrMucking(int SeatId, IReadOnlyList<string> Cards) : GameOperation;
 
+public sealed record HandKilling(int SeatId) : GameOperation;
+
 public sealed record BetCollection(IReadOnlyList<long> CollectedBets) : GameOperation;
 
 public sealed record ChipsPushing(int PotIndex, int BoardIndex, int SeatId, long Amount) : GameOperation;
