@@ -2,7 +2,7 @@
 
 namespace PokerEngine.Models;
 
-public sealed record Post(int SeatId, BlindType Type, long Amount);
+public sealed record BlindOrStraddle(int SeatId, BlindType Type, long Amount);
 
 public sealed record Ante(bool Uniform, IReadOnlyList<long> Amounts)
 {

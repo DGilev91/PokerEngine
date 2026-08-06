@@ -1,5 +1,4 @@
-﻿using PokerEngine.Enums;
-using PokerEngine.Models;
+﻿using PokerEngine.Models;
 
 namespace PokerEngine.Games;
 
@@ -7,23 +6,75 @@ public interface IGameState
 {
     IReadOnlyList<GameEvent> Events { get; }
 
-    void Initialize(IReadOnlyList<long> stacks, int buttonSeatId);
-    
-    void PostAnte(Ante ante);
+    bool IsActive { get; }
 
-    void PostBlindsOrStraddles(IReadOnlyList<Post> posts);
+    bool CanPostAnte { get; }
 
-    void Start();
+    bool CanCollectBets { get; }
 
-    void DealHole(int seatId, IReadOnlyList<string> cards);
+    bool CanPostBlindOrStraddle { get; }
 
-    void PlayerAction(int seatId, PlayerActionType actionType, long amount = 0);
+    bool CanStart { get; }
 
-    void SelectRunoutCount(int count);
+    bool CanDealHole { get; }
 
-    void BurnCard(string card);
+    bool CanFold { get; }
 
-    void DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
+    bool CanCheckOrCall { get; }
 
-    void ShowOrMuckCards(int seatId, IReadOnlyList<string> cards);
+    bool CanBetOrRaiseTo { get; }
+
+    bool CanSelectRunoutCount { get; }
+
+    bool CanBurnCard { get; }
+
+    bool CanDealBoard { get; }
+
+    bool CanShowOrMuckCards { get; }
+
+    bool CanKillHand { get; }
+
+    bool CanPushChips { get; }
+
+    bool CanPullChips { get; }
+
+    int? ActorSeatId { get; }
+
+    long CheckingOrCallingAmount { get; }
+
+    long? MinBetOrRaiseToAmount { get; }
+
+    long? MaxBetOrRaiseToAmount { get; }
+
+    void Initialize(IReadOnlyList<long> stacks, int buttonSeatId, Ante ante, IReadOnlyList<BlindOrStraddle> blindsOrStraddles);
+
+    AntePostedEvent PostAnte();
+
+    BetsCollectedEvent CollectBets();
+
+    BlindOrStraddlePostedEvent PostBlindOrStraddle();
+
+    GameStartedEvent Start();
+
+    HoleCardsDealtEvent DealHole(IReadOnlyList<string> cards);
+
+    FoldedEvent Fold();
+
+    CheckedOrCalledEvent CheckOrCall();
+
+    BetOrRaisedToEvent BetOrRaiseTo(long amount);
+
+    RunoutCountSelectedEvent SelectRunoutCount(int? count);
+
+    CardBurnedEvent BurnCard(string card);
+
+    BoardCardsDealtEvent DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
+
+    CardsShownOrMuckedEvent ShowOrMuckCards(IReadOnlyList<string>? cards = null);
+
+    HandKilledEvent KillHand();
+
+    IReadOnlyList<ChipsPushedEvent> PushChips();
+
+    ChipsPulledEvent PullChips();
 }
