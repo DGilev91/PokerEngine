@@ -10,8 +10,6 @@ public interface IGameState
 
     bool CanPostAnte { get; }
 
-    bool CanCollectBets { get; }
-
     bool CanPostBlindOrStraddle { get; }
 
     bool CanStart { get; }
@@ -32,11 +30,9 @@ public interface IGameState
 
     bool CanShowOrMuckCards { get; }
 
-    bool CanKillHand { get; }
+    bool CanCollectBets { get; }
 
     bool CanPushChips { get; }
-
-    bool CanPullChips { get; }
 
     int? ActorSeatId { get; }
 
@@ -46,15 +42,11 @@ public interface IGameState
 
     long? MaxBetOrRaiseToAmount { get; }
 
-    void Initialize(IReadOnlyList<long> stacks, int buttonSeatId, Ante ante, IReadOnlyList<BlindOrStraddle> blindsOrStraddles);
+    GameInitializedEvent Initialize(IReadOnlyList<long> stacks, int buttonSeatId, Ante ante, IReadOnlyList<BlindOrStraddle> blindsOrStraddles);
 
     AntePostedEvent PostAnte();
 
-    BetsCollectedEvent CollectBets();
-
     BlindOrStraddlePostedEvent PostBlindOrStraddle();
-
-    GameStartedEvent Start();
 
     HoleCardsDealtEvent DealHole(IReadOnlyList<string> cards);
 
@@ -70,11 +62,9 @@ public interface IGameState
 
     BoardCardsDealtEvent DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
 
-    CardsShownOrMuckedEvent ShowOrMuckCards(IReadOnlyList<string>? cards = null);
+    CardsShownOrMuckedEvent ShowOrMuckCards(IReadOnlyList<string> cards);
 
-    HandKilledEvent KillHand();
+    BetsCollectedEvent CollectBets();
 
     IReadOnlyList<ChipsPushedEvent> PushChips();
-
-    ChipsPulledEvent PullChips();
 }
