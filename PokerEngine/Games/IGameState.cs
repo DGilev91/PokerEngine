@@ -1,18 +1,33 @@
-﻿using PokerEngine.Models;
+﻿using PokerEngine.Enums;
+using PokerEngine.Models;
 
 namespace PokerEngine.Games;
 
 public interface IGameState
 {
-    IReadOnlyList<GameEvent> Events { get; }
+    IReadOnlyList<GameOperation> Operations { get; }
+
+    IReadOnlyList<long> StartingStacks { get; }
+
+    IReadOnlyList<long> Stacks { get; }
+
+    IReadOnlyList<bool> Statuses { get; }
+
+    IReadOnlyList<long> Contributions { get; }
+
+    IReadOnlyList<long> RoundBets { get; }
+
+    IReadOnlyList<Pot> Pots { get; }
+
+    IReadOnlyList<Board> Boards { get; }
+
+    RoundType? CurrentRound { get; }
 
     bool IsActive { get; }
 
     bool CanPostAnte { get; }
 
     bool CanPostBlindOrStraddle { get; }
-
-    bool CanStart { get; }
 
     bool CanDealHole { get; }
 
@@ -42,29 +57,29 @@ public interface IGameState
 
     long? MaxBetOrRaiseToAmount { get; }
 
-    GameInitializedEvent Initialize(IReadOnlyList<long> stacks, int buttonSeatId, Ante ante, IReadOnlyList<BlindOrStraddle> blindsOrStraddles);
+    GameInitialization Initialize(IReadOnlyList<long> stacks, Ante ante, IReadOnlyList<BlindOrStraddle> blindsOrStraddles);
 
-    AntePostedEvent PostAnte();
+    AntePosting PostAnte();
 
-    BlindOrStraddlePostedEvent PostBlindOrStraddle();
+    BlindOrStraddlePosting PostBlindOrStraddle();
 
-    HoleCardsDealtEvent DealHole(IReadOnlyList<string> cards);
+    HoleDealing DealHole(IReadOnlyList<string> cards);
 
-    FoldedEvent Fold();
+    Folding Fold();
 
-    CheckedOrCalledEvent CheckOrCall();
+    CheckingOrCalling CheckOrCall();
 
-    BetOrRaisedToEvent BetOrRaiseTo(long amount);
+    BettingOrRaisingTo BetOrRaiseTo(long amount);
 
-    RunoutCountSelectedEvent SelectRunoutCount(int? count);
+    RunoutCountSelection SelectRunoutCount(int? count);
 
-    CardBurnedEvent BurnCard(string card);
+    CardBurning BurnCard(string card);
 
-    BoardCardsDealtEvent DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
+    BoardDealing DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
 
-    CardsShownOrMuckedEvent ShowOrMuckCards(IReadOnlyList<string> cards);
+    HoleCardsShowingOrMucking ShowOrMuckCards(IReadOnlyList<string>? cards = null);
 
-    BetsCollectedEvent CollectBets();
+    BetCollection CollectBets();
 
-    IReadOnlyList<ChipsPushedEvent> PushChips();
+    IReadOnlyList<ChipsPushing> PushChips();
 }
