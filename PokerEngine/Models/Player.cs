@@ -10,6 +10,8 @@ public sealed class Player
 
     public long Stack { get; internal set; }
 
+    public long TotalBet { get; internal set; }
+
     public long RoundBet { get; internal set; }
 
     public long Payoff { get; internal set; }
