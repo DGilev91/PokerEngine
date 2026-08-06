@@ -4,7 +4,7 @@ public sealed class Player
 {
     private readonly List<string> _holeCards = [];
 
-    public int SeatId { get; }
+    public int Index { get; }
 
     public long StartingStack { get; }
 
@@ -24,11 +24,11 @@ public sealed class Player
 
     public IReadOnlyList<string> HoleCards => _holeCards;
 
-    internal Player(int seatId, long startingStack)
+    internal Player(int index, long startingStack)
     {
-        if (seatId < 0)
+        if (Index < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(seatId));
+            throw new ArgumentOutOfRangeException(nameof(Index));
         }
 
         if (startingStack < 0)
@@ -36,7 +36,7 @@ public sealed class Player
             throw new ArgumentOutOfRangeException(nameof(startingStack));
         }
 
-        SeatId = seatId;
+        Index = index;
         StartingStack = startingStack;
         Stack = startingStack;
     }

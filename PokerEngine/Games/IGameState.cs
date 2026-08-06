@@ -14,7 +14,7 @@ public interface IGameState
 
     int? RoundIndex { get; }
 
-    int? ActorSeatId { get; }
+    int? ActorIndex { get; }
 
     long? CallAmount { get; }
 
