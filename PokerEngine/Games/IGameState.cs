@@ -26,7 +26,7 @@ public interface IGameState
 
     bool CanInitialize { get; }
 
-    bool CanPostAnte { get; }
+    bool CanPostAnteOrDead { get; }
 
     bool CanPostBlindOrStraddle { get; }
 
@@ -55,9 +55,9 @@ public interface IGameState
     bool CanPullChips { get; }
 
 
-    GameInitialization Initialize(IReadOnlyList<long> stacks, IReadOnlyList<long> antes, IReadOnlyList<long> blindsOrStraddles);
+    GameInitialization Initialize(IReadOnlyList<long> stacks, IReadOnlyList<long> antesOrDeads, IReadOnlyList<long> blindsOrStraddles);
 
-    AntePosting PostAnte();
+    AnteOrDeadPosting PostAnteOrDead();
 
     BlindOrStraddlePosting PostBlindOrStraddle();
 
