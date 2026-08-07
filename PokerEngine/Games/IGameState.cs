@@ -73,7 +73,7 @@ public interface IGameState
 
     CardBurning BurnCard(string card);
 
-    BoardDealing DealBoard(IReadOnlyList<string> cards, int boardIndex);
+    BoardDealing DealBoard(IReadOnlyList<string> cards);
 
     HoleCardsShowingOrMucking ShowOrMuckHoleCards(IReadOnlyList<string> cards);
 
