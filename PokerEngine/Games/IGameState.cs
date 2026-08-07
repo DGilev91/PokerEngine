@@ -10,7 +10,7 @@ public interface IGameState
 
     IReadOnlyList<Pot> Pots { get; }
 
-    IReadOnlyList<Board> Boards { get; }
+    IReadOnlyList<IReadOnlyList<string>> Boards { get; }
 
     int? RoundIndex { get; }
 
