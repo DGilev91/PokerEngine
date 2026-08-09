@@ -4,7 +4,7 @@ namespace PokerEngine.Models;
 
 public abstract record GameOperation;
 
-public sealed record GameInitialization(IReadOnlyList<long> stacks, IReadOnlyList<long> deadBets, IReadOnlyList<long> forceBets) : GameOperation;
+public sealed record GameInitialization(IReadOnlyList<long> Stacks, IReadOnlyList<long> DeadBets, IReadOnlyList<long> ForceBets) : GameOperation;
 
 public sealed record DeadBetPosting(int PlayerIndex, long Amount) : GameOperation;
 
