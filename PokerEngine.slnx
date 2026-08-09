@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="PokerEngine.Examples/PokerEngine.Examples.csproj" Id="46894c12-68aa-4e77-918e-0a0d3e6b2fa9" />
   <Project Path="PokerEngine.Tests/PokerEngine.Tests.csproj" Id="220ce069-fe0d-437d-8468-a0ac3deb130d" />
   <Project Path="PokerEngine/PokerEngine.csproj" />
 </Solution>

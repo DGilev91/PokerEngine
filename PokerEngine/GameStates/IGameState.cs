@@ -61,7 +61,7 @@ public interface IGameState
 
     ForceBetPosting PostForceBet();
 
-    HoleDealing DealHole(IReadOnlyList<Card> cards);
+    HoleDealing DealHole(IReadOnlyList<string> cards);
 
     Folding Fold();
 
@@ -71,11 +71,11 @@ public interface IGameState
 
     RunoutCountSelection SelectRunoutCount(int count);
 
-    CardBurning BurnCard(Card card);
+    CardBurning BurnCard(string card);
 
-    BoardDealing DealBoard(IReadOnlyList<Card> cards);
+    BoardDealing DealBoard(IReadOnlyList<string> cards);
 
-    HoleCardsShowingOrMucking ShowOrMuckHoleCards(IReadOnlyList<Card> cards);
+    HoleCardsShowingOrMucking ShowOrMuckHoleCards(IReadOnlyList<string> cards);
 
     HandKilling KillHand();
 
