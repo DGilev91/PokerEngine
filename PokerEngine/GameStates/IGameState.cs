@@ -1,6 +1,6 @@
 ﻿using PokerEngine.Models;
 
-namespace PokerEngine.Games;
+namespace PokerEngine.GameStates;
 
 public interface IGameState
 {
