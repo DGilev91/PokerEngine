@@ -4,11 +4,11 @@ namespace PokerEngine.Models;
 
 public abstract record GameOperation;
 
-public sealed record GameInitialization(IReadOnlyList<long> stacks, IReadOnlyList<long> antesOrDeads, IReadOnlyList<long> blindsOrStraddles) : GameOperation;
+public sealed record GameInitialization(IReadOnlyList<long> stacks, IReadOnlyList<long> deadBets, IReadOnlyList<long> forceBets) : GameOperation;
 
-public sealed record AnteOrDeadPosting(int PlayerIndex, long Amount) : GameOperation;
+public sealed record DeadBetPosting(int PlayerIndex, long Amount) : GameOperation;
 
-public sealed record BlindOrStraddlePosting(int PlayerIndex, long Amount) : GameOperation;
+public sealed record ForceBetPosting(int PlayerIndex, long Amount) : GameOperation;
 
 public sealed record HoleDealing(int PlayerIndex, IReadOnlyList<string> Cards, IReadOnlyList<bool> Statuses) : GameOperation;
 

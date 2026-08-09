@@ -26,9 +26,9 @@ public interface IGameState
 
     bool CanInitialize { get; }
 
-    bool CanPostAnteOrDead { get; }
+    bool CanPostDeadBet { get; }
 
-    bool CanPostBlindOrStraddle { get; }
+    bool CanPostForceBet { get; }
 
     bool CanDealHole { get; }
 
@@ -55,11 +55,11 @@ public interface IGameState
     bool CanPullChips { get; }
 
 
-    GameInitialization Initialize(IReadOnlyList<long> stacks, IReadOnlyList<long> antesOrDeads, IReadOnlyList<long> blindsOrStraddles);
+    GameInitialization Initialize(IReadOnlyList<long> stacks, IReadOnlyList<long> deadBets, IReadOnlyList<long> forceBets);
 
-    AnteOrDeadPosting PostAnteOrDead();
+    DeadBetPosting PostDeadBet();
 
-    BlindOrStraddlePosting PostBlindOrStraddle();
+    ForceBetPosting PostForceBet();
 
     HoleDealing DealHole(IReadOnlyList<string> cards);
 
