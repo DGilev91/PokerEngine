@@ -2,7 +2,7 @@
 
 namespace PokerEngine.Models;
 
-public static class Deck
+public static class DeckBuilder
 {
     public static IReadOnlyList<Card> Standard { get; } = Create(RankOrder.Standard);
 
