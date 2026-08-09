@@ -10,7 +10,7 @@ public sealed record DeadBetPosting(int PlayerIndex, long Amount) : GameOperatio
 
 public sealed record ForceBetPosting(int PlayerIndex, long Amount) : GameOperation;
 
-public sealed record HoleDealing(int PlayerIndex, IReadOnlyList<string> Cards) : GameOperation;
+public sealed record HoleDealing(int PlayerIndex, IReadOnlyList<Card> Cards) : GameOperation;
 
 public sealed record Folding(int PlayerIndex) : GameOperation;
 
@@ -20,11 +20,11 @@ public sealed record BettingOrRaisingTo(int PlayerIndex, long Amount) : GameOper
 
 public sealed record RunoutCountSelection(int SeatId, int? Count) : GameOperation;
 
-public sealed record CardBurning(string Card) : GameOperation;
+public sealed record CardBurning(Card Card) : GameOperation;
 
-public sealed record BoardDealing(IReadOnlyList<string> Cards) : GameOperation;
+public sealed record BoardDealing(IReadOnlyList<Card> Cards) : GameOperation;
 
-public sealed record HoleCardsShowingOrMucking(int PlayerIndex, bool Status) : GameOperation;
+public sealed record HoleCardsShowingOrMucking(int PlayerIndex, IReadOnlyList<Card> Cards) : GameOperation;
 
 public sealed record HandKilling(int PlayerIndex) : GameOperation;
 

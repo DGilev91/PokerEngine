@@ -10,7 +10,7 @@ public interface IGameState
 
     IReadOnlyList<Pot> Pots { get; }
 
-    IReadOnlyList<IReadOnlyList<string>> Boards { get; }
+    IReadOnlyList<IReadOnlyList<Card>> Boards { get; }
 
     int? RoundIndex { get; }
 
@@ -61,7 +61,7 @@ public interface IGameState
 
     ForceBetPosting PostForceBet();
 
-    HoleDealing DealHole(IReadOnlyList<string> cards);
+    HoleDealing DealHole(IReadOnlyList<Card> cards);
 
     Folding Fold();
 
@@ -71,11 +71,11 @@ public interface IGameState
 
     RunoutCountSelection SelectRunoutCount(int count);
 
-    CardBurning BurnCard(string card);
+    CardBurning BurnCard(Card card);
 
-    BoardDealing DealBoard(IReadOnlyList<string> cards);
+    BoardDealing DealBoard(IReadOnlyList<Card> cards);
 
-    HoleCardsShowingOrMucking ShowOrMuckHoleCards(IReadOnlyList<string> cards);
+    HoleCardsShowingOrMucking ShowOrMuckHoleCards(IReadOnlyList<Card> cards);
 
     HandKilling KillHand();
 

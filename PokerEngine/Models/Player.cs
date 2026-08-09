@@ -2,7 +2,7 @@
 
 public sealed class Player
 {
-    private readonly List<string> _holeCards = [];
+    private readonly List<Card> _holeCards = [];
 
     public int Index { get; }
 
@@ -22,7 +22,7 @@ public sealed class Player
 
     public bool IsAllIn => Stack == 0 && !IsFolded;
 
-    public IReadOnlyList<string> HoleCards => _holeCards;
+    public IReadOnlyList<Card> HoleCards => _holeCards;
 
     internal Player(int index, long startingStack)
     {
@@ -41,7 +41,7 @@ public sealed class Player
         Stack = startingStack;
     }
 
-    internal void DealHole(IReadOnlyList<string> cards)
+    internal void DealHole(IReadOnlyList<Card> cards)
     {
         ArgumentNullException.ThrowIfNull(cards);
 
