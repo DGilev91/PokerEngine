@@ -4,29 +4,33 @@ namespace PokerEngine.Models;
 
 public abstract record GameOperation;
 
-public sealed record GameInitialization(IReadOnlyList<long> Stacks, IReadOnlyList<long> DeadBets, IReadOnlyList<long> ForceBets) : GameOperation;
+public sealed record GameInitialization(IReadOnlyList<long> Stacks) : GameOperation;
 
-public sealed record DeadBetPosting(int PlayerIndex, long Amount) : GameOperation;
+public sealed record AntePosting(int PlayerIndex, long Amount) : GameOperation;
 
-public sealed record ForceBetPosting(int PlayerIndex, long Amount) : GameOperation;
+public sealed record BlindPosting(int PlayerIndex, long Amount) : GameOperation;
+
+public sealed record StraddlePosting(int PlayerIndex, long Amount) : GameOperation;
+
+public sealed record DeadBlindPosting(int PlayerIndex, long Amount) : GameOperation;
 
 public sealed record HoleDealing(int PlayerIndex, IReadOnlyList<Card> Cards) : GameOperation;
 
 public sealed record Folding(int PlayerIndex) : GameOperation;
 
-public sealed record CheckingOrCalling(int PlayerIndex, long Amount) : GameOperation;
+public sealed record Checking(int PlayerIndex) : GameOperation;
 
-public sealed record BettingOrRaisingTo(int PlayerIndex, long Amount) : GameOperation;
+public sealed record Calling(int PlayerIndex, long Amount, bool IsAllIn) : GameOperation;
+
+public sealed record Betting(int PlayerIndex, long Amount, bool IsAllIn) : GameOperation;
+
+public sealed record Raising(int PlayerIndex, long Amount, long ToAmount, bool IsAllIn) : GameOperation;
 
 public sealed record RunoutCountSelection(int SeatId, int? Count) : GameOperation;
 
-public sealed record CardBurning(Card Card) : GameOperation;
-
 public sealed record BoardDealing(IReadOnlyList<Card> Cards) : GameOperation;
 
-public sealed record HoleCardsShowingOrMucking(int PlayerIndex, IReadOnlyList<Card> Cards) : GameOperation;
-
-public sealed record HandKilling(int PlayerIndex) : GameOperation;
+public sealed record ShowingOrMucking(int PlayerIndex, IReadOnlyList<Card> Cards) : GameOperation;
 
 public sealed record BetCollection(IReadOnlyList<long> Bets) : GameOperation;
 

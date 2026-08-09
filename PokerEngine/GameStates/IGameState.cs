@@ -26,27 +26,31 @@ public interface IGameState
 
     bool CanInitialize { get; }
 
-    bool CanPostDeadBet { get; }
+    bool CanPostAnte { get; }
 
-    bool CanPostForceBet { get; }
+    bool CanPostDeadBlind { get; }
+
+    bool CanPostBlind { get; }
+
+    bool CanPostStraddle { get; }
 
     bool CanDealHole { get; }
 
     bool CanFold { get; }
 
-    bool CanCheckOrCall { get; }
+    bool CanCheck { get; }
 
-    bool CanBetOrRaiseTo { get; }
+    bool CanCall { get; }
+
+    bool CanBet { get; }
+
+    bool CanRaiseTo { get; }
 
     bool CanSelectRunoutCount { get; }
-
-    bool CanBurnCard { get; }
 
     bool CanDealBoard { get; }
 
     bool CanShowOrMuckHoleCards { get; }
-
-    bool CanKillHand { get; }
 
     bool CanCollectBets { get; }
 
@@ -55,29 +59,33 @@ public interface IGameState
     bool CanPullChips { get; }
 
 
-    GameInitialization Initialize(IReadOnlyList<long> stacks, IReadOnlyList<long> deadBets, IReadOnlyList<long> forceBets);
+    GameInitialization Initialize(IReadOnlyList<long> stacks);
 
-    DeadBetPosting PostDeadBet();
+    AntePosting PostAnte(int playerIndex, long amount);
 
-    ForceBetPosting PostForceBet();
+    BlindPosting PostBlind(int playerIndex, long amount);
+
+    StraddlePosting PostStraddle(int playerIndex, long amount);
+
+    DeadBlindPosting PostDeadBlind(int playerIndex, long amount);
 
     HoleDealing DealHole(IReadOnlyList<string> cards);
 
     Folding Fold();
 
-    CheckingOrCalling CheckOrCall();
+    Checking Check();
 
-    BettingOrRaisingTo BetOrRaiseTo(long amount);
+    Calling Call();
+
+    Betting Bet(long amount);
+
+    Raising RaiseTo(long amount);
 
     RunoutCountSelection SelectRunoutCount(int count);
 
-    CardBurning BurnCard(string card);
-
     BoardDealing DealBoard(IReadOnlyList<string> cards);
 
-    HoleCardsShowingOrMucking ShowOrMuckHoleCards(IReadOnlyList<string> cards);
-
-    HandKilling KillHand();
+    ShowingOrMucking ShowOrMuckHole(IReadOnlyList<string> cards);
 
     BetCollection CollectBets();
 
