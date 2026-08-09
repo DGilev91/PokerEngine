@@ -10,7 +10,7 @@ public sealed record DeadBetPosting(int PlayerIndex, long Amount) : GameOperatio
 
 public sealed record ForceBetPosting(int PlayerIndex, long Amount) : GameOperation;
 
-public sealed record HoleDealing(int PlayerIndex, IReadOnlyList<string> Cards, IReadOnlyList<bool> Statuses) : GameOperation;
+public sealed record HoleDealing(int PlayerIndex, IReadOnlyList<string> Cards) : GameOperation;
 
 public sealed record Folding(int PlayerIndex) : GameOperation;
 
