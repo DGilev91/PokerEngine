@@ -4,15 +4,7 @@ namespace PokerEngine.Models;
 
 public abstract record GameOperation;
 
-public sealed record GameInitialization(IReadOnlyList<long> Stacks) : GameOperation;
-
-public sealed record AntePosting(int PlayerIndex, long Amount) : GameOperation;
-
-public sealed record BlindPosting(int PlayerIndex, long Amount) : GameOperation;
-
-public sealed record StraddlePosting(int PlayerIndex, long Amount) : GameOperation;
-
-public sealed record DeadBlindPosting(int PlayerIndex, long Amount) : GameOperation;
+public sealed record Initializing(GameSetup Setup) : GameOperation;
 
 public sealed record HoleDealing(int PlayerIndex, IReadOnlyList<Card> Cards) : GameOperation;
 

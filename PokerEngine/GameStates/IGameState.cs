@@ -22,17 +22,8 @@ public interface IGameState
 
     long? MaxBetOrRaiseToAmount { get; }
 
-    bool IsActive { get; }
 
     bool CanInitialize { get; }
-
-    bool CanPostAnte { get; }
-
-    bool CanPostDeadBlind { get; }
-
-    bool CanPostBlind { get; }
-
-    bool CanPostStraddle { get; }
 
     bool CanDealHole { get; }
 
@@ -59,37 +50,29 @@ public interface IGameState
     bool CanPullChips { get; }
 
 
-    GameInitialization Initialize(IReadOnlyList<long> stacks);
+    void Initialize(GameSetup setup);
 
-    AntePosting PostAnte(int playerIndex, long amount);
+    void DealHole(IReadOnlyList<string> cards);
 
-    BlindPosting PostBlind(int playerIndex, long amount);
+    void Fold();
 
-    StraddlePosting PostStraddle(int playerIndex, long amount);
+    void Check();
 
-    DeadBlindPosting PostDeadBlind(int playerIndex, long amount);
+    void Call();
 
-    HoleDealing DealHole(IReadOnlyList<string> cards);
+    void Bet(long amount);
 
-    Folding Fold();
+    void RaiseTo(long amount);
 
-    Checking Check();
+    void SelectRunoutCount(int count);
 
-    Calling Call();
+    void DealBoard(IReadOnlyList<string> cards);
 
-    Betting Bet(long amount);
+    void ShowOrMuckHole(IReadOnlyList<string> cards);
 
-    Raising RaiseTo(long amount);
+    void CollectBets();
 
-    RunoutCountSelection SelectRunoutCount(int count);
+    void PushChips();
 
-    BoardDealing DealBoard(IReadOnlyList<string> cards);
-
-    ShowingOrMucking ShowOrMuckHole(IReadOnlyList<string> cards);
-
-    BetCollection CollectBets();
-
-    ChipsPushing PushChips();
-
-    ChipsPulling PullChips();
+    void PullChips();
 }
