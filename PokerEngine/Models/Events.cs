@@ -32,4 +32,4 @@ public sealed record BoardDealt(IReadOnlyList<Card> Cards) : GameEvent;
 
 public sealed record HoleShown(int PlayerIndex, IReadOnlyList<Card> Cards) : GameEvent;
 
-public sealed record HoleMucked(int PlayerIndex) : GameEvent;
+public sealed record Mucked(int PlayerIndex) : GameEvent;

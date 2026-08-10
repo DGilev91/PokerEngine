@@ -47,7 +47,7 @@ public interface IGameState
 
     bool CanShowHole { get; }
 
-    bool CanMuckHole { get; }
+    bool CanMuck { get; }
 
 
     void Initialize(GameSetup setup);
@@ -70,5 +70,5 @@ public interface IGameState
 
     void ShowHole(IReadOnlyList<string> cards);
 
-    void MuckHole();
+    void Muck();
 }
