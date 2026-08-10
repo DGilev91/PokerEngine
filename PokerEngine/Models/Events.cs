@@ -4,7 +4,7 @@ namespace PokerEngine.Models;
 
 public abstract record GameEvent;
 
-public sealed record SeatInitialized(int PlayerIndex, long Stack) : GameEvent;
+public sealed record PlayerInitialized(int PlayerIndex, long Stack) : GameEvent;
 
 public sealed record AntePosted(int PlayerIndex, long Amount, bool IsAllIn) : GameEvent;
 
