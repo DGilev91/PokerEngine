@@ -28,7 +28,7 @@ public sealed record Raised(int PlayerIndex, long Amount, long ToAmount, bool Is
 
 public sealed record RunoutCountSelected(int PlayerIndex, int? Count) : GameEvent;
 
-public sealed record BoardDealt(IReadOnlyList<Card> Cards) : GameEvent;
+public sealed record BoardDealt(int BoardIndex, IReadOnlyList<Card> Cards) : GameEvent;
 
 public sealed record HoleShown(int PlayerIndex, IReadOnlyList<Card> Cards) : GameEvent;
 
