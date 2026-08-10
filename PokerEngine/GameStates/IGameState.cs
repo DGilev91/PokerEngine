@@ -18,9 +18,11 @@ public interface IGameState
 
     long? CallAmount { get; }
 
-    long? MinBetOrRaiseToAmount { get; }
+    long? MinBetAmount { get; }
+    long? MaxBetAmount { get; }
 
-    long? MaxBetOrRaiseToAmount { get; }
+    long? MinRaiseToAmount { get; }
+    long? MaxRaiseToAmount { get; }
 
 
     bool CanInitialize { get; }
@@ -43,13 +45,6 @@ public interface IGameState
 
     bool CanShowOrMuckHoleCards { get; }
 
-    bool CanCollectBets { get; }
-
-    bool CanPushChips { get; }
-
-    bool CanPullChips { get; }
-
-
     void Initialize(GameSetup setup);
 
     void DealHole(IReadOnlyList<string> cards);
@@ -68,11 +63,7 @@ public interface IGameState
 
     void DealBoard(IReadOnlyList<string> cards);
 
-    void ShowOrMuckHole(IReadOnlyList<string> cards);
+    void ShowHole(IReadOnlyList<string> cards);
 
-    void CollectBets();
-
-    void PushChips();
-
-    void PullChips();
+    void MuckHole();
 }

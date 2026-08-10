@@ -22,7 +22,9 @@ public sealed record RunoutCountSelection(int SeatId, int? Count) : GameOperatio
 
 public sealed record BoardDealing(IReadOnlyList<Card> Cards) : GameOperation;
 
-public sealed record ShowingOrMucking(int PlayerIndex, IReadOnlyList<Card> Cards) : GameOperation;
+public sealed record ShowingHole(int PlayerIndex, IReadOnlyList<Card> Cards) : GameOperation;
+
+public sealed record MuckingHole() : GameOperation;
 
 public sealed record BetCollection(IReadOnlyList<long> Bets) : GameOperation;
 
