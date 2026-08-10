@@ -4,7 +4,7 @@ namespace PokerEngine.GameStates;
 
 public interface IGameState
 {
-    IReadOnlyList<GameOperation> Operations { get; }
+    IReadOnlyList<GameEvent> Events { get; }
 
     IReadOnlyList<Player> Players { get; }
 
@@ -19,9 +19,11 @@ public interface IGameState
     long? CallAmount { get; }
 
     long? MinBetAmount { get; }
+
     long? MaxBetAmount { get; }
 
     long? MinRaiseToAmount { get; }
+
     long? MaxRaiseToAmount { get; }
 
 
@@ -43,7 +45,10 @@ public interface IGameState
 
     bool CanDealBoard { get; }
 
-    bool CanShowOrMuckHoleCards { get; }
+    bool CanShowHole { get; }
+
+    bool CanMuckHole { get; }
+
 
     void Initialize(GameSetup setup);
 
