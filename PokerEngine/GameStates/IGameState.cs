@@ -65,9 +65,9 @@ public interface IGameState
 
     void Start();
 
-    void DealHole(IReadOnlyList<string> cards);
+    void DealHole(int playerIndex, IReadOnlyList<string> cards);
 
-    void Act(ActionType type, long amount = 0);
+    void Act(int playerIndex, ActionType type, long amount = 0);
 
     void ReturnUncalledBet();
 
@@ -75,9 +75,9 @@ public interface IGameState
 
     void DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
 
-    void ShowHole(IReadOnlyList<string> cards);
+    void ShowHole(int playerIndex, IReadOnlyList<string> cards);
 
-    void Muck();
+    void Muck(int playerIndex);
 
     void AwardPots();
 }
