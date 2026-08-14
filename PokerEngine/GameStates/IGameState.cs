@@ -13,6 +13,8 @@ public interface IGameState
 
     IReadOnlyList<IReadOnlyList<Card>> Boards { get; }
 
+    IReadOnlyList<Award> Awards { get; }
+
     int? ButtonIndex { get; }
 
     int? RoundIndex { get; }
