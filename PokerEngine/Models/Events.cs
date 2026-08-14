@@ -4,32 +4,26 @@ namespace PokerEngine.Models;
 
 public abstract record GameEvent;
 
-public sealed record PlayerInitialized(int PlayerIndex, long Stack) : GameEvent;
+public sealed record GameStarted : GameEvent;
 
-public sealed record AntePosted(int PlayerIndex, long Amount, bool IsAllIn) : GameEvent;
+public sealed record PlayerAdded(int PlayerIndex, long Stack) : GameEvent;
 
-public sealed record BlindPosted(int PlayerIndex, long Amount, bool IsAllIn) : GameEvent;
-
-public sealed record StraddlePosted(int PlayerIndex, long Amount, bool IsAllIn) : GameEvent;
-
-public sealed record DeadBlindPosted(int PlayerIndex, long Amount, bool IsAllIn) : GameEvent;
+public sealed record Posted(int PlayerIndex, PostType Type, long Amount, bool IsAllIn) : GameEvent;
 
 public sealed record HoleDealt(int PlayerIndex, IReadOnlyList<Card> Cards) : GameEvent;
 
-public sealed record Folded(int PlayerIndex) : GameEvent;
+public sealed record Acted(int PlayerIndex, ActionType Type, long Amount, bool IsAllIn) : GameEvent;
 
-public sealed record Checked(int PlayerIndex) : GameEvent;
+public sealed record UncalledBetReturned(int PlayerIndex, long Amount) : GameEvent;
 
-public sealed record Called(int PlayerIndex, long Amount, bool IsAllIn) : GameEvent;
-
-public sealed record Bet(int PlayerIndex, long Amount, bool IsAllIn) : GameEvent;
-
-public sealed record Raised(int PlayerIndex, long Amount, long ToAmount, bool IsAllIn) : GameEvent;
-
-public sealed record RunoutCountSelected(int PlayerIndex, int? Count) : GameEvent;
+public sealed record BetsCollected(IReadOnlyList<long> Amounts) : GameEvent;
 
 public sealed record BoardDealt(int BoardIndex, IReadOnlyList<Card> Cards) : GameEvent;
 
 public sealed record HoleShown(int PlayerIndex, IReadOnlyList<Card> Cards) : GameEvent;
 
 public sealed record Mucked(int PlayerIndex) : GameEvent;
+
+public sealed record PotAwarded(int PotIndex, int BoardIndex, int PlayerIndex, long Amount) : GameEvent;
+
+public sealed record GameEnded : GameEvent;

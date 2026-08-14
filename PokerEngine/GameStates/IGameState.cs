@@ -1,4 +1,5 @@
-﻿using PokerEngine.Models;
+﻿using PokerEngine.Enums;
+using PokerEngine.Models;
 
 namespace PokerEngine.GameStates;
 
@@ -16,6 +17,8 @@ public interface IGameState
 
     int? ActorIndex { get; }
 
+    IReadOnlyList<ActionType> AllowedActions { get; }
+
     long? CallAmount { get; }
 
     long? MinBetAmount { get; }
@@ -26,22 +29,20 @@ public interface IGameState
 
     long? MaxRaiseToAmount { get; }
 
+    bool IsEnded { get; }
 
-    bool CanInitialize { get; }
+
+    bool CanAddPlayer { get; }
+
+    bool CanPost { get; }
+
+    bool CanStart { get; }
 
     bool CanDealHole { get; }
 
-    bool CanFold { get; }
+    bool CanReturnUncalledBet { get; }
 
-    bool CanCheck { get; }
-
-    bool CanCall { get; }
-
-    bool CanBet { get; }
-
-    bool CanRaiseTo { get; }
-
-    bool CanSelectRunoutCount { get; }
+    bool CanCollectBets { get; }
 
     bool CanDealBoard { get; }
 
@@ -49,26 +50,32 @@ public interface IGameState
 
     bool CanMuck { get; }
 
+    bool CanAwardPots { get; }
 
-    void Initialize(GameSetup setup);
+    bool CanFinish { get; }
+
+
+    void AddPlayer(long stack);
+
+    void Post(int playerIndex, PostType type, long amount);
+
+    void Start();
 
     void DealHole(IReadOnlyList<string> cards);
 
-    void Fold();
+    void Act(ActionType type, long amount = 0);
 
-    void Check();
+    void ReturnUncalledBet();
 
-    void Call();
+    void CollectBets();
 
-    void Bet(long amount);
-
-    void RaiseTo(long amount);
-
-    void SelectRunoutCount(int count);
-
-    void DealBoard(IReadOnlyList<string> cards);
+    void DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
 
     void ShowHole(IReadOnlyList<string> cards);
 
     void Muck();
+
+    void AwardPots();
+
+    void Finish();
 }
