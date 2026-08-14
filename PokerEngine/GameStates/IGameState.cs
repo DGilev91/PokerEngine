@@ -13,6 +13,8 @@ public interface IGameState
 
     IReadOnlyList<IReadOnlyList<Card>> Boards { get; }
 
+    int? ButtonIndex { get; }
+
     int? RoundIndex { get; }
 
     int? ActorIndex { get; }
@@ -29,10 +31,10 @@ public interface IGameState
 
     long? MaxRaiseToAmount { get; }
 
-    bool IsEnded { get; }
-
 
     bool CanAddPlayer { get; }
+
+    bool CanSetButton { get; }
 
     bool CanPost { get; }
 
@@ -52,10 +54,10 @@ public interface IGameState
 
     bool CanAwardPots { get; }
 
-    bool CanFinish { get; }
-
 
     void AddPlayer(long stack);
+
+    void SetButton(int playerIndex);
 
     void Post(int playerIndex, PostType type, long amount);
 
@@ -76,6 +78,4 @@ public interface IGameState
     void Muck();
 
     void AwardPots();
-
-    void Finish();
 }
