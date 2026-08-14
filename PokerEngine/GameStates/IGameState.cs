@@ -7,7 +7,7 @@ public interface IGameState
 {
     IReadOnlyList<GameEvent> Events { get; }
 
-    IReadOnlyList<Player> Players { get; }
+    IReadOnlyDictionary<int, Player> Players { get; }
 
     IReadOnlyList<Pot> Pots { get; }
 
@@ -15,11 +15,11 @@ public interface IGameState
 
     IReadOnlyList<Award> Awards { get; }
 
-    int? ButtonIndex { get; }
+    int? ButtonSeatIndex { get; }
 
     int? RoundIndex { get; }
 
-    int? ActorIndex { get; }
+    int? ActorSeatIndex { get; }
 
     IReadOnlyList<ActionType> AllowedActions { get; }
 
@@ -33,41 +33,17 @@ public interface IGameState
 
     long? MaxRaiseToAmount { get; }
 
+    void AddPlayer(int seatIndex, long stack);
 
-    bool CanAddPlayer { get; }
+    void SetButton(int seatIndex);
 
-    bool CanSetButton { get; }
-
-    bool CanPost { get; }
-
-    bool CanStart { get; }
-
-    bool CanDealHole { get; }
-
-    bool CanReturnUncalledBet { get; }
-
-    bool CanCollectBets { get; }
-
-    bool CanDealBoard { get; }
-
-    bool CanShowHole { get; }
-
-    bool CanMuck { get; }
-
-    bool CanAwardPots { get; }
-
-
-    void AddPlayer(long stack);
-
-    void SetButton(int playerIndex);
-
-    void Post(int playerIndex, PostType type, long amount);
+    void Post(int seatIndex, PostType type, long amount);
 
     void Start();
 
-    void DealHole(int playerIndex, IReadOnlyList<string> cards);
+    void DealHole(int seatIndex, IReadOnlyList<string> cards);
 
-    void Act(int playerIndex, ActionType type, long amount = 0);
+    void Act(int seatIndex, ActionType type, long amount = 0);
 
     void ReturnUncalledBet();
 
@@ -75,9 +51,9 @@ public interface IGameState
 
     void DealBoard(IReadOnlyList<string> cards, int boardIndex = 0);
 
-    void ShowHole(int playerIndex, IReadOnlyList<string> cards);
+    void ShowHole(int seatIndex, IReadOnlyList<string> cards);
 
-    void Muck(int playerIndex);
+    void Muck(int seatIndex);
 
     void AwardPots();
 }
