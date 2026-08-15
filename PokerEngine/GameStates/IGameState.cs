@@ -55,5 +55,7 @@ public interface IGameState
 
     void Muck(int seatIndex);
 
+    void EvaluateHands();
+
     void AwardPots();
 }

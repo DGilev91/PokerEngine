@@ -24,4 +24,6 @@ public sealed record HoleShown(int SeatIndex, IReadOnlyList<Card> Cards) : GameE
 
 public sealed record Mucked(int SeatIndex) : GameEvent;
 
+public sealed record HandEvaluation(int SeatIndex, int BoardIndex, HandRank Hand) : GameEvent;
+
 public sealed record PotAwarded(int PotIndex, int BoardIndex, int SeatIndex, long Amount) : GameEvent;
