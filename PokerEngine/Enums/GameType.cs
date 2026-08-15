@@ -4,5 +4,7 @@ namespace PokerEngine.Enums;
 public enum GameType
 {
     TexasHoldem,
-    Omaha,
+    Omaha4c,
+    Omaha5c,
+    Omaha6c,
 }

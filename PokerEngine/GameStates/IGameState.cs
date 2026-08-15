@@ -19,8 +19,6 @@ public interface IGameState
 
     IReadOnlyList<Award> Awards { get; }
 
-    int Button { get; }
-
     int? RoundIndex { get; }
 
     GameStep Step { get; }
