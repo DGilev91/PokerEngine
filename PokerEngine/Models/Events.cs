@@ -4,9 +4,9 @@ namespace PokerEngine.Models;
 
 public abstract record GameEvent;
 
-public sealed record PlayerAdded(int SeatIndex, long Stack) : GameEvent;
+public sealed record NewGame(GameType Type, GameLimit Limit, int Button) : GameEvent;
 
-public sealed record ButtonSet(int SeatIndex) : GameEvent;
+public sealed record PlayerAdded(int SeatIndex, long Stack) : GameEvent;
 
 public sealed record Posted(int SeatIndex, PostType Type, long Amount, bool IsAllIn) : GameEvent;
 
@@ -27,3 +27,5 @@ public sealed record Mucked(int SeatIndex) : GameEvent;
 public sealed record HandEvaluation(int SeatIndex, int BoardIndex, HandRank Hand) : GameEvent;
 
 public sealed record PotAwarded(int PotIndex, int BoardIndex, int SeatIndex, long Amount) : GameEvent;
+
+public sealed record EndGame() : GameEvent;

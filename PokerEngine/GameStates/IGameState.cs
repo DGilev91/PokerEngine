@@ -5,6 +5,8 @@ namespace PokerEngine.GameStates;
 
 public interface IGameState
 {
+    GameSetup Setup { get; }
+    
     IReadOnlyList<GameEvent> Events { get; }
 
     IReadOnlyList<Player> Players { get; }
@@ -17,31 +19,15 @@ public interface IGameState
 
     IReadOnlyList<Award> Awards { get; }
 
-    int? ButtonSeatIndex { get; }
+    int Button { get; }
 
     int? RoundIndex { get; }
 
-    int? ActorSeatIndex { get; }
+    GameStep Step { get; }
 
-    IReadOnlyList<ActionType> AllowedActions { get; }
+    PlayerAction? Action { get; }
 
-    long? CallAmount { get; }
-
-    long? MinBetAmount { get; }
-
-    long? MaxBetAmount { get; }
-
-    long? MinRaiseToAmount { get; }
-
-    long? MaxRaiseToAmount { get; }
-
-    void AddPlayer(long stack);
-
-    void SetButton(int seatIndex);
-
-    void Post(int seatIndex, PostType type, long amount);
-
-    void Start();
+    void Initialize(GameSetup setup);
 
     void DealHole(int seatIndex, IReadOnlyList<string> cards);
 
