@@ -7,11 +7,13 @@ public interface IGameState
 {
     IReadOnlyList<GameEvent> Events { get; }
 
-    IReadOnlyDictionary<int, Player> Players { get; }
+    IReadOnlyList<Player> Players { get; }
 
     IReadOnlyList<Pot> Pots { get; }
 
     IReadOnlyList<IReadOnlyList<Card>> Boards { get; }
+
+    IReadOnlyList<PlayerHand> Hands { get; }
 
     IReadOnlyList<Award> Awards { get; }
 
@@ -33,7 +35,7 @@ public interface IGameState
 
     long? MaxRaiseToAmount { get; }
 
-    void AddPlayer(int seatIndex, long stack);
+    void AddPlayer(long stack);
 
     void SetButton(int seatIndex);
 
