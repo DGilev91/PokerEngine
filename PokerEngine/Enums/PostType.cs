@@ -3,8 +3,7 @@ namespace PokerEngine.Enums;
 public enum PostType
 {
     Ante,
-    SmallBlind,
-    BigBlind,
+    Blind,
     DeadBlind,
     Straddle
 }
